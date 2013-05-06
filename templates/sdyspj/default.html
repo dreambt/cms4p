@@ -1,0 +1,47 @@
+<div class="blog-index">
+    <?py for obj in objs: ?>
+    <article>
+        <header>
+            <h1 class="entry-title"><a href="#{obj.absolute_url}" rel="bookmark" title="Permanent Link to #{obj.title}">#{obj.title}</a>
+            </h1>
+
+            <p class="meta">
+                <?py hrefname = 'comments' if (obj.comment_num >0) else 'respond' ?>
+                <small>#{obj.add_time_fn} in <a href="#{{ BASE_URL }}/category/#{obj.category}/" rel="category tag">#{obj.category}</a>
+                    <a href="#{obj.absolute_url}##{hrefname}" title="Comment on #{obj.title}" class="count">#{obj.comment_num}</a>
+                </small>
+            </p>
+        </header>
+        <div class="entry-content">#{obj.shorten_content}</div>
+        <?py if obj.tags: ?>
+        <small style="color:#999">Tags: #{obj.taglist}</small>
+        <?py #endif ?>
+        <footer>
+            <a rel="full-article" href="#{obj.absolute_url}">查看更多</a>
+            <a rel="full-article" href="#{obj.absolute_url}">评论(#{obj.comment_num})</a>
+            <?py if isauthor: ?>
+            <a rel="full-article" href="#{{ BASE_URL }}/admin/edit_post/#{obj.id}">编辑</a>
+            <a rel="full-article" href="#{{ BASE_URL }}/admin/del_post/#{obj.id}">删除</a>
+            <?py #endif ?>
+        </footer>
+    </article>
+    <?py #endfor ?>
+
+    <nav role="pagination">
+        <div>
+            <?py if 1< page <= allpage: ?>
+            <?py     tvar = fromid if (listtype == 'index') else name ?>
+            <a class="prev" href="#{{ BASE_URL }}/#{listtype}_prev_page/#{page-1}/#{tvar}/">&larr; 上一页</a>
+            <?py #endif ?>
+
+            &nbsp;
+
+            <?py if page< allpage: ?>
+            <?py     tvar = endid if (listtype == 'index') else name ?>
+            <a class="next" href="#{{ BASE_URL }}/#{listtype}_next_page/#{page+1}/#{tvar}/">下一页 &rarr;</a>
+            <?py #endif ?>
+
+
+        </div>
+    </nav>
+</div>

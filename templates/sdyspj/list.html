@@ -1,0 +1,22 @@
+<div class="blog-index">
+    <?py for obj in objs: ?>
+    <li><h5 class="entry-title"><a href="#{obj.absolute_url}" rel="bookmark" title="Permanent Link to #{obj.title}">#{obj.title}</a>
+    </h5></li>
+    <?py #endfor ?>
+
+    <nav role="pagination">
+        <div>
+            <?py if 1< page <= allpage: ?>
+            <?py     tvar = fromid if (listtype == 'index') else name ?>
+            <a class="prev" href="#{{ BASE_URL }}/#{listtype}_prev_page/#{page-1}/#{tvar}/">&larr; 上一页</a>
+            <?py #endif ?>
+
+            &nbsp;
+
+            <?py if page< allpage: ?>
+            <?py     tvar = endid if (listtype == 'index') else name ?>
+            <a class="next" href="#{{ BASE_URL }}/#{listtype}_next_page/#{page+1}/#{tvar}/">下一页 &rarr;</a>
+            <?py #endif ?>
+        </div>
+    </nav>
+</div>

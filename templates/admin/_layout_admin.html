@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>#{title} - #{{ SITE_TITLE }}</title>
+    <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon"/>
+    <link rel="stylesheet" href="/static/style/bootstrap.min.css" type="text/css"/>
+    <link rel="stylesheet" href="/static/style/bootstrap-responsive.min.css" type="text/css"/>
+    <link rel="stylesheet" href="/static/style/admin.css" type="text/css"/>
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="/static/jquery-plugin/jquery-1.9.1.min.js"></script>
+    <![endif]-->
+    <!--[if gte IE 9]><!-->
+    <script type="text/javascript" src="/static/jquery-plugin/jquery-2.0.0.min.js"></script>
+    <!--<![endif]-->
+    <script type="text/javascript" src="/static/jquery-plugin/bootstrap.min.js"></script>
+</head>
+<body data-spy="scroll" data-target=".bs-docs-sidebar">
+<div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+        <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="/">#{{ SITE_TITLE }}</a>
+
+            <div class="nav-collapse collapse">
+                <ul class="nav">
+                    <li id="admin_page"><a href="/admin/">后台首页</a></li>
+                    <li id="article_page" class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">文章管理
+                        <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/admin/add_post">发表文章</a></li>
+                            <li><a href="/admin/list_post">文章列表</a></li>
+                        </ul>
+                    </li>
+                    <li id="comment_page"><a href="/admin/comment/">评论管理</a></li>
+                    <li id="link_page"><a href="/admin/links">友情链接</a></li>
+                    <li id="user_page"><a href="/admin/profile">个人资料</a></li>
+                    <li id="sys_page" class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">系统设置
+                        <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li class="nav-header">基本设置</li>
+                            <li><a href="/admin/setting">站点信息</a></li>
+                            <li><a href="/admin/setting2">邮箱配置</a></li>
+                            <li class="divider"></li>
+                            <li class="nav-header">应用设置</li>
+                            <li><a href="/admin/setting3">详细参数</a></li>
+                            <li><a href="/admin/setting4">广告统计</a></li>
+                            <li class="divider"></li>
+                            <li class="nav-header">性能管理</li>
+                            <!--<li><a href="/admin/kvdb">KVDB管理</a></li>-->
+                            <li><a href="/admin/flushdata">缓存管理</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="/admin/logout">安全退出</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<header class="jumbotron subhead" id="overview">
+    <div class="container">
+        <h1>#{title}</h1>
+
+        <p class="lead">#{{ SITE_SUB_TITLE }}</p>
+    </div>
+</header>
+<div class="container">
+    #{_content}
+</div>
+<footer>
+    <p>
+        &copy; #{{ COPY_YEAR }} Copyright <a href="#{{ BASE_URL }}">#{{ SITE_TITLE }}</a> -
+        Powered by <a href="http://cms4p.im47.cn/" target="_blank">cms4p</a> -
+        Time: <span id="requesttime">#{ int(request.request_time()*1000) }</span> ms
+    </p>
+</footer>
+</body>
+</html>

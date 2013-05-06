@@ -1,0 +1,52 @@
+<div class="row">
+    <div class="span6">
+        <form action="/admin/flushdata?act=flushcache" class="form-horizontal" method="post">
+            <fieldset>
+                <legend>清空缓存</legend>
+                <div class="control-group">
+                    <label class="control-label" for="input01">确认操作</label>
+
+                    <div class="controls">
+                        <label class="checkbox">
+                            <input type="checkbox" class="input-xlarge" id="input01" tabindex="0"/>
+                            当页面显示和您预期不一致时，可以尝试清空缓存。
+                        </label>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" id="flushcache" class="btn btn-primary">执行</button>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+    <div class="span6">
+        <form action="/admin/flushdata?act=flush" class="form-horizontal" method="post">
+            <fieldset>
+                <legend>清空数据</legend>
+                <div class="control-group">
+                    <label class="control-label" for="input02">确认操作</label>
+
+                    <div class="controls">
+                        <label class="checkbox">
+                            <input type="checkbox" class="input-xlarge" id="input02" tabindex="0"/>
+                            我想好了，我会对我的行为负责，点一下就删除所有数据（没有弹出确认，千万别点着玩）
+                        </label>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" id="flush" class="btn btn-danger">执行</button>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function () {
+        $("#flushcache").click(function () {
+            return $("#input01").prop("checked");
+        });
+        $("#flush").click(function () {
+            return $("#input02").prop("checked");
+        });
+    });
+</script>
