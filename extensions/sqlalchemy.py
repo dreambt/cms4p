@@ -13,6 +13,9 @@ import functools
 from functools import partial
 
 import tornado.web
+
+import sqlalchemy
+from sqlalchemy import orm
 from sqlalchemy.orm.session import Session
 from sqlalchemy.orm import attributes, object_mapper
 from sqlalchemy.orm.properties import RelationshipProperty
@@ -21,9 +24,6 @@ from sqlalchemy.orm.interfaces import MapperExtension, SessionExtension, \
 from sqlalchemy.orm.exc import UnmappedClassError
 from sqlalchemy.ext.declarative import declarative_base, DeclarativeMeta
 from sqlalchemy.util import to_list
-
-import sqlalchemy
-from sqlalchemy import orm
 from .signals import Namespace
 
 
