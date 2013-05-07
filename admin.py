@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import StringIO
 from PIL import Image
+from tornado import escape
 
 try:
     import json
@@ -677,7 +678,7 @@ class EditProfile(BaseHandler):
                 if user:
                     User.update_user(username, newPassword)
                     self.set_secure_cookie('userpw', '123', path="/", expires_days=1)
-                    self.redirect('%s/admin/' % BASE_URL)
+                    self.write(escape.json_encode(1))
                     return
                 else:
                     pass
@@ -685,10 +686,10 @@ class EditProfile(BaseHandler):
                 pass
         else:
             pass
-        self.redirect('%s/admin/profile' % BASE_URL)
-        return
+        self.write(escape.json_encode(0))
 
 
+# TODO KVDB 管理
 class KVDBAdmin(BaseHandler):
     @authorized()
     def get(self):

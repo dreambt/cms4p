@@ -1,25 +1,26 @@
-<form action="" class="form-horizontal" method="post">
+<form id="myForm" action="" class="form-horizontal" method="post">
     <fieldset>
         <legend>个人资料</legend>
         <div class="control-group">
-            <label class="control-label" for="input01">原密码</label>
+            <label class="control-label" for="oldPassword">原密码</label>
 
             <div class="controls">
-                <input type="password" name="oldPassword" value="" class="input-xlarge" id="input01" tabindex="0"/>
+                <input type="password" name="oldPassword" class="input-xlarge required" id="oldPassword" tabindex="1"/>
             </div>
         </div>
         <div class="control-group">
-            <label class="control-label" for="input02">新密码</label>
+            <label class="control-label" for="newPassword">新密码</label>
 
             <div class="controls">
-                <input type="password" name="newPassword" value="" class="input-xlarge" id="input02" tabindex="1"/>
+                <input type="password" name="newPassword" class="input-xlarge required" id="newPassword" tabindex="2"/>
             </div>
         </div>
         <div class="control-group">
-            <label class="control-label" for="input03">确认密码</label>
+            <label class="control-label" for="newPassword2">确认密码</label>
 
             <div class="controls">
-                <input type="password" name="newPassword2" value="" class="input-xlarge" id="input03" tabindex="2"/>
+                <input type="password" name="newPassword2" class="input-xlarge required" equalTo="#newPassword"
+                       id="newPassword2" tabindex="3"/>
             </div>
         </div>
         <div class="form-actions">
@@ -29,3 +30,33 @@
     </fieldset>
 </form>
 <span class="label label-info">提示</span> 修改密码成功后会自动踢出系统，您需要重新登录系统.
+<script type="text/javascript">
+    $(function () {
+        $("#myForm").validate({
+            submitHandler: function (form) {
+                $.ajax({
+                    url: "/admin/profile",
+                    method: "POST",
+                    data: {
+                        oldPassword: $("#oldPassword").val(),
+                        newPassword: $("#newPassword").val(),
+                        newPassword2: $("#newPassword2").val()
+                    },
+                    timeout: 3000
+                }).success(function (data) {
+                            if (data > 0) {
+                                bootbox.alert("修改密码成功！请重新登录系统！", function () {
+                                    location.href = "/admin/login";
+                                });
+                            }
+                            else {
+                                bootbox.alert("修改密码失败！请检查您输入的原密码是否正确！");
+                            }
+                            ;
+                        });
+                return false;
+                //form.submit();
+            }
+        });
+    });
+</script>

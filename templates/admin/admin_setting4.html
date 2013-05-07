@@ -1,4 +1,4 @@
-<form action="" class="form-horizontal" method="post">
+<form id="myForm" action="" class="form-horizontal" method="post">
     <fieldset>
         <legend>参数设置</legend>
         <div class="control-group">
@@ -28,3 +28,8 @@
         </div>
     </fieldset>
 </form>
+<script type="text/javascript">
+    $(function () {
+        $("#myForm").validate();
+    });
+</script>

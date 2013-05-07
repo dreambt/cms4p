@@ -1,4 +1,4 @@
-<form action="" class="form-horizontal" method="post">
+<form id="myForm" action="" class="form-horizontal" method="post">
     <fieldset>
         <div class="row">
             <div class="span6">
@@ -8,7 +8,7 @@
 
                     <div class="controls">
                         <input type="text" name="EACH_PAGE_POST_NUM" value="#{getAttr('EACH_PAGE_POST_NUM')}"
-                               class="input-xlarge" id="input01" tabindex="1"/>
+                               class="input-xlarge required" id="input01" tabindex="1"/>
                     </div>
                 </div>
                 <div class="control-group">
@@ -16,7 +16,7 @@
 
                     <div class="controls">
                         <input type="text" name="RELATIVE_POST_NUM" value="#{getAttr('RELATIVE_POST_NUM')}"
-                               class="input-xlarge" id="input03" tabindex="3"/>
+                               class="input-xlarge required" id="input03" tabindex="3"/>
                     </div>
                 </div>
                 <div class="control-group">
@@ -24,7 +24,7 @@
 
                     <div class="controls">
                         <input type="text" name="SHORTEN_CONTENT_WORDS" value="#{getAttr('SHORTEN_CONTENT_WORDS')}"
-                               class="input-xlarge" id="input04" tabindex="5"/>
+                               class="input-xlarge required" id="input04" tabindex="5"/>
                     </div>
                 </div>
                 <div class="control-group">
@@ -32,7 +32,7 @@
 
                     <div class="controls">
                         <input type="text" name="DESCRIPTION_CUT_WORDS" value="#{getAttr('DESCRIPTION_CUT_WORDS')}"
-                               class="input-xlarge" id="input05" tabindex="7"/>
+                               class="input-xlarge required" id="input05" tabindex="7"/>
                     </div>
                 </div>
             </div>
@@ -43,7 +43,7 @@
 
                     <div class="controls">
                         <input type="text" name="EACH_PAGE_COMMENT_NUM" value="#{EACH_PAGE_COMMENT_NUM}"
-                               class="input-xlarge" id="input02" tabindex="11"/>
+                               class="input-xlarge required" id="input02" tabindex="11"/>
                     </div>
                 </div>
                 <div class="control-group">
@@ -51,7 +51,7 @@
 
                     <div class="controls">
                         <input type="text" name="EACH_PAGE_COMMENT_NUM" value="#{getAttr('EACH_PAGE_COMMENT_NUM')}"
-                               class="input-xlarge" id="input06" tabindex="13"/>
+                               class="input-xlarge required" id="input06" tabindex="13"/>
                     </div>
                 </div>
                 <div class="control-group">
@@ -59,7 +59,7 @@
 
                     <div class="controls">
                         <input type="text" name="RECENT_COMMENT_CUT_WORDS"
-                               value="#{getAttr('RECENT_COMMENT_CUT_WORDS')}" class="input-xlarge" id="input07"
+                               value="#{getAttr('RECENT_COMMENT_CUT_WORDS')}" class="input-xlarge required" id="input07"
                                tabindex="15"/>
                     </div>
                 </div>
@@ -68,7 +68,7 @@
 
                     <div class="controls">
                         <input type="text" name="MAX_COMMENT_NUM_A_DAY" value="#{getAttr('MAX_COMMENT_NUM_A_DAY')}"
-                               class="input-xlarge" id="input09" tabindex="17"/>
+                               class="input-xlarge required" id="input09" tabindex="17"/>
                     </div>
                 </div>
                 <div class="control-group">
@@ -76,7 +76,7 @@
 
                     <div class="controls">
                         <input type="text" name="COMMENT_DEFAULT_VISIBLE" value="#{COMMENT_DEFAULT_VISIBLE}"
-                               class="input-xlarge" id="input02" tabindex="19"/>
+                               class="input-xlarge required" id="input02" tabindex="19"/>
                     </div>
                 </div>
             </div>
@@ -89,7 +89,7 @@
 
                     <div class="controls">
                         <input type="text" name="PAGE_CACHE_TIME" value="#{getAttr('PAGE_CACHE_TIME')}"
-                               class="input-xlarge" id="input10" tabindex="21"/>
+                               class="input-xlarge required" id="input10" tabindex="21"/>
                     </div>
                 </div>
                 <div class="control-group">
@@ -97,7 +97,7 @@
 
                     <div class="controls">
                         <input type="text" name="POST_CACHE_TIME" value="#{getAttr('POST_CACHE_TIME')}"
-                               class="input-xlarge" id="input11" tabindex="23"/>
+                               class="input-xlarge required" id="input11" tabindex="23"/>
                     </div>
                 </div>
             </div>
@@ -107,7 +107,7 @@
                     <label class="control-label" for="input08">边栏显示友情链接数</label>
 
                     <div class="controls">
-                        <input type="text" name="LINK_NUM" value="#{getAttr('LINK_NUM')}" class="input-xlarge"
+                        <input type="text" name="LINK_NUM" value="#{getAttr('LINK_NUM')}" class="input-xlarge required"
                                id="input08" tabindex="31"/>
                     </div>
                 </div>
@@ -115,7 +115,8 @@
                     <label class="control-label" for="input12">热门标签显示数</label>
 
                     <div class="controls">
-                        <input type="text" name="HOT_TAGS_NUM" value="#{getAttr('HOT_TAGS_NUM')}" class="input-xlarge"
+                        <input type="text" name="HOT_TAGS_NUM" value="#{getAttr('HOT_TAGS_NUM')}"
+                               class="input-xlarge required"
                                id="input12" tabindex="33"/>
                     </div>
                 </div>
@@ -124,7 +125,7 @@
 
                     <div class="controls">
                         <input type="text" name="MAX_ARCHIVES_NUM" value="#{getAttr('MAX_ARCHIVES_NUM')}"
-                               class="input-xlarge" id="input13" tabindex="35"/>
+                               class="input-xlarge required" id="input13" tabindex="35"/>
                     </div>
                 </div>
             </div>
@@ -135,3 +136,8 @@
         </div>
     </fieldset>
 </form>
+<script type="text/javascript">
+    $(function () {
+        $("#myForm").validate();
+    });
+</script>

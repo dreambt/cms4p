@@ -13,11 +13,12 @@
     <link rel="alternate" type="application/rss+xml" title="#{SITE_TITLE} RSS Feed" href="#{{ BASE_URL }}/feed"/>
     <link rel="shortcut icon" href="#{{ BASE_URL }}/static/favicon.ico" type="image"/>
 
+    <link href="/static/style/bootstrap.min.css" media="screen, projection" rel="stylesheet" type="text/css"/>
     <link href="/static/themes/sdyspj/css/screen.css" media="screen, projection" rel="stylesheet" type="text/css"/>
 
     <!--[if lt IE 9]>
-  <script type="text/javascript" src="/static/jquery-plugin/jquery-1.9.1.min.js"></script>
-  <![endif]-->
+    <script type="text/javascript" src="/static/jquery-plugin/jquery-1.9.1.min.js"></script>
+    <![endif]-->
     <!--[if gte IE 9]><!-->
     <script type="text/javascript" src="/static/jquery-plugin/jquery-2.0.0.min.js"></script>
     <!--<![endif]-->
@@ -41,80 +42,88 @@
     <meta name="keywords" content="${keywords}"/>
     <?py #endif ?>
     <link rel="canonical" href="#{{ BASE_URL }}#{request.uri}"/>
-    <script type="text/javascript">
-        $(function () {
-            $("#go-to-top").click(function () {
-                $("html, body").animate({'scrollTop': 0}, 400);
-                return false;
-            });
-            $(window).scroll(function () {
-                var top = $(document).scrollTop();
-                var g = $("#go-to-top");
-                if (top > 300 && g.is(":hidden")) {
-                    g.fadeIn();
-                } else if (top < 300 && g.is(":visible")) {
-                    g.fadeOut();
-                }
-            });
-        })
-    </script>
 </head>
-<body>
-<header role="banner">
-    <hgroup>
-        <h1><a href="/">#{{ SITE_TITLE }}</a></h1>
+<body data-spy="scroll" data-target=".bs-docs-sidebar" data-twttr-rendered="true">
+<div class="container" style="background:#fff">
+    <img src="/static/themes/sdyspj/images/banner.jpg">
 
-        <h2>#{{ SITE_SUB_TITLE }}</h2>
-    </hgroup>
-</header>
-<nav role=navigation>
-    <ul role=subscription data-subscription="rss">
-        <li><a href="/feed" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
-    </ul>
-    <script type="text/javascript">
-        var dispatch = function () {
-            q = document.getElementById("q");
-            if (q.value != "") {
-                window.open('http://www.google.com/search?q=site:#{{MAJOR_DOMAIN}}/topic/%20' + q.value, "_blank");
-                return false;
-            } else {
-                return false;
-            }
-        }
-    </script>
-    <form onsubmit="return dispatch()">
-        <fieldset role="site-search">
-            <input class="search" type="search" id="q" placeholder="Search"/>
-        </fieldset>
-    </form>
-    <ul role=main-navigation>
-        <li><a href="/">首页</a></li>
-        <li><a href="/page/8/%E5%85%AC%E5%8F%B8%E7%AE%80%E4%BB%8B">公司简介</a></li>
-        <li><a href="/category/%E4%BA%A7%E5%93%81%E5%B1%95%E7%A4%BA/">产品展示</a></li>
-        <li><a href="/list/%E6%96%B0%E9%97%BB%E8%B5%84%E8%AE%AF/">新闻资讯</a></li>
-        <li><a href="/page/6/%E8%B4%AD%E4%B9%B0%E6%96%B9%E5%BC%8F">购买方式</a></li>
-        <li><a href="/category/%E8%A7%86%E9%A2%91%E6%BC%94%E7%A4%BA/">视频演示</a></li>
-        <li><a href="/list/%E8%A1%8C%E4%B8%9A%E8%B5%84%E8%AE%AF/">行业资讯</a></li>
-        <li><a href="/page/7/%E7%95%99%E8%A8%80%E5%8F%8D%E9%A6%88">留言反馈</a></li>
-        <li><a href="/page/4/%E8%81%94%E7%B3%BB%E6%88%91%E4%BB%AC">联系我们</a></li>
-    </ul>
-</nav>
-<div id="main">
-    <div id="content">
-        #{_content}
-        <?py include("sider.html") ?>
+    <div class="navbar">
+        <div class="navbar-inner">
+            <div class="container">
+                <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <div class="nav-collapse collapse">
+                    <ul class="nav">
+                        <li class="active"><a href="/">首页</a></li>
+                        <li><a href="/page/8/%E5%85%AC%E5%8F%B8%E7%AE%80%E4%BB%8B">公司简介</a></li>
+                        <li><a href="/category/%E4%BA%A7%E5%93%81%E5%B1%95%E7%A4%BA/">产品展示</a></li>
+                        <li><a href="/list/%E6%96%B0%E9%97%BB%E8%B5%84%E8%AE%AF/">新闻资讯</a></li>
+                        <li><a href="/page/6/%E8%B4%AD%E4%B9%B0%E6%96%B9%E5%BC%8F">购买方式</a></li>
+                        <li><a href="/category/%E8%A7%86%E9%A2%91%E6%BC%94%E7%A4%BA/">视频演示</a></li>
+                        <li><a href="/list/%E8%A1%8C%E4%B8%9A%E8%B5%84%E8%AE%AF/">行业资讯</a></li>
+                        <li><a href="/page/7/%E7%95%99%E8%A8%80%E5%8F%8D%E9%A6%88">留言反馈</a></li>
+                        <li><a href="/page/4/%E8%81%94%E7%B3%BB%E6%88%91%E4%BB%AC">联系我们</a></li>
+                    </ul>
+                    <form class="navbar-form pull-right" onsubmit="return dispatch()">
+                        <input class="span2" type="search" id="q" placeholder="Search">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <img src="/static/themes/sdyspj/images/ads.jpg">
+    #{_content}
+    <hr>
+    <div class="">
+        <div class="span3">
+            <address>
+                <strong>联系方式</strong><br/>
+                联系人：黄经理<br/>
+                <abbr title="Phone">手机:</abbr> 1595374****
+            </address>
+        </div>
+        <div class="span3">
+            <address>
+                <strong>分类</strong><br/>
+                <?py for cat in cats: ?>
+                <span class="label label-info" onclick="location.href='#{{ BASE_URL }}/category/#{cat.name}/'">#{cat.name}(#{cat.id_num})</span>
+                <?py #endfor ?>
+            </address>
+        </div>
+        <div class="span4">
+            <address>
+                <strong>Tags</strong><br/>
+                <?py for tagi in tags: ?>
+                <span class="label label-info" onclick="location.href='#{{ BASE_URL }}/tag/#{tagi.name}/'">#{tagi.name}(#{tagi.id_num})</span>
+                <?py #endfor ?>
+            </address>
+        </div>
+        <div class="span2">
+            <address>
+                <strong>归档</strong><br/>
+                <?py for archive in archives: ?>
+                <span class="label label-info" onclick="location.href='#{{ BASE_URL }}/archive/#{archive.name}/'">#{archive.name}</span>
+                <?py #endfor ?>
+            </address>
+        </div>
     </div>
 </div>
-<footer>
-    <p>
-        联系人：黄经理 手机：1595374**** 本公司以上所有产品仅供娱乐表演，切勿用于赌博，一切后果自负.<br/>
-        &copy; #{{ COPY_YEAR }} Copyright <a href="#{{ BASE_URL }}">#{{ SITE_TITLE }}</a> -
-        Powered by <a href="http://cms4p.im47.cn/" target="_blank">cms4p</a> -
-        Time: <span id="requesttime">#{ int(request.request_time()*1000) }</span> ms -
-        <a href="#{{ BASE_URL }}/admin/" rel="nofollow">后台管理</a>
-        <a class="fr" target="_blank" href="http://sae.sina.com.cn"><img title="Powered by Sina App Engine"
-                                                                         src="/static/images/sae.gif"></a>
-    </p>
+<footer class="footer">
+    <div class="container">
+        <p><strong>本公司以上所有产品仅供娱乐表演，切勿用于赌博，一切后果自负.</strong></p>
+
+        <p>&copy; #{{ COPY_YEAR }} Copyright <a href="#{{ BASE_URL }}">#{{ SITE_TITLE }}</a> -
+            <a href="/feed" rel="subscribe-rss" title="subscribe via RSS">RSS</a> -
+            <a href="#{{ BASE_URL }}/admin/" rel="nofollow">后台管理</a></p>
+
+        <p>Powered by <a href="https://github.com/dreambt/cms4p" target="_blank">cms4p</a> - Time: <span
+                id="requesttime">#{ int(request.request_time()*1000) }</span> ms - <a class="fr" target="_blank"
+                                                                                      href="http://sae.sina.com.cn"><img
+                title="Powered by Sina App Engine" src="/static/images/sae.gif"></a></p>
+    </div>
     <a style="display: none; " rel="nofollow" href="#top" id="go-to-top">▲</a>
 </footer>
 
@@ -131,7 +140,53 @@
 
 <?py #endif ?>
 
+<script type="text/javascript">
+    var dispatch = function () {
+        q = document.getElementById("q");
+        if (q.value != "") {
+            window.open('http://www.google.com/search?q=site:#{{MAJOR_DOMAIN}}/topic/%20' + q.value, "_blank");
+            return false;
+        } else {
+            return false;
+        }
+    }
+    $(function () {
+        $("#go-to-top").click(function () {
+            $("html, body").animate({'scrollTop': 0}, 400);
+            return false;
+        });
+        $(window).scroll(function () {
+            var top = $(document).scrollTop();
+            var g = $("#go-to-top");
+            if (top > 300 && g.is(":hidden")) {
+                g.fadeIn();
+            } else if (top < 300 && g.is(":visible")) {
+                g.fadeOut();
+            }
+        });
+        // fix sub nav on scroll
+        var $win = $(window)
+                , $nav = $('.navbar')
+                , navTop = $('.navbar').length && $('.navbar').offset().top
+                , isFixed = 0
 
+        processScroll()
+
+        $win.on('scroll', processScroll)
+
+        function processScroll() {
+            var i, scrollTop = $win.scrollTop()
+            if (scrollTop >= navTop && !isFixed) {
+                isFixed = 1
+                $nav.addClass('navbar-fixed-top')
+            } else if (scrollTop <= navTop && isFixed) {
+                isFixed = 0
+                $nav.removeClass('navbar-fixed-top')
+            }
+        }
+    })
+</script>
+<script type="text/javascript" src="/static/jquery-plugin/bootstrap.min.js"></script>
 <?PY if ANALYTICS_CODE: ?>
 #{{ ANALYTICS_CODE }}
 <?PY #endif ?>
