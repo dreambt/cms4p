@@ -3,7 +3,7 @@
 <head>
     <meta charset='utf-8'>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <title>#{title} - #{{ SITE_TITLE }}</title>
+    <title>#{title} - #{{ getAttr('SITE_TITLE') }}</title>
     <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon"/>
     <link rel="stylesheet" href="/static/style/bootstrap.min.css" type="text/css"/>
     <link rel="stylesheet" href="/static/style/bootstrap-responsive.min.css" type="text/css"/>
@@ -25,7 +25,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="brand" href="/">#{{ SITE_TITLE }}</a>
+            <a class="brand" href="/">#{{ getAttr('SITE_TITLE') }}</a>
 
             <div class="nav-collapse collapse">
                 <ul class="nav">
@@ -71,7 +71,7 @@
     <div class="container">
         <h1>#{title}</h1>
 
-        <p class="lead">#{{ SITE_SUB_TITLE }}</p>
+        <p class="lead">#{{ getAttr('SITE_SUB_TITLE') }}</p>
     </div>
 </header>
 <div class="container">
@@ -79,7 +79,7 @@
 </div>
 <footer>
     <p>
-        &copy; #{{ COPY_YEAR }} Copyright <a href="#{{ BASE_URL }}">#{{ SITE_TITLE }}</a> -
+        &copy; #{{ getAttr('COPY_YEAR') }} Copyright <a href="#{{ BASE_URL }}">#{{ getAttr('SITE_TITLE') }}</a> -
         Powered by <a href="http://cms4p.im47.cn/" target="_blank">cms4p</a> -
         Time: <span id="requesttime">#{ int(request.request_time()*1000) }</span> ms
     </p>
