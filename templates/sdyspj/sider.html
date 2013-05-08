@@ -1,33 +1,24 @@
-<aside role=sidebar>
-    <section>
-        <h1>最新评论</h1>
-        <ul id="recent_posts">
-            <?py for each in comments: ?>
-            <li class="post">
-                #{each.author} 说: <span class="grey">${each.add_time}</span> <br/> <a
-                    href="#{{ BASE_URL }}/t/#{each.postid}#r#{each.id}">#{each.short_content} </a>
-            </li>
-            <?py #endfor ?>
-        </ul>
-    </section>
+<h4>强烈推荐</h4>
+<p>112123123123</p>
+<p>112123123123</p>
+<p>112123123123</p>
+<p>112123123123</p>
+<p>112123123123</p>
+<p>112123123123</p>
+<h4>最新评论</h4>
+<?py for each in comments: ?>
+<div class="media">
+    <a class="pull-left" href="#"><img class="media-object" data-src="holder.js/48x48" alt="48x48"
+                                       style="width:48px;height:48px;" src="#{each.gravatar}?s=48&d=monsterid"></a>
 
-    <section>
-        <h1></h1>
-
-        <p id="Ads">
-            #{getAttr('ADSENSE_CODE2')}
-        </p>
-    </section>
-
-    <section>
-        <h1>友情链接</h1>
-        <ul id="Category_list">
-            <?py for link in LINK_BROLL: ?>
-            <li class="category"><a href="#{link['url']}" target="_blank">#{link['text']}</a></li>
-            <?py #endfor ?>
-            <?py for link in links: ?>
-            <li class="category"><a href="#{link['url']}" target="_blank">#{link['name']}</a></li>
-            <?py #endfor ?>
-        </ul>
-    </section>
-</aside>
+    <div class="media-body"><h6 class="media-heading">#{each.author} 于 ${each.add_time}</h6>#{each.short_content}</div>
+</div>
+<?py #endfor ?>
+<p id="Ads">#{getAttr('ADSENSE_CODE2')}</p>
+<h4>友情链接</h4>
+<?py for link in LINK_BROLL: ?>
+<span class="label" onclick="window.open('#{link['url']}','_blank');">#{link['text']}</span>
+<?py #endfor ?>
+<?py for link in links: ?>
+<span class="label" onclick="window.open('#{link['url']}','_blank');">#{link['name']}</span>
+<?py #endfor ?>

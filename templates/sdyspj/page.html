@@ -1,4 +1,4 @@
-<div>
+<div class="row">
     <div class="span9">
         <article class="hentry" role="article">
             <div class="entry-content" id="postcondiv">#{obj.content}<br/>#{getAttr('ADSENSE_CODE1')}<br/></div>
@@ -51,18 +51,14 @@
         <section>
             <div id="respond" class="topline">
                 <?py if obj.closecomment: ?>
-
-                <p>无法评论</p>
+                <!--<p>无法评论</p>-->
                 <script>
                     function reply(toid, name) {
                         return false;
                     }
                 </script>
-
                 <?py else: ?>
-
                 <?py include("newcomment.html") ?>
-
                 <?py #endif ?>
             </div>
         </section>

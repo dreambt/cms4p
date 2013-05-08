@@ -1,22 +1,23 @@
 # -*- coding: utf-8 -*-
 import StringIO
+from hashlib import md5
+from time import time
+
 from PIL import Image
 from tornado import escape
+import sae.storage
+
+from common import BaseHandler, authorized, safe_encode, clear_cache_by_pathlist, quoted_string, clear_all_cache, genArchive, setAttr, clearAllKVDB, set_count, increment, getAttr
+from helpers import generate_random
+from setting import *
+from extensions.imagelib import Recaptcha
+from model import Article, Comment, Link, Category, Tag, User, MyData, Archive
+
 
 try:
     import json
 except:
     import simplejson as json
-
-from hashlib import md5
-from time import time
-
-from common import BaseHandler, authorized, safe_encode, clear_cache_by_pathlist, quoted_string, clear_all_cache, genArchive, setAttr, clearAllKVDB, set_count, increment, getAttr
-from helpers import generate_random
-from setting import *
-from utils.imagelib import Recaptcha
-from model import Article, Comment, Link, Category, Tag, User, MyData, Archive
-import sae.storage
 
 if not debug:
     import sae.mail
@@ -542,9 +543,9 @@ class BlogSetting2(BaseHandler):
         if value:
             setAttr('MAIL_FROM', value)
 
-        value = self.get_argument("MAIL_PASSWORD", '')
+        value = self.get_argument("MAIL_KEY", '')
         if value:
-            setAttr('MAIL_PASSWORD', value)
+            setAttr('MAIL_KEY', value)
 
         value = self.get_argument("MAIL_SMTP", '')
         if value:
@@ -773,7 +774,7 @@ class SendMail(BaseHandler):
         if subject and content:
             sae.mail.send_mail(getAttr('NOTICE_MAIL'), subject, content,
                                (getAttr('MAIL_SMTP'), int(getAttr('MAIL_PORT')), getAttr('MAIL_FROM'),
-                                getAttr('MAIL_PASSWORD'), True))
+                                getAttr('MAIL_KEY'), True))
 
 
 # 初始化一些参数
@@ -801,8 +802,8 @@ def Init():
         setAttr('MAIL_SMTP', MAIL_SMTP)
     if not getAttr('MAIL_PORT'):
         setAttr('MAIL_PORT', MAIL_PORT)
-    if not getAttr('MAIL_PASSWORD'):
-        setAttr('MAIL_PASSWORD', MAIL_PASSWORD)
+    if not getAttr('MAIL_KEY'):
+        setAttr('MAIL_KEY', MAIL_KEY)
 
     if not getAttr('EACH_PAGE_POST_NUM'):
         setAttr('EACH_PAGE_POST_NUM', EACH_PAGE_POST_NUM)

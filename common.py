@@ -3,6 +3,7 @@ import re
 import os.path
 from urllib import unquote, quote
 from datetime import datetime, timedelta
+import requests
 
 import tornado.web
 
@@ -264,7 +265,6 @@ class BaseHandler(tornado.web.RequestHandler):
                 self._session = Session(self.get_secure_cookie, self.set_secure_cookie, expires_days=expires)
             return self._session
 
-
     def isAuthor(self):
         user_name_cookie = self.get_secure_cookie('username', '')
         user_pw_cookie = self.get_secure_cookie('userpw', '')
@@ -275,6 +275,18 @@ class BaseHandler(tornado.web.RequestHandler):
         else:
             user = False
         return user
+
+    # http://www.keakon.net/2012/12/03/Tornado%E4%BD%BF%E7%94%A8%E7%BB%8F%E9%AA%8C
+    def write_error(self, status_code, **kwargs):
+        if status_code == 404:
+            sendEmail("404 页面找不到", "")
+            self.render('404.html')
+        elif status_code == 500:
+            sendEmail("500 页面找不到", "")
+            self.render('500.html')
+        else:
+            sendEmail("*** 未知异常", "")
+            super(tornado.web.RequestHandler, self).write_error(status_code, **kwargs)
 
 
 def authorized(url='/admin/login'):
@@ -382,7 +394,25 @@ def increment(keyname, num_shards=NUM_SHARDS, value=1):
         kv.set(keyname, count)
     return count
 
+# 发送邮件
+def sendEmail(subject, html, to=None):
+    url = "https://sendcloud.sohu.com/webapi/mail.send.xml"
+    if to:
+        to = getAttr('MAIL_TO')
+    params = {
+        "api_user": getAttr('MAIL_FROM'),
+        "api_key": getAttr('MAIL_KEY'),
+        "to": to,
+        "from": getAttr('MAIL_FROM'),
+        "formname": getAttr('SITE_TITLE'),
+        "subject": subject,
+        "html": html
+    }
+    r = requests.post(url, params)
+    print r.text
 
+
+# 清空 KVDB 缓存
 def clearAllKVDB():
     total = get_count('Totalblog', NUM_SHARDS, 0)
     for loop in range(0, total + 1):
@@ -391,6 +421,7 @@ def clearAllKVDB():
     kv.delete('Totalblog')
 
 
+# 设置属性
 def getAttr(keyname):
     value = mc.get(keyname)
     if value is None:

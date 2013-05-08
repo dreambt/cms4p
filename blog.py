@@ -277,7 +277,7 @@ class PostDetail(BaseHandler):
 
                             sae.mail.send_mail(','.join(tolist), m_subject, m_html,
                                                (getAttr('MAIL_SMTP'), int(getAttr('MAIL_PORT')), getAttr('MAIL_FROM'),
-                                                getAttr('MAIL_PASSWORD'), True))
+                                                getAttr('MAIL_KEY'), True))
 
                     except:
                         pass
@@ -449,7 +449,7 @@ class PageDetail(BaseHandler):
 
                             sae.mail.send_mail(','.join(tolist), m_subject, m_html,
                                                (getAttr('MAIL_SMTP'), int(getAttr('MAIL_PORT')), getAttr('MAIL_FROM'),
-                                                getAttr('MAIL_PASSWORD'), True))
+                                                getAttr('MAIL_KEY'), True))
 
                     except:
                         pass
