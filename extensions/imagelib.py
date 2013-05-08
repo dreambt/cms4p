@@ -13,10 +13,10 @@ import os
 import random
 import StringIO
 
-import Image
-import ImageFont
-import ImageDraw
-import ImageEnhance
+from PIL import Image
+from PIL import ImageFont
+from PIL import ImageDraw
+from PIL import ImageEnhance
 
 root_path = os.path.dirname(__file__)
 
