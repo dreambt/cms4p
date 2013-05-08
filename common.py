@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
+import gzip
 import re
 import os.path
+import traceback
 from urllib import unquote, quote
 from datetime import datetime, timedelta
+import cStringIO
 import requests
 
 import tornado.web
@@ -278,14 +281,19 @@ class BaseHandler(tornado.web.RequestHandler):
 
     # http://www.keakon.net/2012/12/03/Tornado%E4%BD%BF%E7%94%A8%E7%BB%8F%E9%AA%8C
     def write_error(self, status_code, **kwargs):
+        message = "<h4>Error Code:" + str(status_code) + "</h4>"
+        message += "<h4>Exception Stack:</h4>"
+        message += "<br />".join(traceback.format_exception(*kwargs["exc_info"]))
+        # TODO 完善使之具有丰富的调试上下文，方便调试
+        message += "<h4>Content:</h4>"
         if status_code == 404:
-            sendEmail("404 页面找不到", "")
+            sendEmail("404 页面找不到", message)
             self.render('404.html')
         elif status_code == 500:
-            sendEmail("500 页面找不到", "")
+            sendEmail("500 页面找不到", message)
             self.render('500.html')
         else:
-            sendEmail("*** 未知异常", "")
+            sendEmail("*** 未知异常", message)
             super(tornado.web.RequestHandler, self).write_error(status_code, **kwargs)
 
 
@@ -394,11 +402,12 @@ def increment(keyname, num_shards=NUM_SHARDS, value=1):
         kv.set(keyname, count)
     return count
 
+
 # 发送邮件
 def sendEmail(subject, html, to=None):
     url = "https://sendcloud.sohu.com/webapi/mail.send.xml"
-    if to:
-        to = getAttr('MAIL_TO')
+    if to is None:
+        to = MAIL_TO
     params = {
         "api_user": getAttr('MAIL_FROM'),
         "api_key": getAttr('MAIL_KEY'),
@@ -410,6 +419,21 @@ def sendEmail(subject, html, to=None):
     }
     r = requests.post(url, params)
     print r.text
+
+
+# 邮件 html 压缩
+def gzip_compress(content):
+    out = cStringIO.StringIO()
+    gzipfile = gzip.GzipFile(fileobj=out, mode='w', compresslevel=9)
+    gzipfile.write(content)
+    gzipfile.close()
+    out.seek(0)
+    byte = out.read(1)
+    byteArr = []
+    while byte:
+        byteArr.append(byte)
+        byte = out.read(1)
+    return bytearray(byteArr).decode('iso-8859-1')
 
 
 # 清空 KVDB 缓存
