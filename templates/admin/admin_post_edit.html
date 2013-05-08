@@ -87,6 +87,7 @@
 <script src="/static/kindeditor/kindeditor-min.js" type="text/javascript"></script>
 <script type="text/javascript">
     $(function () {
+        $("#post_page").addClass("active");
         var editor = KindEditor.create('#html', {
             uploadJson: '/admin/fileupload',
             fileManagerJson: '/admin/filelist',

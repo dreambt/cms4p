@@ -30,7 +30,7 @@
             <div class="nav-collapse collapse">
                 <ul class="nav">
                     <li id="admin_page"><a href="/admin/">后台首页</a></li>
-                    <li id="article_page" class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">文章管理
+                    <li id="post_page" class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">文章管理
                         <b class="caret"></b></a>
                         <ul class="dropdown-menu">
                             <li><a href="/admin/add_post">发表文章</a></li>
@@ -52,13 +52,14 @@
                             <li><a href="/admin/setting4">广告统计</a></li>
                         </ul>
                     </li>
-                    <li id="xn_page" class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">性能管理
+                    <li id="cache_page"><a href="/admin/flushdata">缓存管理</a></li>
+                    <!--<li id="perf_page" class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">性能管理
                         <b class="caret"></b></a>
                         <ul class="dropdown-menu">
-                            <!--<li><a href="/admin/kvdb">KVDB管理</a></li>-->
+                            <li><a href="/admin/kvdb">KVDB管理</a></li>
                             <li><a href="/admin/flushdata">缓存管理</a></li>
                         </ul>
-                    </li>
+                    </li>-->
                     <li class="divider-vertical"></li>
                     <li id="user_page"><a href="/admin/profile">个人资料</a></li>
                     <li><a href="/admin/logout">安全退出</a></li>
@@ -70,8 +71,6 @@
 <header class="jumbotron subhead" id="overview">
     <div class="container">
         <h1>#{title}</h1>
-
-        <p class="lead">#{{ getAttr('SITE_SUB_TITLE') }}</p>
     </div>
 </header>
 <div class="container">

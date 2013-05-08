@@ -32,6 +32,7 @@
 <span class="label label-info">提示</span> 修改密码成功后会自动踢出系统，您需要重新登录系统.
 <script type="text/javascript">
     $(function () {
+        $("#user_page").addClass("active");
         $("#myForm").validate({
             submitHandler: function (form) {
                 $.ajax({
