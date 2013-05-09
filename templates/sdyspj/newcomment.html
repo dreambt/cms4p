@@ -1,31 +1,48 @@
-<a rel="nofollow" id="cancel-comment-reply-link" href="#{obj.absolute_url}#respond" style="display:none;">取消回复</a><h2
-        class="respond">发表评论</h2>
-<form action="#{obj.absolute_url}" method="post" id="commentform">
-    <p>
-        <input type="text" id="author" name="author" placeholder="Username" required tabindex="1"/>
-        <label for="author">* 姓名 (必填)</label>
-    </p>
+<a rel="nofollow" id="cancel-comment-reply-link" href="#{obj.absolute_url}#respond" style="display:none;">取消回复</a>
+<form action="#{obj.absolute_url}" method="post" id="commentform" class="form-horizontal">
+    <fieldset>
+        <legend>发表评论</legend>
+        <div class="control-group">
+            <label class="control-label" for="author">姓名</label>
 
-    <p>
-        <input type="text" id="email" name="email" placeholder="example@domain.com" required tabindex="2"/>
-        <label for="email">* Email (必填, 为您保密)</label>
-    </p>
+            <div class="controls">
+                <input type="text" id="author" name="author" class="input-xlarge required" placeholder="Username">
+                <span class="label label-info">必填</span>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="email">邮箱</label>
 
-    <p>
-        <input type="text" id="url" name="url" placeholder="http://www.yourdomain.com" tabindex="3"/>
-        <label for="email">Website (可选)</label>
-    </p>
+            <div class="controls">
+                <input type="text" id="email" name="email" class="input-xlarge required"
+                       placeholder="example@domain.com">
+                <span class="label label-info">必填</span>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="url">网站</label>
 
-    <p><label for="commentbox">* 字符限制为 10~500 个.</label></p>
-    <textarea name="comment" id="commentbox" tabindex="4"></textarea>
+            <div class="controls">
+                <input type="text" id="url" name="url" class="input-xlarge" placeholder="http://www.yourdomain.com">
+                <span class="label">选填</span>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="commentbox">内容</label>
 
-    <p>
-        <input name="submit" class="submit" type="button" id="submit" tabindex="5" value=" 提 交 "/>
-    </p>
-    <input type='hidden' value='#{obj.id}' id='postkeyname'/>
-    <input type='hidden' value='' id='toid'/>
-
-    <p id="text"></p>
+            <div class="controls">
+                <input type='hidden' value='#{obj.id}' id='postkeyname'/>
+                <input type='hidden' value='' id='toid'/>
+                <textarea id="commentbox" name="comment" class="input-xxlarge required" rows="8"></textarea>
+                <span class="label label-info">必填，限 10~500 个字符</span>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button type="submit" id="submit" class="btn btn-primary">提 交</button>
+            <button class="btn">重 置</button>
+        </div>
+        <p id="text"></p>
+    </fieldset>
 </form>
 <script src="/static/jquery-plugin/jquery.cookie.js" type="text/javascript" charset="utf-8"></script>
 <script>

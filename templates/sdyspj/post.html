@@ -142,17 +142,14 @@
     <!-- readmore comments -->
     <script>
         function goon() {
-
             var fromid = $("#commentlist li:last").attr('id').split("-")[1];
             var showednum = $("#commentlist li").length;
-
             $.ajax({
                 type: 'POST',
                 url: '#{request.path}',
                 dataType: "json",
                 data: {'act': 'readmorecomment', 'fromid': fromid, 'showednum': showednum, 'allnum': '#{obj.comment_num}' },
                 success: function (data) {
-
                     if (data.status == 200) {
                         $('#commentlist').append(data.commentstr);
                         $('#hasnum').text(data.lavenum);

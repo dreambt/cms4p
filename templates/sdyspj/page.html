@@ -13,11 +13,12 @@
             </header>
             <?py #endif ?>
         </article>
+
+
         <a name="comments"></a>
         <?py if obj.comment_num > 0: ?>
         <section>
-            <h1 class="topline">评论</h1>
-
+            <legend>评论列表</legend>
             <div id="comments">
                 <h2 class="comments">共计 #{obj.comment_num} 条评论 "#{obj.title}"</h2>
                 <ul class="singlecomments" id="commentlist">
@@ -32,9 +33,7 @@
                 <?py #endif ?>
             </div>
         </section>
-
         <?py else: ?>
-
         <section id="commentsec" style="display:none;">
             <h1 class="topline">评论</h1>
 
@@ -44,7 +43,6 @@
                 </ul>
             </div>
         </section>
-
         <?py #endif ?>
 
         <!-- new comment -->
@@ -68,17 +66,14 @@
         <!-- readmore comments -->
         <script>
             function goon() {
-
                 var fromid = $("#commentlist li:last").attr('id').split("-")[1];
                 var showednum = $("#commentlist li").length;
-
                 $.ajax({
                     type: 'POST',
                     url: '#{request.path}',
                     dataType: "json",
                     data: {'act': 'readmorecomment', 'fromid': fromid, 'showednum': showednum, 'allnum': '#{obj.comment_num}' },
                     success: function (data) {
-
                         if (data.status == 200) {
                             $('#commentlist').append(data.commentstr);
                             $('#hasnum').text(data.lavenum);
@@ -89,12 +84,13 @@
                     }
 
                 });
-
                 return false;
             }
         </script>
         <!-- readmore comments end -->
         <?py #endif ?>
+
+
     </div>
     <div class="span3">
         <?py include("sider.html") ?>
