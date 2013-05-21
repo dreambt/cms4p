@@ -47,7 +47,6 @@ class HomePage(BaseHandler):
             'endid': endid,
             'comments': Comment.get_recent_comments(),
             'links': Link.get_all_links(),
-            'isauthor': self.isAuthor(),
             'Totalblog': get_count('Totalblog', NUM_SHARDS, 0),
         }, layout='_layout.html')
         self.write(output)
@@ -88,7 +87,6 @@ class IndexPage(BaseHandler):
             'endid': endid,
             'comments': Comment.get_recent_comments(),
             'links': Link.get_all_links(),
-            'isauthor': self.isAuthor(),
             'Totalblog': get_count('Totalblog', NUM_SHARDS, 0),
         }, layout='_layout.html')
         self.write(output)
@@ -127,7 +125,7 @@ class PostDetail(BaseHandler):
             rp = self.get_secure_cookie("rp%s" % id, '')
             if rp != obj.password:
                 tmpl = '_pw'
-        elif obj.password and BLOG_PSW_SUPPORT:
+        elif obj.password and getAttr('BLOG_PSW_SUPPORT'):
             rp = self.get_secure_cookie("rp%s" % id, '')
             print 'rp===%s' % (str(rp))
             if rp != obj.password:
@@ -152,14 +150,13 @@ class PostDetail(BaseHandler):
             'allpage': 10,
             'comments': Comment.get_recent_comments(),
             'links': Link.get_all_links(),
-            'isauthor': self.isAuthor(),
             'hits': get_count(keyname),
             'Totalblog': get_count('Totalblog', NUM_SHARDS, 0),
             'listtype': '',
         }, layout='_layout.html')
         self.write(output)
 
-        if obj.password and BLOG_PSW_SUPPORT:
+        if obj.password and getAttr('BLOG_PSW_SUPPORT'):
             return output
         elif obj.password and THEME == 'default':
             return
@@ -326,7 +323,6 @@ class PageDetail(BaseHandler):
             'allpage': 10,
             'comments': Comment.get_recent_comments(),
             'links': Link.get_all_links(),
-            'isauthor': self.isAuthor(),
             'Totalblog': get_count('Totalblog', NUM_SHARDS, 0),
         }, layout='_layout.html')
         self.write(output)
@@ -367,18 +363,18 @@ class PageDetail(BaseHandler):
 
         if action == 'readmorecomment':
             fromid = self.get_argument("fromid", '')
-            allnum = int(self.get_argument("allnum", 0))
-            EACH_PAGE_COMMENT_NUM = getAttr('EACH_PAGE_COMMENT_NUM')
-            showednum = int(self.get_argument("showednum", EACH_PAGE_COMMENT_NUM))
+            all_num = int(self.get_argument("allnum", 0))
+            each_page_comment_num = getAttr('EACH_PAGE_COMMENT_NUM')
+            showednum = int(self.get_argument("showednum", each_page_comment_num))
             if fromid:
                 rspd['status'] = 200
-                if (allnum - showednum) >= EACH_PAGE_COMMENT_NUM:
-                    limit = EACH_PAGE_COMMENT_NUM
+                if (all_num - showednum) >= each_page_comment_num:
+                    limit = each_page_comment_num
                 else:
-                    limit = allnum - showednum
+                    limit = all_num - showednum
                 cobjs = Comment.get_post_page_comments_by_id(id, fromid, limit)
                 rspd['commentstr'] = self.render('comments.html', {'cobjs': cobjs})
-                rspd['lavenum'] = allnum - showednum - limit
+                rspd['lavenum'] = all_num - showednum - limit
                 self.write(json.dumps(rspd))
             return
 
@@ -475,24 +471,23 @@ class CategoryDetail(BaseHandler):
     @pagecache('cat', PAGE_CACHE_TIME, lambda self, name: name)
     def get(self, name=''):
         objs = Category.get_cat_page_posts(name, 1)
-
         catobj = Category.get_cat_by_name(name)
+        show_type = self.get_argument('type', 'default')
 
-        print objs
-        print catobj
         if catobj:
             pass
         else:
             self.redirect(BASE_URL)
             return
 
-        allpost = catobj.id_num
-        allpage = allpost / EACH_PAGE_POST_NUM
-        if allpost % EACH_PAGE_POST_NUM:
-            allpage += 1
+        each_page_post_num = int(getAttr('EACH_PAGE_POST_NUM'))
+        all_post = catobj.id_num
+        all_page = all_post / each_page_post_num
+        if all_post % each_page_post_num:
+            all_page += 1
 
-        output = self.render('default.html', {
-            'title': "%s - %s" % ( catobj.name, getAttr('SITE_TITLE')),
+        output = self.render(show_type+'.html', {
+            'title': "%s - %s" % (catobj.name, getAttr('SITE_TITLE')),
             'keywords': catobj.name,
             'description': getAttr('SITE_DECR'),
             'objs': objs,
@@ -500,48 +495,7 @@ class CategoryDetail(BaseHandler):
             'tags': Tag.get_hot_tag_name(),
             'archives': Archive.get_all_archive_name(),
             'page': 1,
-            'allpage': allpage,
-            'listtype': 'cat',
-            'name': name,
-            'namemd5': md5(name.encode('utf-8')).hexdigest(),
-            'comments': Comment.get_recent_comments(),
-            'links': Link.get_all_links(),
-            'isauthor': self.isAuthor(),
-        }, layout='_layout.html')
-        self.write(output)
-        return output
-
-
-class ListDetail(BaseHandler):
-    @pagecache('cat', PAGE_CACHE_TIME, lambda self, name: name)
-    def get(self, name=''):
-        objs = Category.get_cat_page_posts(name, 1)
-
-        catobj = Category.get_cat_by_name(name)
-
-        print objs
-        print catobj
-        if catobj:
-            pass
-        else:
-            self.redirect(BASE_URL)
-            return
-
-        allpost = catobj.id_num
-        allpage = allpost / EACH_PAGE_POST_NUM
-        if allpost % EACH_PAGE_POST_NUM:
-            allpage += 1
-
-        output = self.render('list.html', {
-            'title': "%s - %s" % ( catobj.name, getAttr('SITE_TITLE')),
-            'keywords': catobj.name,
-            'description': getAttr('SITE_DECR'),
-            'objs': objs,
-            'cats': Category.get_all_cat_name(),
-            'tags': Tag.get_hot_tag_name(),
-            'archives': Archive.get_all_archive_name(),
-            'page': 1,
-            'allpage': allpage,
+            'allpage': all_page,
             'listtype': 'cat',
             'name': name,
             'namemd5': md5(name.encode('utf-8')).hexdigest(),
@@ -568,13 +522,13 @@ class ArchiveDetail(BaseHandler):
             self.redirect(BASE_URL)
             return
 
-        allpost = archiveobj.id_num
-        allpage = allpost / EACH_PAGE_POST_NUM
-        if allpost % EACH_PAGE_POST_NUM:
-            allpage += 1
+        all_post = archiveobj.id_num
+        all_page = all_post / EACH_PAGE_POST_NUM
+        if all_post % EACH_PAGE_POST_NUM:
+            all_page += 1
 
         output = self.render('index.html', {
-            'title': "%s - %s" % ( archiveobj.name, getAttr('SITE_TITLE')),
+            'title': "%s - %s" % (archiveobj.name, getAttr('SITE_TITLE')),
             'keywords': archiveobj.name,
             'description': getAttr('SITE_DECR'),
             'objs': objs,
@@ -582,13 +536,12 @@ class ArchiveDetail(BaseHandler):
             'tags': Tag.get_hot_tag_name(),
             'archives': Archive.get_all_archive_name(),
             'page': 1,
-            'allpage': allpage,
+            'allpage': all_page,
             'listtype': 'archive',
             'name': name,
             'namemd5': md5(name.encode('utf-8')).hexdigest(),
             'comments': Comment.get_recent_comments(),
             'links': Link.get_all_links(),
-            'isauthor': self.isAuthor(),
             'Totalblog': get_count('Totalblog', NUM_SHARDS, 0),
         }, layout='_layout.html')
         self.write(output)
@@ -607,13 +560,13 @@ class TagDetail(BaseHandler):
             self.redirect(BASE_URL)
             return
 
-        allpost = catobj.id_num
-        allpage = allpost / EACH_PAGE_POST_NUM
-        if allpost % EACH_PAGE_POST_NUM:
-            allpage += 1
+        all_post = catobj.id_num
+        all_page = all_post / EACH_PAGE_POST_NUM
+        if all_post % EACH_PAGE_POST_NUM:
+            all_page += 1
 
         output = self.render('default.html', {
-            'title': "%s - %s" % ( catobj.name, getAttr('SITE_TITLE')),
+            'title': "%s - %s" % (catobj.name, getAttr('SITE_TITLE')),
             'keywords': catobj.name,
             'description': getAttr('SITE_DECR'),
             'objs': objs,
@@ -621,13 +574,12 @@ class TagDetail(BaseHandler):
             'tags': Tag.get_hot_tag_name(),
             'archives': Archive.get_all_archive_name(),
             'page': 1,
-            'allpage': allpage,
+            'allpage': all_page,
             'listtype': 'tag',
             'name': name,
             'namemd5': md5(name.encode('utf-8')).hexdigest(),
             'comments': Comment.get_recent_comments(),
             'links': Link.get_all_links(),
-            'isauthor': self.isAuthor(),
             'Totalblog': get_count('Totalblog', NUM_SHARDS, 0),
         }, layout='_layout.html')
         self.write(output)
@@ -635,31 +587,32 @@ class TagDetail(BaseHandler):
 
 
 class ArticleList(BaseHandler):
-    @pagecache('post_list_tag', PAGE_CACHE_TIME, lambda self, listtype, direction, page, name: "%s_%s" % (name, page))
-    def get(self, listtype='', direction='next', page='1', name=''):
-        if listtype == 'cat':
+    @pagecache('post_list_tag', PAGE_CACHE_TIME, lambda self, list_type, direction, page, name: "%s_%s" % (name, page))
+    def get(self, list_type='', direction='next', page='1', name=''):
+        if list_type == 'cat':
             objs = Category.get_cat_page_posts(name, page)
             catobj = Category.get_cat_by_name(name)
-        elif listtype == 'tag':
+        elif list_type == 'tag':
             objs = Tag.get_tag_page_posts(name, page)
             catobj = Tag.get_tag_by_name(name)
-        elif listtype == 'archive':
+        elif list_type == 'archive':
             objs = Archive.get_archive_page_posts(name, page)
             catobj = Archive.get_archive_by_name(name)
 
-        #
+        show_type = self.get_argument('type', 'default')
+
         if catobj:
             pass
         else:
             self.redirect(BASE_URL)
             return
 
-        allpost = catobj.id_num
-        allpage = allpost / EACH_PAGE_POST_NUM
-        if allpost % EACH_PAGE_POST_NUM:
-            allpage += 1
+        all_post = catobj.id_num
+        all_page = all_post / EACH_PAGE_POST_NUM
+        if all_post % EACH_PAGE_POST_NUM:
+            all_page += 1
 
-        output = self.render('default.html', {
+        output = self.render(show_type+'.html', {
             'title': "%s - %s | Part %s" % ( catobj.name, getAttr('SITE_TITLE'), page),
             'keywords': catobj.name,
             'description': getAttr('SITE_DECR'),
@@ -668,13 +621,12 @@ class ArticleList(BaseHandler):
             'tags': Tag.get_hot_tag_name(),
             'archives': Archive.get_all_archive_name(),
             'page': int(page),
-            'allpage': allpage,
-            'listtype': listtype,
+            'allpage': all_page,
+            'listtype': list_type,
             'name': name,
             'namemd5': md5(name.encode('utf-8')).hexdigest(),
             'comments': Comment.get_recent_comments(),
             'links': Link.get_all_links(),
-            'isauthor': self.isAuthor(),
             'Totalblog': get_count('Totalblog', NUM_SHARDS, 0),
         }, layout='_layout.html')
         self.write(output)
@@ -715,12 +667,13 @@ urls = [
     (r"/feed", Feed),
     (r"/index.xml", Feed),
     (r"/t/(\d+)$", PostDetailShort),
-    (r"/topic/(\d+)/(.*)$", PostDetail), # 文章
-    (r"/page/(\d+)/(.*)$", PageDetail), # 页面
+    (r"/topic/(\d+)/(.*)$", PostDetail),  # 文章
+    (r"/page/(\d+)/(.*)$", PageDetail),  # 页面
     (r"/index_(prev|next)_page/(\d+)/(\d+)/$", IndexPage),
+    # 分类
     (r"/c/(\d+)$", CategoryDetailShort),
-    (r"/category/(.+)/$", CategoryDetail), # 摘要模式
-    (r"/list/(.+)/$", ListDetail), # 列表模式
+    (r"/category/(.*)/$", CategoryDetail),
+
     (r"/tag/(.+)/$", TagDetail),
     (r"/archive/", ArchiveDetail),
     (r"/archive/(.+)/$", ArchiveDetail),

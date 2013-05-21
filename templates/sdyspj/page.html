@@ -2,16 +2,6 @@
     <div class="span9">
         <article class="hentry" role="article">
             <div class="entry-content" id="postcondiv">#{obj.content}<br/>#{getAttr('ADSENSE_CODE1')}<br/></div>
-            <?py if isauthor: ?>
-            <header>
-                <p class="meta grey">
-                <span class="categories greyhref">
-                  <a rel="full-article" href="#{{ BASE_URL }}/admin/edit_post/#{obj.id}">编辑</a>
-                  | <a rel="full-article" href="#{{ BASE_URL }}/admin/del_post/#{obj.id}">删除</a>
-                </span>
-                </p>
-            </header>
-            <?py #endif ?>
         </article>
 
 

@@ -1,5 +1,5 @@
-<div>
-    <article class="hentry" role="article">
+<div class="row">
+    <div class="span9">
         <header>
             <h1 class="entry-title">#{obj.title}</h1>
 
@@ -26,13 +26,6 @@
                 <?py #endif ?>
                 | <span class="categories greyhref">评论(#{obj.comment_num})</span>
                 | <span class="categories greyhref">浏览(#{hits})</span>
-
-                <?py if isauthor: ?>
-                <span class="categories greyhref">
-                  | <a rel="full-article" href="#{{ BASE_URL }}/admin/edit_post/#{obj.id}">编辑</a>
-                  | <a rel="full-article" href="#{{ BASE_URL }}/admin/del_post/#{obj.id}">删除</a>
-                </span>
-                <?py #endif ?>
             </p>
 
             <div style="display:block;margin-bottom:20px;">
@@ -77,95 +70,96 @@
             </div>
 
         </footer>
-    </article>
 
-    <a name="comments"></a>
-    <?py if obj.comment_num > 0: ?>
+        <a name="comments"></a>
+        <?py if obj.comment_num > 0: ?>
 
-    <section>
-        <h1 class="topline">评论</h1>
+        <section>
+            <h1 class="topline">评论</h1>
 
-        <div id="comments">
-            <h2 class="comments">共计 #{obj.comment_num} 条评论 "#{obj.title}"</h2>
-            <ul class="singlecomments" id="commentlist">
+            <div id="comments">
+                <h2 class="comments">共计 #{obj.comment_num} 条评论 "#{obj.title}"</h2>
+                <ul class="singlecomments" id="commentlist">
 
-                <?py include("comments.html") ?>
+                    <?py include("comments.html") ?>
 
-            </ul>
+                </ul>
 
-            <?py if obj.comment_num > EACH_PAGE_COMMENT_NUM: ?>
-            <p class="topline grey">
-                本主题还有 <strong id="hasnum">#{obj.comment_num - EACH_PAGE_COMMENT_NUM}</strong> 条评论未显示， <span id="idgoon"><a
-                    href="#" class="greyhref" onclick="goon();return false;">猛击这里往下翻 ↓</a></span>
-            </p>
-            <?py #endif ?>
+                <?py if obj.comment_num > EACH_PAGE_COMMENT_NUM: ?>
+                <p class="topline grey">
+                    本主题还有 <strong id="hasnum">#{obj.comment_num - EACH_PAGE_COMMENT_NUM}</strong> 条评论未显示， <span id="idgoon"><a
+                        href="#" class="greyhref" onclick="goon();return false;">猛击这里往下翻 ↓</a></span>
+                </p>
+                <?py #endif ?>
 
-        </div>
-    </section>
+            </div>
+        </section>
 
-    <?py else: ?>
+        <?py else: ?>
 
-    <section id="commentsec" style="display:none;">
-        <h1 class="topline">评论</h1>
+        <section id="commentsec" style="display:none;">
+            <h1 class="topline">评论</h1>
 
-        <div id="comments">
-            <h2 class="comments">只有一条评论 "#{obj.title}"</h2>
-            <ul class="singlecomments" id="commentlist">
-            </ul>
-        </div>
-    </section>
+            <div id="comments">
+                <h2 class="comments">只有一条评论 "#{obj.title}"</h2>
+                <ul class="singlecomments" id="commentlist">
+                </ul>
+            </div>
+        </section>
 
-    <?py #endif ?>
+        <?py #endif ?>
 
-    <!-- new comment -->
-    <section>
-        <div id="respond" class="topline">
-            <?py if obj.closecomment: ?>
+        <!-- new comment -->
+        <section>
+            <div id="respond" class="topline">
+                <?py if obj.closecomment: ?>
 
-            <p>该篇文章已关闭评论</p>
-            <script>
-                function reply(toid, name) {
-                    return false;
-                }
-            </script>
+                <p>该篇文章已关闭评论</p>
+                <script>
+                    function reply(toid, name) {
+                        return false;
+                    }
+                </script>
 
-            <?py else: ?>
+                <?py else: ?>
 
-            <?py include("newcomment.html") ?>
+                <?py include("newcomment.html") ?>
 
-            <?py #endif ?>
-        </div>
-    </section>
-    <!-- new comment end -->
+                <?py #endif ?>
+            </div>
+        </section>
+        <!-- new comment end -->
 
-    <?py if obj.comment_num > EACH_PAGE_COMMENT_NUM: ?>
-    <!-- readmore comments -->
-    <script>
-        function goon() {
-            var fromid = $("#commentlist li:last").attr('id').split("-")[1];
-            var showednum = $("#commentlist li").length;
-            $.ajax({
-                type: 'POST',
-                url: '#{request.path}',
-                dataType: "json",
-                data: {'act': 'readmorecomment', 'fromid': fromid, 'showednum': showednum, 'allnum': '#{obj.comment_num}' },
-                success: function (data) {
-                    if (data.status == 200) {
-                        $('#commentlist').append(data.commentstr);
-                        $('#hasnum').text(data.lavenum);
-                        if (data.lavenum == 0) {
-                            $('#idgoon').html('没有了！在下面补上一条吧！！');
+        <?py if obj.comment_num > EACH_PAGE_COMMENT_NUM: ?>
+        <!-- readmore comments -->
+        <script>
+            function goon() {
+                var fromid = $("#commentlist li:last").attr('id').split("-")[1];
+                var showednum = $("#commentlist li").length;
+                $.ajax({
+                    type: 'POST',
+                    url: '#{request.path}',
+                    dataType: "json",
+                    data: {'act': 'readmorecomment', 'fromid': fromid, 'showednum': showednum, 'allnum': '#{obj.comment_num}' },
+                    success: function (data) {
+                        if (data.status == 200) {
+                            $('#commentlist').append(data.commentstr);
+                            $('#hasnum').text(data.lavenum);
+                            if (data.lavenum == 0) {
+                                $('#idgoon').html('没有了！在下面补上一条吧！！');
+                            }
                         }
                     }
-                }
 
-            });
+                });
 
-            return false;
-        }
-    </script>
-    <!-- readmore comments end -->
-    <?py #endif ?>
-
+                return false;
+            }
+        </script>
+        <!-- readmore comments end -->
+        <?py #endif ?>
+    </div>
+    <div class="span3">
+        <?py include("sider.html") ?>
+    </div>
 </div>
-<?py include("sider.html") ?>

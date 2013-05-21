@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 from tornado import database
 
-from common import slugfy, time_from_now, cnnow, timestamp_to_datetime, safe_encode
+from common import slugfy, time_from_now, cnnow, timestamp_to_datetime, safe_encode, getAttr
 from setting import *
 
 
@@ -78,7 +78,7 @@ def post_list_format(posts):
         if '<!--more-->' in obj.content:
             obj.shorten_content = obj.content.split('<!--more-->')[0]
         else:
-            obj.shorten_content = HTML_REG.sub('', obj.content[:SHORTEN_CONTENT_WORDS])
+            obj.shorten_content = HTML_REG.sub('', obj.content[:int(getAttr('SHORTEN_CONTENT_WORDS'))])
 
         obj.add_time_fn = time_from_now(int(obj.add_time))
     return posts

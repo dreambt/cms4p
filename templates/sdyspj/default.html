@@ -8,7 +8,6 @@
             <p class="meta">
                 <?py hrefname = 'comments' if (obj.comment_num >0) else 'respond' ?>
                 <small>#{obj.add_time_fn} in <a href="#{{ BASE_URL }}/category/#{obj.category}/" rel="category tag">#{obj.category}</a>
-                    <a href="#{obj.absolute_url}##{hrefname}" title="Comment on #{obj.title}" class="count">#{obj.comment_num}</a>
                 </small>
             </p>
         </header>
@@ -19,10 +18,6 @@
         <footer>
             <a rel="full-article" href="#{obj.absolute_url}">查看更多</a>
             <a rel="full-article" href="#{obj.absolute_url}">评论(#{obj.comment_num})</a>
-            <?py if isauthor: ?>
-            <a rel="full-article" href="#{{ BASE_URL }}/admin/edit_post/#{obj.id}">编辑</a>
-            <a rel="full-article" href="#{{ BASE_URL }}/admin/del_post/#{obj.id}">删除</a>
-            <?py #endif ?>
         </footer>
     </article>
     <?py #endfor ?>

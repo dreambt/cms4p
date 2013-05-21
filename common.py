@@ -202,17 +202,18 @@ def pagecache(key="", time=PAGE_CACHE_TIME, key_suffix_calc_func=None):
                 if key == 'post':
                     if key_suffix:
                         keyname = 'pv_%s' % (quoted_string(key_suffix))
-                        pvcookie = req.get_cookie(keyname, '0')
-                        # print keyname,pvcookie
+                        pvcookie = req.get_secure_cookie(keyname)
+                        print keyname, pvcookie
                         if int(pvcookie) == 0:
-                            req.set_cookie(keyname, '1', path="/", expires_days=1)  # 不同浏览器有不同cookie
+                            req.set_secure_cookie(keyname, '1', path="/", expires_days=1)  # 不同浏览器有不同cookie
                             increment(keyname)
                         count = get_count(keyname)
                         print count
+                        set_count(keyname, 0, count + 1)
                         req.write(PV_RE.sub('<span class="categories greyhref">PageView(%d)</span>' % count, html))
                         return _wrapper
                 req.write(html)
-                #req.write(RQT_RE.sub('<span id="requesttime">%d</span>'%request_time, html))
+                # req.write(RQT_RE.sub('<span id="requesttime">%d</span>'%request_time, html))
             else:
                 result = method(*args, **kwargs)
                 print time

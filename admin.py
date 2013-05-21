@@ -880,7 +880,7 @@ class NotFoundPage(BaseHandler):
             'page': '404',
             'title': "Can't find out this URL",
             'h2': 'Oh, my god!',
-            'msg': 'Something seems to be lost...'
+            'msg': '<script type="text/javascript" src="http://www.qq.com/404/search_children.js?edition=small" charset="utf-8"></script>'
         })
 
 #####
@@ -891,7 +891,7 @@ urls = [
     (r"/admin/403", Forbidden),
     (r"/admin/add_post", AddPost),
     (r"/admin/edit_post/(\d*)", EditPost),
-    (r"/admin/list_post", ListPost), # TODO 分页
+    (r"/admin/list_post", ListPost),  # TODO 分页
     (r"/admin/del_post/(\d+)", DelPost),
     (r"/admin/comment/(\d*)", EditComment),
     (r"/admin/flushdata", FlushData),
