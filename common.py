@@ -204,8 +204,8 @@ def pagecache(key="", time=PAGE_CACHE_TIME, key_suffix_calc_func=None):
                         keyname = 'pv_%s' % (quoted_string(key_suffix))
                         pvcookie = req.get_secure_cookie(keyname)
                         print keyname, pvcookie
-                        if int(pvcookie) == 0:
-                            req.set_secure_cookie(keyname, '1', path="/", expires_days=1)  # 不同浏览器有不同cookie
+                        if pvcookie is not None and int(pvcookie) == 0:
+                            req.set_secure_cookie(keyname, '1', expires_days=1)  # 不同浏览器有不同cookie
                             increment(keyname)
                         count = get_count(keyname)
                         print count
@@ -287,6 +287,7 @@ class BaseHandler(tornado.web.RequestHandler):
         message += "<br />".join(traceback.format_exception(*kwargs["exc_info"]))
         # TODO 完善使之具有丰富的调试上下文，方便调试
         message += "<h4>Content:</h4>"
+        message += "<br />".join(self.request.arguments)
         if status_code == 404:
             sendEmail("404 页面找不到", message)
             self.render('404.html')
@@ -295,7 +296,7 @@ class BaseHandler(tornado.web.RequestHandler):
             self.render('500.html')
         else:
             sendEmail("*** 未知异常", message)
-            super(tornado.web.RequestHandler, self).write_error(status_code, **kwargs)
+            super(RequestHandler, self).write_error(status_code, **kwargs)
 
 
 def authorized(url='/admin/login'):

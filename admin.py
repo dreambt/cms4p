@@ -74,8 +74,8 @@ class Login(BaseHandler):
                 password = md5(password.encode('utf-8')).hexdigest()
                 user = User.check_user(name, password)
                 if user:
-                    self.set_secure_cookie('username', name, path="/", expires_days=365)
-                    self.set_secure_cookie('userpw', password, path="/", expires_days=365)
+                    self.set_secure_cookie('username', name, expires_days=365)
+                    self.set_secure_cookie('userpw', password, expires_days=365)
                     self.redirect('%s/admin/' % BASE_URL)
                     return
                 else:
@@ -85,9 +85,8 @@ class Login(BaseHandler):
                 # add new user
                 newuser = User.add_user(name, password)
                 if newuser:
-                    self.set_secure_cookie('username', name, path="/", expires_days=365)
-                    self.set_secure_cookie('userpw', md5(password.encode('utf-8')).hexdigest(), path="/",
-                                           expires_days=365)
+                    self.set_secure_cookie('username', name, expires_days=365)
+                    self.set_secure_cookie('userpw', md5(password.encode('utf-8')).hexdigest(), expires_days=365)
                     self.redirect('%s/admin/' % BASE_URL)
                     return
                 else:
@@ -678,7 +677,7 @@ class EditProfile(BaseHandler):
                 user = User.check_user(username, oldPassword)
                 if user:
                     User.update_user(username, newPassword)
-                    self.set_secure_cookie('userpw', '123', path="/", expires_days=1)
+                    self.set_secure_cookie('userpw', '123', expires_days=1)
                     self.write(escape.json_encode(1))
                     return
                 else:

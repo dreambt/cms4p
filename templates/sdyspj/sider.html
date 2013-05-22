@@ -1,17 +1,19 @@
 <h4>强烈推荐</h4>
-<p>112123123123</p>
-<p>112123123123</p>
-<p>112123123123</p>
-<p>112123123123</p>
-<p>112123123123</p>
-<p>112123123123</p>
+<ul class="nav nav-pills nav-stacked">
+<li><a href="#">1111111111111</a></li>
+<li><a href="#">1111111111111</a></li>
+<li><a href="#">1111111111111</a></li>
+<li><a href="#">1111111111111</a></li>
+<li><a href="#">1111111111111</a></li>
+<li><a href="#">1111111111111</a></li>
+<li><a href="#">1111111111111</a></li>
+</ul>
 <h4>最新评论</h4>
 <?py for each in comments: ?>
 <div class="media">
-    <a class="pull-left" href="#"><img class="media-object" data-src="holder.js/48x48" alt="48x48"
+    <a class="pull-left" href="#{BASE_URL}/t/#{each.postid}#r#{each.id}"><img class="media-object" data-src="holder.js/48x48" alt="48x48"
                                        style="width:48px;height:48px;" src="#{each.gravatar}?s=48&d=monsterid"></a>
-
-    <div class="media-body"><h6 class="media-heading">#{each.author} 于 ${each.add_time}</h6>#{each.short_content}</div>
+    <div class="media-body"><h6 class="media-heading"><a href="#{BASE_URL}/t/#{each.postid}#r#{each.id}">#{each.author}</a> 于 ${each.add_time}</h6>#{each.short_content}</div>
 </div>
 <?py #endfor ?>
 <p id="Ads">#{getAttr('ADSENSE_CODE2')}</p>

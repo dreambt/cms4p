@@ -27,10 +27,11 @@ class HomePage(BaseHandler):
         else:
             fromid = endid = ''
 
-        allpost = Article.count_all_post()
-        allpage = allpost / EACH_PAGE_POST_NUM
-        if allpost % EACH_PAGE_POST_NUM:
-            allpage += 1
+        each_page_post_num = int(getAttr('EACH_PAGE_POST_NUM'))
+        all_post = Article.count_all_post()
+        all_page = all_post / each_page_post_num
+        if all_post % each_page_post_num:
+            all_page += 1
 
         output = self.render('index.html', {
             'title': "%s - %s" % (getAttr('SITE_TITLE'), getAttr('SITE_SUB_TITLE')),
@@ -41,7 +42,7 @@ class HomePage(BaseHandler):
             'tags': Tag.get_hot_tag_name(),
             'archives': Archive.get_all_archive_name(),
             'page': 1,
-            'allpage': allpage,
+            'allpage': all_page,
             'listtype': 'index',
             'fromid': fromid,
             'endid': endid,
@@ -68,10 +69,11 @@ class IndexPage(BaseHandler):
         else:
             fromid = endid = ''
 
-        allpost = Article.count_all_post()
-        allpage = allpost / EACH_PAGE_POST_NUM
-        if allpost % EACH_PAGE_POST_NUM:
-            allpage += 1
+        each_page_post_num = int(getAttr('EACH_PAGE_POST_NUM'))
+        all_post = Article.count_all_post()
+        all_page = all_post / each_page_post_num
+        if all_post % each_page_post_num:
+            all_page += 1
         output = self.render('default.html', {
             'title': "%s - %s | Part %s" % (getAttr('SITE_TITLE'), getAttr('SITE_SUB_TITLE'), page),
             'keywords': getAttr('KEYWORDS'),
@@ -81,7 +83,7 @@ class IndexPage(BaseHandler):
             'tags': Tag.get_hot_tag_name(),
             'archives': Archive.get_all_archive_name(),
             'page': int(page),
-            'allpage': allpage,
+            'allpage': all_page,
             'listtype': 'index',
             'fromid': fromid,
             'endid': endid,
@@ -133,10 +135,14 @@ class PostDetail(BaseHandler):
 
         keyname = 'pv_%s' % (str(id))
         increment(keyname)
-        self.set_secure_cookie(keyname, '1', path="/", expires_days=1)
+        self.set_secure_cookie(keyname, '1', expires_days=1)
         self.set_header("Last-Modified", obj.last_modified)
 
-        output = self.render('post%s.html' % tmpl, {
+        template_prefix = 'post'
+        if obj.category == '-':
+            template_prefix = 'page'
+
+        output = self.render(template_prefix+'%s.html' % tmpl, {
             'title': "%s - %s" % (obj.title, getAttr('SITE_TITLE')),
             'keywords': obj.keywords,
             'description': obj.description,
@@ -167,175 +173,6 @@ class PostDetail(BaseHandler):
         action = self.get_argument("act")
 
         if action == 'inputpw':
-            wrn = self.get_secure_cookie("wrpw", '0')
-            if int(wrn) >= 10:
-                self.write('403')
-                return
-
-            pw = self.get_argument("pw", '')
-            pobj = Article.get_article_by_id_simple(id)
-            wr = False
-            if pw:
-                if pobj.password == pw:
-                    clear_cache_by_pathlist(['post:%s' % id])
-                    self.set_secure_cookie("rp%s" % id, pobj.password, path="/", expires_days=1)
-                else:
-                    wr = True
-            else:
-                wr = True
-            if wr:
-                wrn = self.get_secure_cookie("wrpw", '0')
-                self.set_secure_cookie("wrpw", str(int(wrn) + 1), path="/", expires_days=1)
-
-            self.redirect('%s/topic/%d/%s' % (BASE_URL, pobj.id, pobj.title))
-            return
-
-        self.set_header('Content-Type', 'application/json')
-        rspd = {'status': 201, 'msg': 'ok'}
-
-        if action == 'readmorecomment':
-            fromid = self.get_argument("fromid", '')
-            allnum = int(self.get_argument("allnum", 0))
-            EACH_PAGE_COMMENT_NUM = getAttr('EACH_PAGE_COMMENT_NUM')
-            showednum = int(self.get_argument("showednum", EACH_PAGE_COMMENT_NUM))
-            if fromid:
-                rspd['status'] = 200
-                if (allnum - showednum) >= EACH_PAGE_COMMENT_NUM:
-                    limit = EACH_PAGE_COMMENT_NUM
-                else:
-                    limit = allnum - showednum
-                cobjs = Comment.get_post_page_comments_by_id(id, fromid, limit)
-                rspd['commentstr'] = self.render('comments.html', {'cobjs': cobjs})
-                rspd['lavenum'] = allnum - showednum - limit
-                self.write(json.dumps(rspd))
-            return
-
-        #
-        usercomnum = self.get_secure_cookie('usercomnum', '0')
-        if int(usercomnum) > getAttr('MAX_COMMENT_NUM_A_DAY'):
-            rspd = {'status': 403, 'msg': '403: Forbidden'}
-            self.write(json.dumps(rspd))
-            return
-
-        try:
-            timestamp = int(time())
-            post_dic = {
-                'author': self.get_argument("author"),
-                'email': self.get_argument("email", ''),
-                'content': safe_encode(self.get_argument("con").replace('\r', '\n')),
-                'url': self.get_argument("url", ''),
-                'postid': self.get_argument("postid"),
-                'add_time': timestamp,
-                'toid': self.get_argument("toid", ''),
-                'visible': COMMENT_DEFAULT_VISIBLE
-            }
-        except:
-            rspd['status'] = 500
-            rspd['msg'] = '错误： 注意必填的三项'
-            self.write(json.dumps(rspd))
-            return
-
-        pobj = Article.get_article_by_id_simple(id)
-        if pobj and not pobj.closecomment:
-            cobjid = Comment.add_new_comment(post_dic)
-            if cobjid:
-                Article.update_post_comment(pobj.comment_num + 1, id)
-                rspd['status'] = 200
-                #rspd['msg'] = '恭喜： 已成功提交评论'
-
-                rspd['msg'] = self.render('comment.html', {
-                    'cobjid': cobjid,
-                    'gravatar': 'http://www.gravatar.com/avatar/%s' % md5(post_dic['email']).hexdigest(),
-                    'url': post_dic['url'],
-                    'author': post_dic['author'],
-                    'visible': post_dic['visible'],
-                    'content': post_dic['content'],
-                })
-
-                clear_cache_by_pathlist(['/', 'post:%s' % id])
-                #send mail
-                if not debug:
-                    try:
-                        NOTICE_MAIL = getAttr('NOTICE_MAIL')
-                        if NOTICE_MAIL:
-                            tolist = [NOTICE_MAIL]
-                        else:
-                            tolist = []
-                        if post_dic['toid']:
-                            tcomment = Comment.get_comment_by_id(post_dic['toid'])
-                            if tcomment and tcomment.email:
-                                tolist.append(tcomment.email)
-                        commenturl = "%s/t/%s#r%s" % (BASE_URL, str(pobj.id), str(cobjid))
-                        m_subject = u'有人回复您在 《%s》 里的评论 %s' % ( pobj.title, str(cobjid))
-                        m_html = u'这是一封提醒邮件（请勿直接回复）： %s ，请尽快处理： %s' % (m_subject, commenturl)
-
-                        if tolist:
-                            import sae.mail
-
-                            sae.mail.send_mail(','.join(tolist), m_subject, m_html,
-                                               (getAttr('MAIL_SMTP'), int(getAttr('MAIL_PORT')), getAttr('MAIL_FROM'),
-                                                getAttr('MAIL_KEY'), True))
-
-                    except:
-                        pass
-            else:
-                rspd['msg'] = '错误： 未知错误'
-        else:
-            rspd['msg'] = '错误： 未知错误'
-        self.write(json.dumps(rspd))
-
-
-class PageDetail(BaseHandler):
-    @pagecache('post', PAGE_CACHE_TIME, lambda self, id, title: id)
-    def get(self, id='', title=''):
-        tmpl = ''
-        obj = Article.get_article_by_id_detail(id)
-        if not obj:
-            self.redirect(BASE_URL)
-            return
-            #redirect to right title
-        try:
-            title = unquote(title).decode('utf-8')
-        except:
-            pass
-        if title != obj.slug:
-            self.redirect(obj.absolute_url, 301)
-            return
-            #
-        if obj.password and THEME == 'default':
-            rp = self.get_secure_cookie("rp%s" % id, '')
-            if rp != obj.password:
-                tmpl = '_pw'
-
-        self.set_header("Last-Modified", obj.last_modified)
-
-        output = self.render('page%s.html' % tmpl, {
-            'title': "%s - %s" % (obj.title, SITE_TITLE),
-            'keywords': obj.keywords,
-            'description': obj.description,
-            'obj': obj,
-            'cobjs': obj.coms,
-            'postdetail': 'postdetail',
-            'cats': Category.get_all_cat_name(),
-            'tags': Tag.get_hot_tag_name(),
-            'archives': Archive.get_all_archive_name(),
-            'page': 1,
-            'allpage': 10,
-            'comments': Comment.get_recent_comments(),
-            'links': Link.get_all_links(),
-            'Totalblog': get_count('Totalblog', NUM_SHARDS, 0),
-        }, layout='_layout.html')
-        self.write(output)
-
-        if obj.password and THEME == 'default':
-            return
-        else:
-            return output
-
-    def post(self, id='', title=''):      # 与上一个方法代码重复
-        action = self.get_argument("act")
-
-        if action == 'inputpw':
             wrn = self.get_secure_cookie("wrpw")
             if wrn is not None and int(wrn) >= 10:
                 self.write('403')
@@ -343,17 +180,14 @@ class PageDetail(BaseHandler):
 
             pw = self.get_argument("pw", '')
             pobj = Article.get_article_by_id_simple(id)
-            wr = False
             if pw:
                 if pobj.password == pw:
                     clear_cache_by_pathlist(['post:%s' % id])
-                    self.set_secure_cookie("rp%s" % id, pobj.password, path="/", expires_days=1)
+                    self.set_secure_cookie("rp%s" % id, pobj.password, expires_days=1)
                 else:
-                    wr = True
+                    self.set_secure_cookie("wrpw", str(int(wrn) + 1), expires_days=1)
             else:
-                wr = True
-            if wr:
-                self.set_secure_cookie("wrpw", str(int(wrn) + 1), path="/", expires_days=1)
+                self.set_secure_cookie("wrpw", str(int(wrn) + 1), expires_days=1)
 
             self.redirect('%s/topic/%d/%s' % (BASE_URL, pobj.id, pobj.title))
             return
@@ -365,27 +199,26 @@ class PageDetail(BaseHandler):
             fromid = self.get_argument("fromid", '')
             all_num = int(self.get_argument("allnum", 0))
             each_page_comment_num = getAttr('EACH_PAGE_COMMENT_NUM')
-            showednum = int(self.get_argument("showednum", each_page_comment_num))
+            showed_num = int(self.get_argument("showednum", each_page_comment_num))
             if fromid:
                 rspd['status'] = 200
-                if (all_num - showednum) >= each_page_comment_num:
+                if (all_num - showed_num) >= each_page_comment_num:
                     limit = each_page_comment_num
                 else:
-                    limit = all_num - showednum
+                    limit = all_num - showed_num
                 cobjs = Comment.get_post_page_comments_by_id(id, fromid, limit)
                 rspd['commentstr'] = self.render('comments.html', {'cobjs': cobjs})
-                rspd['lavenum'] = all_num - showednum - limit
+                rspd['lavenum'] = all_num - showed_num - limit
                 self.write(json.dumps(rspd))
             return
 
-        usercomnum = self.get_secure_cookie('usercomnum')
-        if usercomnum is None:
-            usercomnum = 0
-
-        if int(usercomnum) > getAttr('MAX_COMMENT_NUM_A_DAY'):
+        usercomnum = self.get_secure_cookie("usercomnum")
+        if usercomnum is not None and int(usercomnum) > getAttr('MAX_COMMENT_NUM_A_DAY'):
             rspd = {'status': 403, 'msg': '403: Forbidden'}
             self.write(json.dumps(rspd))
             return
+        else:
+            usercomnum = 0
 
         try:
             timestamp = int(time())
@@ -410,9 +243,10 @@ class PageDetail(BaseHandler):
             cobjid = Comment.add_new_comment(post_dic)
             if cobjid:
                 Article.update_post_comment(pobj.comment_num + 1, id)
-                self.set_secure_cookie('usercomnum', str(usercomnum + 1))
+                self.set_secure_cookie("usercomnum", str(usercomnum + 1), expires_days=1)
                 rspd['status'] = 200
                 #rspd['msg'] = '恭喜： 已成功提交评论'
+
                 rspd['msg'] = self.render('comment.html', {
                     'cobjid': cobjid,
                     'gravatar': 'http://www.gravatar.com/avatar/%s' % md5(post_dic['email']).hexdigest(),
@@ -423,8 +257,7 @@ class PageDetail(BaseHandler):
                 })
 
                 clear_cache_by_pathlist(['/', 'post:%s' % id])
-
-                # send mail
+                #send mail
                 if not debug:
                     try:
                         NOTICE_MAIL = getAttr('NOTICE_MAIL')
@@ -522,9 +355,10 @@ class ArchiveDetail(BaseHandler):
             self.redirect(BASE_URL)
             return
 
+        each_page_post_num = int(getAttr('EACH_PAGE_POST_NUM'))
         all_post = archiveobj.id_num
-        all_page = all_post / EACH_PAGE_POST_NUM
-        if all_post % EACH_PAGE_POST_NUM:
+        all_page = all_post / each_page_post_num
+        if all_post % each_page_post_num:
             all_page += 1
 
         output = self.render('index.html', {
@@ -560,9 +394,10 @@ class TagDetail(BaseHandler):
             self.redirect(BASE_URL)
             return
 
+        each_page_post_num = int(getAttr('EACH_PAGE_POST_NUM'))
         all_post = catobj.id_num
-        all_page = all_post / EACH_PAGE_POST_NUM
-        if all_post % EACH_PAGE_POST_NUM:
+        all_page = all_post / each_page_post_num
+        if all_post % each_page_post_num:
             all_page += 1
 
         output = self.render('default.html', {
@@ -607,9 +442,10 @@ class ArticleList(BaseHandler):
             self.redirect(BASE_URL)
             return
 
+        each_page_post_num = int(getAttr('EACH_PAGE_POST_NUM'))
         all_post = catobj.id_num
-        all_page = all_post / EACH_PAGE_POST_NUM
-        if all_post % EACH_PAGE_POST_NUM:
+        all_page = all_post / each_page_post_num
+        if all_post % each_page_post_num:
             all_page += 1
 
         output = self.render(show_type+'.html', {
@@ -666,13 +502,13 @@ urls = [
     (r"/robots.txt", Robots),
     (r"/feed", Feed),
     (r"/index.xml", Feed),
+    # 文章
     (r"/t/(\d+)$", PostDetailShort),
-    (r"/topic/(\d+)/(.*)$", PostDetail),  # 文章
-    (r"/page/(\d+)/(.*)$", PageDetail),  # 页面
+    (r"/topic/(\d+)/(.*)$", PostDetail),
     (r"/index_(prev|next)_page/(\d+)/(\d+)/$", IndexPage),
     # 分类
     (r"/c/(\d+)$", CategoryDetailShort),
-    (r"/category/(.*)/$", CategoryDetail),
+    (r"/category/(.+)/$", CategoryDetail),
 
     (r"/tag/(.+)/$", TagDetail),
     (r"/archive/", ArchiveDetail),

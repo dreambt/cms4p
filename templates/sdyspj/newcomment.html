@@ -1,27 +1,24 @@
 <a rel="nofollow" id="cancel-comment-reply-link" href="#{obj.absolute_url}#respond" style="display:none;">取消回复</a>
 <form action="#{obj.absolute_url}" method="post" id="commentform" class="form-horizontal">
-    <fieldset>
+    <fieldset style="width:700px">
         <legend>发表评论</legend>
         <div class="control-group">
             <label class="control-label" for="author">姓名</label>
-
             <div class="controls">
-                <input type="text" id="author" name="author" class="input-xlarge required" placeholder="Username">
+                <input type="text" id="author" name="author" class="input-xlarge required" required placeholder="Username">
                 <span class="label label-info">必填</span>
             </div>
         </div>
         <div class="control-group">
             <label class="control-label" for="email">邮箱</label>
-
             <div class="controls">
-                <input type="text" id="email" name="email" class="input-xlarge required"
+                <input type="email" id="email" name="email" class="input-xlarge required" required
                        placeholder="example@domain.com">
                 <span class="label label-info">必填</span>
             </div>
         </div>
         <div class="control-group">
             <label class="control-label" for="url">网站</label>
-
             <div class="controls">
                 <input type="text" id="url" name="url" class="input-xlarge" placeholder="http://www.yourdomain.com">
                 <span class="label">选填</span>
@@ -29,17 +26,16 @@
         </div>
         <div class="control-group">
             <label class="control-label" for="commentbox">内容</label>
-
             <div class="controls">
                 <input type='hidden' value='#{obj.id}' id='postkeyname'/>
                 <input type='hidden' value='' id='toid'/>
-                <textarea id="commentbox" name="comment" class="input-xxlarge required" rows="8"></textarea>
+                <textarea id="commentbox" name="comment" class="span5 required" required rows="8"></textarea>
                 <span class="label label-info">必填，限 10~500 个字符</span>
             </div>
         </div>
         <div class="form-actions">
-            <button type="submit" id="submit" class="btn btn-primary">提 交</button>
-            <button class="btn">重 置</button>
+            <input type="button" name="submit" id="submit" class="btn btn-primary" value="提 交"/>
+            <input type="reset" class="btn" value="重 置"/>
         </div>
         <p id="text"></p>
     </fieldset>

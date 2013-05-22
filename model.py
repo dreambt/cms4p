@@ -203,8 +203,7 @@ class Article():
     def get_article_by_id_simple(self, id):
         sdb._ensure_connected()
         return sdb.get(
-            'SELECT `id`,`title`,`comment_num`,`closecomment`,`password` FROM `sp_posts` WHERE `id` = %s LIMIT 1' % str(
-                id))
+            'SELECT `id`,`category`,`title`,`comment_num`,`closecomment`,`password` FROM `sp_posts` WHERE `id` = %s LIMIT 1' % str(id))
 
     def get_article_by_id_edit(self, id):
         sdb._ensure_connected()
