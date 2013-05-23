@@ -705,12 +705,6 @@ class KVDBAdmin(BaseHandler):
 
 class FlushData(BaseHandler):
     @authorized()
-    def get(self):
-        self.echo('admin_flushdata.html', {
-            'title': "缓存管理",
-        }, layout='_layout_admin.html')
-
-    @authorized()
     def post(self):
         act = self.get_argument("act", '')
         if act == 'flush':

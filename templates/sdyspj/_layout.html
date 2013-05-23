@@ -43,7 +43,6 @@
 <body data-spy="scroll" data-target=".bs-docs-sidebar" data-twttr-rendered="true">
 <div class="container" style="background:#fff">
     <img src="/static/themes/sdyspj/images/banner.jpg">
-
     <div class="navbar">
         <div class="navbar-inner">
             <div class="container">
@@ -108,20 +107,20 @@
         </div>
     </div>
 </div>
-<footer class="footer">
+<footer id="footer">
     <div class="container">
         <p><strong>本公司以上所有产品仅供娱乐表演，切勿用于赌博，一切后果自负.</strong></p>
-
         <p>&copy; #{{ COPY_YEAR }} Copyright <a href="#{{ BASE_URL }}">#{{ SITE_TITLE }}</a> -
             <a href="/feed" rel="subscribe-rss" title="subscribe via RSS">RSS</a> -
             <a href="#{{ BASE_URL }}/admin/" rel="nofollow">后台管理</a></p>
-
         <p>Powered by <a href="https://github.com/dreambt/cms4p" target="_blank">cms4p</a> - Time: <span
                 id="requesttime">#{ int(request.request_time()*1000) }</span> ms - <a class="fr" target="_blank"
                                                                                       href="http://sae.sina.com.cn"><img
                 title="Powered by Sina App Engine" src="/static/images/sae.gif"></a></p>
     </div>
-    <a style="display: none; " rel="nofollow" href="#top" id="go-to-top">▲</a>
+    <div id="toTop" style="display:none;">
+            <a href="#toTop" rel="nofollow" title="返回顶部">Top</a>
+        </div>
 </footer>
 
 <?py if 'postdetail' in _context and postdetail: ?>
@@ -132,11 +131,8 @@
     hljs.tabReplace = '    ';
     hljs.initHighlightingOnLoad();
 </script>
-
 <?py     #endif ?>
-
 <?py #endif ?>
-
 <script type="text/javascript">
     var dispatch = function () {
         q = document.getElementById("q");
@@ -148,13 +144,13 @@
         }
     }
     $(function () {
-        $("#go-to-top").click(function () {
-            $("html, body").animate({'scrollTop': 0}, 400);
+        $("#toTop").click(function () {
+            $("html, body").animate({'scrollTop': 0}, 1000);
             return false;
         });
         $(window).scroll(function () {
             var top = $(document).scrollTop();
-            var g = $("#go-to-top");
+            var g = $("#toTop");
             if (top > 300 && g.is(":hidden")) {
                 g.fadeIn();
             } else if (top < 300 && g.is(":visible")) {
@@ -187,6 +183,5 @@
 <?PY if ANALYTICS_CODE: ?>
 #{{ ANALYTICS_CODE }}
 <?PY #endif ?>
-
 </body>
 </html>

@@ -49,16 +49,13 @@
                             <li class="nav-header">应用设置</li>
                             <li><a href="/admin/setting3">详细参数</a></li>
                             <li><a href="/admin/setting4">广告统计</a></li>
+                            <li class="divider"></li>
+                            <li class="nav-header">系统性能</li>
+                            <!--<li><a href="/admin/kvdb">KVDB管理</a></li>-->
+                            <li><a id="flushcache">清空缓存</a></li>
+                            <li><a id="flush">清空数据</a></li>
                         </ul>
                     </li>
-                    <li id="cache_page"><a href="/admin/flushdata">缓存管理</a></li>
-                    <!--<li id="perf_page" class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">性能管理
-                        <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                            <li><a href="/admin/kvdb">KVDB管理</a></li>
-                            <li><a href="/admin/flushdata">缓存管理</a></li>
-                        </ul>
-                    </li>-->
                     <li class="divider-vertical"></li>
                     <li id="user_page"><a href="/admin/profile">个人资料</a></li>
                     <li><a href="/admin/logout">安全退出</a></li>
@@ -72,17 +69,23 @@
         <h1>#{title}</h1>
     </div>
 </header>
+<div class="bb-alert alert" style="display:none;">
+    <span>默认提示信息</span>
+</div>
 <div class="container">
     #{_content}
 </div>
-<footer>
-    <p>
-        &copy; #{{ getAttr('COPY_YEAR') }} Copyright <a href="#{{ BASE_URL }}">#{{ getAttr('SITE_TITLE') }}</a> -
-        Powered by <a href="http://cms4p.im47.cn/" target="_blank">cms4p</a> -
-        Time: <span id="requesttime">#{ int(request.request_time()*1000) }</span> ms
-    </p>
+<footer id="footer">
+    <div class="container">
+        <p>&copy; #{{ COPY_YEAR }} Copyright <a href="http://www.im47.cn/">思奇博客</a></p>
+        <p>Powered by <a href="https://github.com/dreambt/cms4p" target="_blank">cms4p</a> - Time: <span
+                id="requesttime">#{ int(request.request_time()*1000) }</span> ms - <a class="fr" target="_blank"
+                                                                                      href="http://sae.sina.com.cn"><img
+                title="Powered by Sina App Engine" src="/static/images/sae.gif"></a></p>
+    </div>
 </footer>
 <script type="text/javascript" src="/static/jquery-plugin/bootstrap.min.js"></script>
 <script type="text/javascript" src="/static/jquery-plugin/bootbox.min.js"></script>
+<script type="text/javascript" src="/static/jquery-plugin/main.js"></script>
 </body>
 </html>

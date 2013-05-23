@@ -130,15 +130,15 @@ body > .navbar .brand:hover {
 
 /* Footer
 -------------------------------------------------- */
-footer {
+#footer {
     text-align: center;
     padding: 30px 0;
-    margin-top: 20px;
+    margin-top: 70px;
     border-top: 1px solid #e5e5e5;
     background-color: #f5f5f5;
 }
 
-footer p {
+#footer p {
     margin-bottom: 0;
     color: #777;
 }
@@ -154,4 +154,15 @@ footer p {
 
 .footer-links li:first-child {
     padding-left: 0;
+}
+
+/* Tip
+-------------------------------------------------- */
+.bb-alert {
+    position: fixed;
+    bottom: 25%;
+    right: 0;
+    margin-bottom: 0;
+    font-size: 1.2em;
+    padding: 1em 1.3em;
 }
