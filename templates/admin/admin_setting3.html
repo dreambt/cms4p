@@ -5,34 +5,30 @@
                 <legend>文章相关</legend>
                 <div class="control-group">
                     <label class="control-label" for="input01">每页显示文章数</label>
-
                     <div class="controls">
-                        <input type="text" name="EACH_PAGE_POST_NUM" value="#{getAttr('EACH_PAGE_POST_NUM')}"
-                               class="input-xlarge required" id="input01" tabindex="1"/>
+                        <input type="number" name="EACH_PAGE_POST_NUM" value="#{getAttr('EACH_PAGE_POST_NUM')}"
+                               class="input-xlarge" required id="input01" tabindex="1"/>
                     </div>
                 </div>
                 <div class="control-group">
                     <label class="control-label" for="input03">显示相关文章数</label>
-
                     <div class="controls">
-                        <input type="text" name="RELATIVE_POST_NUM" value="#{getAttr('RELATIVE_POST_NUM')}"
-                               class="input-xlarge required" id="input03" tabindex="3"/>
+                        <input type="number" name="RELATIVE_POST_NUM" value="#{getAttr('RELATIVE_POST_NUM')}"
+                               class="input-xlarge" required id="input03" tabindex="2"/>
                     </div>
                 </div>
                 <div class="control-group">
                     <label class="control-label" for="input04">文章列表显示字符数</label>
-
                     <div class="controls">
-                        <input type="text" name="SHORTEN_CONTENT_WORDS" value="#{getAttr('SHORTEN_CONTENT_WORDS')}"
-                               class="input-xlarge required" id="input04" tabindex="5"/>
+                        <input type="number" name="SHORTEN_CONTENT_WORDS" value="#{getAttr('SHORTEN_CONTENT_WORDS')}"
+                               class="input-xlarge" required id="input04" tabindex="3"/>
                     </div>
                 </div>
                 <div class="control-group">
                     <label class="control-label" for="input05">描述显示的字符数</label>
-
                     <div class="controls">
-                        <input type="text" name="DESCRIPTION_CUT_WORDS" value="#{getAttr('DESCRIPTION_CUT_WORDS')}"
-                               class="input-xlarge required" id="input05" tabindex="7"/>
+                        <input type="number" name="DESCRIPTION_CUT_WORDS" value="#{getAttr('DESCRIPTION_CUT_WORDS')}"
+                               class="input-xlarge" required id="input05" tabindex="4"/>
                     </div>
                 </div>
             </div>
@@ -40,43 +36,37 @@
                 <legend>留言相关</legend>
                 <div class="control-group">
                     <label class="control-label" for="input02">每页评论数</label>
-
                     <div class="controls">
-                        <input type="text" name="EACH_PAGE_COMMENT_NUM" value="#{EACH_PAGE_COMMENT_NUM}"
-                               class="input-xlarge required" id="input02" tabindex="11"/>
+                        <input type="number" name="EACH_PAGE_COMMENT_NUM" value="#{EACH_PAGE_COMMENT_NUM}"
+                               class="input-xlarge" required id="input02" tabindex="11"/>
                     </div>
                 </div>
                 <div class="control-group">
                     <label class="control-label" for="input06">显示最近评论数</label>
-
                     <div class="controls">
-                        <input type="text" name="EACH_PAGE_COMMENT_NUM" value="#{getAttr('EACH_PAGE_COMMENT_NUM')}"
-                               class="input-xlarge required" id="input06" tabindex="13"/>
+                        <input type="number" name="EACH_PAGE_COMMENT_NUM" value="#{getAttr('EACH_PAGE_COMMENT_NUM')}"
+                               class="input-xlarge" required id="input06" tabindex="12"/>
                     </div>
                 </div>
                 <div class="control-group">
                     <label class="control-label" for="input07">边栏评论显示字符数</label>
-
                     <div class="controls">
-                        <input type="text" name="RECENT_COMMENT_CUT_WORDS"
-                               value="#{getAttr('RECENT_COMMENT_CUT_WORDS')}" class="input-xlarge required" id="input07"
-                               tabindex="15"/>
+                        <input type="number" name="RECENT_COMMENT_CUT_WORDS" value="#{getAttr('RECENT_COMMENT_CUT_WORDS')}"
+                               class="input-xlarge" id="input07" required tabindex="13"/>
                     </div>
                 </div>
                 <div class="control-group">
                     <label class="control-label" for="input09">每天最大评论数</label>
-
                     <div class="controls">
-                        <input type="text" name="MAX_COMMENT_NUM_A_DAY" value="#{getAttr('MAX_COMMENT_NUM_A_DAY')}"
-                               class="input-xlarge required" id="input09" tabindex="17"/>
+                        <input type="number" name="MAX_COMMENT_NUM_A_DAY" value="#{getAttr('MAX_COMMENT_NUM_A_DAY')}"
+                               class="input-xlarge" id="input09" required tabindex="14"/>
                     </div>
                 </div>
                 <div class="control-group">
-                    <label class="control-label" for="input02">评论显示无需审核(0/1)</label>
-
+                    <label class="control-label" for="input18">评论显示无需审核(0/1)</label>
                     <div class="controls">
-                        <input type="text" name="COMMENT_DEFAULT_VISIBLE" value="#{COMMENT_DEFAULT_VISIBLE}"
-                               class="input-xlarge required" id="input02" tabindex="19"/>
+                        <input type="number" name="COMMENT_DEFAULT_VISIBLE" value="#{COMMENT_DEFAULT_VISIBLE}"
+                               class="input-xlarge" id="input18" required tabindex="15"/>
                     </div>
                 </div>
             </div>
@@ -86,18 +76,16 @@
                 <legend>缓存相关</legend>
                 <div class="control-group">
                     <label class="control-label" for="input10">页面缓存时间</label>
-
                     <div class="controls">
-                        <input type="text" name="PAGE_CACHE_TIME" value="#{getAttr('PAGE_CACHE_TIME')}"
-                               class="input-xlarge required" id="input10" tabindex="21"/>
+                        <input type="number" name="PAGE_CACHE_TIME" value="#{getAttr('PAGE_CACHE_TIME')}"
+                               class="input-xlarge" id="input10" required tabindex="21"/>
                     </div>
                 </div>
                 <div class="control-group">
                     <label class="control-label" for="input11">文章缓存时间</label>
-
                     <div class="controls">
-                        <input type="text" name="POST_CACHE_TIME" value="#{getAttr('POST_CACHE_TIME')}"
-                               class="input-xlarge required" id="input11" tabindex="23"/>
+                        <input type="number" name="POST_CACHE_TIME" value="#{getAttr('POST_CACHE_TIME')}"
+                               class="input-xlarge" id="input11" required tabindex="22"/>
                     </div>
                 </div>
             </div>
@@ -105,39 +93,48 @@
                 <legend>其他杂项</legend>
                 <div class="control-group">
                     <label class="control-label" for="input08">边栏显示友情链接数</label>
-
                     <div class="controls">
-                        <input type="text" name="LINK_NUM" value="#{getAttr('LINK_NUM')}" class="input-xlarge required"
-                               id="input08" tabindex="31"/>
+                        <input type="number" name="LINK_NUM" value="#{getAttr('LINK_NUM')}" class="input-xlarge"
+                               id="input08" required tabindex="31"/>
                     </div>
                 </div>
                 <div class="control-group">
                     <label class="control-label" for="input12">热门标签显示数</label>
-
                     <div class="controls">
-                        <input type="text" name="HOT_TAGS_NUM" value="#{getAttr('HOT_TAGS_NUM')}"
-                               class="input-xlarge required"
-                               id="input12" tabindex="33"/>
+                        <input type="number" name="HOT_TAGS_NUM" value="#{getAttr('HOT_TAGS_NUM')}"
+                               class="input-xlarge" id="input12" required tabindex="31"/>
                     </div>
                 </div>
                 <div class="control-group">
                     <label class="control-label" for="input13">归档显示数</label>
-
                     <div class="controls">
-                        <input type="text" name="MAX_ARCHIVES_NUM" value="#{getAttr('MAX_ARCHIVES_NUM')}"
-                               class="input-xlarge required" id="input13" tabindex="35"/>
+                        <input type="number" name="MAX_ARCHIVES_NUM" value="#{getAttr('MAX_ARCHIVES_NUM')}"
+                               class="input-xlarge" id="input13" required tabindex="32"/>
                     </div>
                 </div>
             </div>
         </div>
         <div class="form-actions">
-            <button type="submit" class="btn btn-primary" tabindex="100">保存更改</button>
-            <button class="btn" tabindex="101">重置</button>
+            <button type="submit" class="btn btn-primary" tabindex="100">保 存</button>
+            <button type="reset" class="btn" tabindex="101">重 置</button>
         </div>
     </fieldset>
 </form>
 <script type="text/javascript">
     $(function () {
         $("#sys_page").addClass("active");
+        $("input,select,textarea").not("[type=submit]").not("[type=reset]").jqBootstrapValidation();
+        $('#myForm').submit(function () {
+            $.ajax({
+                type: 'POST',
+                url: "",
+                dataType: "json",
+                data: $("#myForm").serialize(),
+                success: function () {
+                    SiQiTip.show("success", "保存成功！");
+                }
+            });
+            return false;
+        });
     });
 </script>

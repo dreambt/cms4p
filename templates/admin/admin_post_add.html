@@ -112,7 +112,7 @@
                 success: function (data) {
                     $('#postid').val(data.postid);
                     $('#method').val(data.method);
-                    $('#submit').removeAttr("disabled");
+                    SiQiTip.show("success", "保存文章成功！");
                 }
             });
         });

@@ -1,28 +1,24 @@
-<form id="myForm" action="#" class="form-horizontal" method="POST" onsubmit="onSave()">
+<form id="myForm" action="#" class="form-horizontal" method="POST">
     <fieldset>
         <legend>修改密码</legend>
         <div class="row">
             <div class="span12">
                 <div class="control-group">
                     <label class="control-label" for="oldPassword">原密码</label>
-
                     <div class="controls">
                         <input type="password" name="oldPassword" class="input-xlarge" required id="oldPassword" tabindex="1"/>
                     </div>
                 </div>
                 <div class="control-group">
                     <label class="control-label" for="newPassword">新密码</label>
-
                     <div class="controls">
                         <input type="password" name="newPassword" class="input-xlarge" required id="newPassword" tabindex="2"/>
                     </div>
                 </div>
                 <div class="control-group">
                     <label class="control-label" for="newPassword2">确认密码</label>
-
                     <div class="controls">
-                        <input type="password" name="newPassword2" class="input-xlarge" required equalTo="#newPassword"
-                               id="newPassword2" tabindex="3"/>
+                        <input type="password" name="newPassword2" class="input-xlarge" required id="newPassword2" tabindex="3"/>
                     </div>
                 </div>
                 <div class="form-actions">
@@ -33,7 +29,6 @@
         </div>
     </fieldset>
 </form>
-<span class="label label-info">提示</span> 修改密码成功后会自动踢出系统，您需要重新登录系统.
 <script type="text/javascript">
     function onSave() {
         var oldPassword = $("#oldPassword").val().trim();
@@ -66,5 +61,29 @@
     }
     $(function () {
         $("#user_page").addClass("active");
+        $("input,select,textarea").not("[type=submit]").not("[type=reset]").jqBootstrapValidation();
+        $('#myForm').submit(function () {
+            var oldPassword = $("#oldPassword").val().trim();
+            var newPassword = $("#newPassword").val().trim();
+            var newPassword2 = $("#newPassword2").val().trim();
+            if(newPassword != newPassword2){
+                SiQiTip.show("error", "新密码和确认密码必须一致");
+                return false;
+            }
+            $.ajax({
+                type: 'POST',
+                url: "",
+                dataType: "json",
+                data: {
+                    oldPassword: oldPassword,
+                    newPassword: newPassword,
+                    newPassword2: newPassword2
+                },
+                success: function () {
+                    SiQiTip.show("success", "保存成功！");
+                }
+            });
+            return false;
+        });
     });
 </script>

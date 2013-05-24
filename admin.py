@@ -6,6 +6,7 @@ from time import time
 from PIL import Image
 from tornado import escape
 import sae.storage
+from tornado.escape import json_encode
 
 from common import BaseHandler, authorized, safe_encode, clear_cache_by_pathlist, quoted_string, clear_all_cache, genArchive, setAttr, clearAllKVDB, set_count, increment, getAttr
 from helpers import generate_random
@@ -525,8 +526,8 @@ class BlogSetting(BaseHandler):
 
         clear_cache_by_pathlist(['/'])
 
-        self.redirect('%s/admin/setting' % BASE_URL)
-        return
+        #self.redirect('%s/admin/setting' % BASE_URL)
+        self.write(json_encode("OK"))
 
 
 class BlogSetting2(BaseHandler):
@@ -556,8 +557,8 @@ class BlogSetting2(BaseHandler):
 
         clear_cache_by_pathlist(['/'])
 
-        self.redirect('%s/admin/setting2' % BASE_URL)
-        return
+        #self.redirect('%s/admin/setting2' % BASE_URL)
+        self.write(json_encode("OK"))
 
 
 class BlogSetting3(BaseHandler):
@@ -627,8 +628,8 @@ class BlogSetting3(BaseHandler):
 
         clear_cache_by_pathlist(['/'])
 
-        self.redirect('%s/admin/setting3' % BASE_URL)
-        return
+        #self.redirect('%s/admin/setting3' % BASE_URL)
+        self.write(json_encode("OK"))
 
 
 class BlogSetting4(BaseHandler):
@@ -654,8 +655,8 @@ class BlogSetting4(BaseHandler):
 
         clear_cache_by_pathlist(['/'])
 
-        self.redirect('%s/admin/setting4' % BASE_URL)
-        return
+        #self.redirect('%s/admin/setting4' % BASE_URL)
+        self.write(json_encode("OK"))
 
 
 class EditProfile(BaseHandler):
@@ -891,7 +892,7 @@ urls = [
     (r"/task/pingrpctask", PingRPCTask),
     (r"/task/pingrpc/(\d+)", PingRPC),
     (r"/task/sendmail", SendMail),
-    (r"/install/125004628", Install),
+    (r"/install", Install),
     (r"/admin/fileupload", FileUpload),
     (r"/admin/filelist", FileManager),
     (r"/admin/links", LinkBroll),
