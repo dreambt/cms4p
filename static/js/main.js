@@ -37,11 +37,11 @@ $(function () {
                         url: "/admin/flushdata?act=flushcache",
                         method: "POST"
                     }).success(function () {
-                        SiQiTip.show("info", "缓存已清空");
+                        SiQiTip.show("info", "缓存已清空!");
                     });
                 }
                 else {
-                    SiQiTip.show("error", "操作已取消");
+                    SiQiTip.show("error", "操作已取消!");
                 }
             });
         });
@@ -52,11 +52,11 @@ $(function () {
                         url: "/admin/flushdata?act=flush",
                         method: "POST"
                     }).success(function () {
-                        SiQiTip.show("info", "数据已清空");
+                        SiQiTip.show("info", "数据已清空!");
                     });
                 }
                 else {
-                    SiQiTip.show("error", "操作已取消");
+                    SiQiTip.show("error", "操作已取消!");
                 }
             });
         });

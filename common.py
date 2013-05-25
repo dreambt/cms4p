@@ -282,7 +282,7 @@ class BaseHandler(tornado.web.RequestHandler):
 
     # http://www.keakon.net/2012/12/03/Tornado%E4%BD%BF%E7%94%A8%E7%BB%8F%E9%AA%8C
     def write_error(self, status_code, **kwargs):
-        message = "<h4>Error Code:" + str(status_code) + "</h4>"
+        message = "<h4>Error Code:" + str(kwargs['exc_info'][1]) + "</h4><br />"
         message += "<h4>Exception Stack:</h4>"
         message += "<br />".join(traceback.format_exception(*kwargs["exc_info"]))
         # TODO 完善使之具有丰富的调试上下文，方便调试
@@ -296,7 +296,7 @@ class BaseHandler(tornado.web.RequestHandler):
             self.render('500.html')
         else:
             sendEmail("*** 未知异常", message)
-            super(RequestHandler, self).write_error(status_code, **kwargs)
+            super(self).write_error(status_code, **kwargs)
 
 
 def authorized(url='/admin/login'):

@@ -400,7 +400,7 @@ class TagDetail(BaseHandler):
         if all_post % each_page_post_num:
             all_page += 1
 
-        output = self.render('default.html', {
+        output = self.render('list.html', {
             'title': "%s - %s" % (catobj.name, getAttr('SITE_TITLE')),
             'keywords': catobj.name,
             'description': getAttr('SITE_DECR'),

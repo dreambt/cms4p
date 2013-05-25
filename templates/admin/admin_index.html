@@ -1,12 +1,21 @@
 <div class="row">
     <div class="span12">
-        <h3>以下为本次请求的 Headers 信息, 请非技术人员忽略.</h3>
-        <dl class="dl-horizontal">
+        <table class="table table-hover table-condensed">
+            <thead>
+            <tr>
+                <th style="text-align:center">Key</th>
+                <th style="text-align:center">Value</th>
+            </tr>
+            </thead>
+            <tbody>
             <?py for k, v in request.headers.iteritems(): ?>
-            <dt><span class="badge badge-info">#{k}</span></dt>
-            <dd>#{v}</dd>
+            <tr>
+                <td style="text-align:right"><span class="badge badge-info">#{k}</span></td>
+                <td>#{v}</td>
+            </tr>
             <?py #endfor ?>
-        </dl>
+            </tbody>
+        </table>
     </div>
 </div>
 <script type="text/javascript">

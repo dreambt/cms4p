@@ -202,11 +202,19 @@ class FileManager(BaseHandler):
 class AddPost(BaseHandler):
     @authorized()
     def get(self):
+        obj = Article
+        obj.category = ''
+        obj.title = ''
+        obj.content = ''
+        obj.tags = ''
+        obj.closecomment = 0
+        obj.password = ''
         self.echo('admin_post_add.html', {
             'title': "添加文章",
             'method': "/admin/add_post",
             'cats': Category.get_all_cat_name(),
             'tags': Tag.get_all_tag_name(),
+            'obj': obj,
         }, layout='_layout_admin.html')
 
     @authorized()
@@ -290,7 +298,7 @@ class EditPost(BaseHandler):
         obj = None
         if id:
             obj = Article.get_article_by_id_edit(id)
-        self.echo('admin_post_edit.html', {
+        self.echo('admin_post_add.html', {
             'title': "编辑文章",
             'method': "/admin/edit_post/" + id,
             'cats': Category.get_all_cat_name(),
@@ -388,9 +396,12 @@ class DelPost(BaseHandler):
                 cache_key_list = ['/', 'post:%s' % id, 'cat:%s' % quoted_string(oldobj.category)]
                 clear_cache_by_pathlist(cache_key_list)
                 clear_cache_by_pathlist(['post:%s' % id])
-                self.redirect('%s/admin/list_post' % (BASE_URL))
+                #self.redirect('%s/admin/list_post' % (BASE_URL))
+                self.write(json_encode("OK"))
+                return
         except:
-            pass
+            self.write(json_encode("error"))
+            return
 
 
 class EditComment(BaseHandler):
@@ -404,12 +415,17 @@ class EditComment(BaseHandler):
                 if act == 'del':
                     Comment.del_comment_by_id(id)
                     clear_cache_by_pathlist(['post:%d' % obj.postid])
-                    self.redirect('%s/admin/comment/' % (BASE_URL))
+                    #self.redirect('%s/admin/comment/' % (BASE_URL))
+                    self.write(json_encode("OK"))
+                    return
+                else:
+                    self.echo('admin_comment.html', {
+                        'title': "评论管理",
+                        'obj': obj,
+                    }, layout='_layout_admin.html')
                     return
         self.echo('admin_comment.html', {
             'title': "评论管理",
-            'cats': Category.get_all_cat_name(),
-            'tags': Tag.get_all_tag_name(),
             'obj': obj,
             'comments': Comment.get_recent_comments(ADMIN_RECENT_COMMENT_NUM),
         }, layout='_layout_admin.html')
@@ -450,7 +466,7 @@ class LinkBroll(BaseHandler):
             if id:
                 Link.del_link_by_id(id)
                 clear_cache_by_pathlist(['/'])
-            self.redirect('%s/admin/links' % BASE_URL)
+            self.write(json_encode("OK"))
             return
         elif act == 'edit':
             if id:
@@ -480,8 +496,8 @@ class LinkBroll(BaseHandler):
 
             clear_cache_by_pathlist(['/'])
 
-        self.redirect('%s/admin/links' % BASE_URL)
-        return
+        #self.redirect('%s/admin/links' % BASE_URL)
+        self.write(json_encode("OK"))
 
 
 class BlogSetting(BaseHandler):
@@ -528,6 +544,7 @@ class BlogSetting(BaseHandler):
 
         #self.redirect('%s/admin/setting' % BASE_URL)
         self.write(json_encode("OK"))
+        return
 
 
 class BlogSetting2(BaseHandler):
@@ -559,6 +576,7 @@ class BlogSetting2(BaseHandler):
 
         #self.redirect('%s/admin/setting2' % BASE_URL)
         self.write(json_encode("OK"))
+        return
 
 
 class BlogSetting3(BaseHandler):
@@ -630,6 +648,7 @@ class BlogSetting3(BaseHandler):
 
         #self.redirect('%s/admin/setting3' % BASE_URL)
         self.write(json_encode("OK"))
+        return
 
 
 class BlogSetting4(BaseHandler):
@@ -657,6 +676,7 @@ class BlogSetting4(BaseHandler):
 
         #self.redirect('%s/admin/setting4' % BASE_URL)
         self.write(json_encode("OK"))
+        return
 
 
 class EditProfile(BaseHandler):
@@ -712,13 +732,11 @@ class FlushData(BaseHandler):
             MyData.flush_all_data()
             clear_all_cache()
             clearAllKVDB()
-            print 'flush'
-            self.redirect('/admin/flushdata')
+            self.write(json_encode("OK"))
             return
         elif act == 'flushcache':
             clear_all_cache()
-            print 'flushcache'
-            self.redirect('/admin/flushdata')
+            self.write(json_encode("OK"))
             return
 
 

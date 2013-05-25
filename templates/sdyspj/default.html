@@ -1,42 +1,38 @@
-<div class="blog-index">
-    <?py for obj in objs: ?>
-    <article>
-        <header>
-            <h1 class="entry-title"><a href="#{obj.absolute_url}" rel="bookmark" title="Permanent Link to #{obj.title}">#{obj.title}</a>
-            </h1>
-
-            <p class="meta">
-                <?py hrefname = 'comments' if (obj.comment_num >0) else 'respond' ?>
-                <small>#{obj.add_time_fn} in <a href="#{{ BASE_URL }}/category/#{obj.category}/" rel="category tag">#{obj.category}</a>
-                </small>
-            </p>
-        </header>
-        <div class="entry-content">#{obj.shorten_content}</div>
-        <?py if obj.tags: ?>
-        <small style="color:#999">Tags: #{obj.taglist}</small>
-        <?py #endif ?>
-        <footer>
-            <a rel="full-article" href="#{obj.absolute_url}">查看更多</a>
-            <a rel="full-article" href="#{obj.absolute_url}">评论(#{obj.comment_num})</a>
-        </footer>
-    </article>
-    <?py #endfor ?>
-
-    <nav role="pagination">
-        <div>
-            <?py if 1< page <= allpage: ?>
-            <?py     tvar = fromid if (listtype == 'index') else name ?>
-            <a class="prev" href="#{{ BASE_URL }}/#{listtype}_prev_page/#{page-1}/#{tvar}/">&larr; 上一页</a>
-            <?py #endif ?>
-
-            &nbsp;
-
-            <?py if page< allpage: ?>
-            <?py     tvar = endid if (listtype == 'index') else name ?>
-            <a class="next" href="#{{ BASE_URL }}/#{listtype}_next_page/#{page+1}/#{tvar}/">下一页 &rarr;</a>
-            <?py #endif ?>
-
-
+<div class="row" style="margin-top:20px">
+    <div class="span9">
+        <?py for obj in objs: ?>
+        <div class="media">
+            <div class="media-body">
+                <h4 class="media-heading"><a href="#{obj.absolute_url}" rel="bookmark"
+                                             title="Permanent Link to #{obj.title}">#{obj.title}</a></h4>
+                <small>发表于 #{obj.add_time_fn}, <a href="#{obj.absolute_url}">评论(#{obj.comment_num})</a></small>
+                <div class="entry-content">#{escape(obj.shorten_content)}</div>
+                <?py if obj.tags: ?>
+                <small style="color:#999">Tags: #{obj.taglist}</small>
+                <?py #endif ?>
+                <div class="pull-right">
+                    <a class="btn btn-primary btn-mini" rel="full-article" href="#{obj.absolute_url}">查看更多</a>
+                </div>
+            </div>
         </div>
-    </nav>
+        <?py #endfor ?>
+
+        <ul class="pager">
+            <li class="previous">
+                <?py if 1< page <= allpage: ?>
+                <?py     tvar = fromid if (listtype == 'index') else name ?>
+                <a class="prev" href="#{{ BASE_URL }}/#{listtype}_prev_page/#{page-1}/#{tvar}/?type=list">&larr; 上一页</a>
+                <?py #endif ?>
+            </li>
+            <li class="next">
+                <?py if page< allpage: ?>
+                <?py     tvar = endid if (listtype == 'index') else name ?>
+                <a class="next" href="#{{ BASE_URL }}/#{listtype}_next_page/#{page+1}/#{tvar}/?type=list">下一页 &rarr;</a>
+                <?py #endif ?>
+            </li>
+        </ul>
+    </div>
+    <div class="span3">
+        <?py include("sider.html") ?>
+    </div>
 </div>

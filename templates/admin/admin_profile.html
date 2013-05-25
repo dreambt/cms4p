@@ -30,35 +30,6 @@
     </fieldset>
 </form>
 <script type="text/javascript">
-    function onSave() {
-        var oldPassword = $("#oldPassword").val().trim();
-        var newPassword = $("#newPassword").val().trim();
-        var newPassword2 = $("#newPassword2").val().trim();
-        if(newPassword != newPassword2){
-            SiQiTip.show("error", "新密码和确认密码必须一致");
-            return false;
-        }
-        $.ajax({
-            url: "/admin/profile",
-            method: "POST",
-            data: {
-                oldPassword: oldPassword,
-                newPassword: newPassword,
-                newPassword2: newPassword2
-            },
-            timeout: 3000
-        }).success(function (data) {
-                    if (data > 0) {
-                        bootbox.alert("修改密码成功！请重新登录系统！", function () {
-                            location.href = "/admin/login";
-                        });
-                    }
-                    else {
-                        SiQiTip.show("error", "修改密码失败！请检查您输入的原密码是否正确！");
-                    }
-                });
-        return false;
-    }
     $(function () {
         $("#user_page").addClass("active");
         $("input,select,textarea").not("[type=submit]").not("[type=reset]").jqBootstrapValidation();
@@ -81,6 +52,7 @@
                 },
                 success: function () {
                     SiQiTip.show("success", "保存成功！");
+                    location.href = "/admin/login";
                 }
             });
             return false;
