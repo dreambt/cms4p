@@ -856,20 +856,24 @@ def Init():
 
 class Install(BaseHandler):
     def get(self):
-        try:
-            self.write('如果出现错误请尝试刷新本页。')
-            has_user = User.check_has_user()
-            if has_user:
-                self.write('博客已经成功安装了，你可以直接 <a href="/admin/flushdata">清空网站数据</a>')
-            else:
-                self.write('博客数据库已经建立，现在就去 <a href="/admin/">设置一个管理员帐号</a>')
-        except:
-            try:
-                MyData.creat_table()
-                Init()  # 初始化系统参数
-            except:
-                pass
-            self.write('博客已经成功安装了，现在就去 <a href="/admin/">设置一个管理员帐号</a>')
+        self.echo('admin_install.html')
+        # try:
+        #     self.write('如果出现错误请尝试刷新本页。')
+        #     has_user = User.check_has_user()
+        #     if has_user:
+        #         self.write('博客已经成功安装了，你可以直接 <a href="/admin/flushdata">清空网站数据</a>')
+        #     else:
+        #         self.write('博客数据库已经建立，现在就去 <a href="/admin/">设置一个管理员帐号</a>')
+        # except:
+        #     try:
+        #         MyData.creat_table()
+        #         Init()  # 初始化系统参数
+        #     except:
+        #         pass
+        #     self.write('博客已经成功安装了，现在就去 <a href="/admin/">设置一个管理员帐号</a>')
+
+    def post(self):
+        pass
 
 
 class GetCaptcha(BaseHandler):
