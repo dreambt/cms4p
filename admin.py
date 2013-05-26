@@ -210,7 +210,7 @@ class AddPost(BaseHandler):
         obj.tags = ''
         obj.closecomment = 0
         obj.password = ''
-        self.echo('admin_post_add.html', {
+        self.echo('admin_post_edit.html', {
             'title': "添加文章",
             'method': "/admin/add_post",
             'cats': Category.get_all_cat_name(),
@@ -230,22 +230,13 @@ class AddPost(BaseHandler):
                 'category': self.get_argument("cat"),
                 'title': self.get_argument("tit"),
                 'content': self.get_argument("con"),
-                'tags': self.get_argument("tag", '').replace(u'，', ','),
-                'closecomment': self.get_argument("clo", '0'),
+                'tags': ','.join(self.get_arguments("tag[]")),
+                'closecomment': tf[self.get_argument("clo", '0').lower()],
                 'password': self.get_argument("password", ''),
                 'add_time': timestamp,
                 'edit_time': timestamp,
                 'archive': genArchive(),
             }
-            if post_dic['tags']:
-                tagslist = set([x.strip() for x in post_dic['tags'].split(',')])
-                try:
-                    tagslist.remove('')
-                except:
-                    pass
-                if tagslist:
-                    post_dic['tags'] = ','.join(tagslist)
-            post_dic['closecomment'] = tf[post_dic['closecomment'].lower()]
         except:
             rspd['status'] = 500
             rspd['msg'] = '错误： 注意必填的三项'
@@ -265,7 +256,7 @@ class AddPost(BaseHandler):
                 Tag.add_postid_to_tags(post_dic['tags'].split(','), str(postid))
 
             rspd['status'] = 200
-            rspd['msg'] = '完成： 你已经成功添加了一篇文章 <a href="/t/%s" target="_blank">查看</a>' % str(postid)
+            rspd['msg'] = '文章发布成功'
             rspd['postid'] = postid
             rspd['method'] = "/admin/edit_post"
             clear_cache_by_pathlist(['/', 'cat:%s' % quoted_string(post_dic['category'])])
@@ -299,7 +290,7 @@ class EditPost(BaseHandler):
         obj = None
         if id:
             obj = Article.get_article_by_id_edit(id)
-        self.echo('admin_post_add.html', {
+        self.echo('admin_post_edit.html', {
             'title': "编辑文章",
             'method': "/admin/edit_post/" + id,
             'cats': Category.get_all_cat_name(),
@@ -373,7 +364,8 @@ class EditPost(BaseHandler):
 
             clear_cache_by_pathlist(cache_key_list)
             rspd['status'] = 200
-            rspd['msg'] = '完成： 你已经成功编辑了一篇文章 <a href="/t/%s" target="_blank">查看编辑后的文章</a>' % str(postid)
+            rspd['msg'] = '文章编辑成功'
+            rspd['postid'] = postid
             self.write(json.dumps(rspd))
             return
         else:
@@ -908,7 +900,7 @@ urls = [
     (r"/admin/403", Forbidden),
     (r"/admin/add_post", AddPost),
     (r"/admin/edit_post/(\d*)", EditPost),
-    (r"/admin/list_post", ListPost),  # TODO 分页
+    (r"/admin/list_post", ListPost), # TODO 分页
     (r"/admin/del_post/(\d+)", DelPost),
     (r"/admin/comment/(\d*)", EditComment),
     (r"/admin/flushdata", FlushData),

@@ -76,21 +76,35 @@
             var con = $('#html').val().replace(/(^\s*)|(\s*$)/g, "");
             var tag = $('#tag').val();
             var password = $('#password').val().replace(/(^\s*)|(\s*$)/g, "");
-
-//            $('#submit').attr('disabled', 'disabled');
+            $('#submit').attr('disabled', 'disabled');
             $.ajax({
                 type: 'POST',
                 url: $('#method').val(),
                 dataType: "json",
                 data: {'id': id, 'cat': cat, 'clo': $('#clo').is(":checked"), 'tit': tit, 'con': con, 'tag': tag, 'password': password},
                 success: function (data) {
-                    $('#postid').val(data.postid);
-                    $('#method').val(data.method);
-                    SiQiTip.show("success", "保存文章成功！");
-                    if (id == undefined || id == "") {
-                        $("input").val("");
-                        $('#html').val("")
-                    }
+                    bootbox.dialog(data.msg+"，请选择下一步操作：", [{
+                        "label" : "新建文章",
+                        "class" : "btn-success",
+                        "callback": function() {
+                            window.location.href = "/admin/add_post";
+                        }
+                    }, {
+                        "label" : "继续编辑",
+                        "class" : "btn-primary",
+                        "callback": function() {
+                            window.location.href = "/admin/edit_post/"+data.postid;
+                        }
+                    }, {
+                        "label" : "文章列表",
+                        "class" : "btn-primary",
+                        "callback": function() {
+                            window.location.href = "/admin/list_post";
+                        }
+                    }]);
+                },
+                error: function(){
+                    SiQiTip.show("block", "服务器貌似出现问题，请稍后重试！");
                 }
             });
             return false;
