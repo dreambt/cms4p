@@ -278,7 +278,8 @@ class ListPost(BaseHandler):
     def get(self, direction='next', page='2', base_id='1'):
         self.echo('admin_post_list.html', {
             'title': "文章列表",
-            'objs': Article.get_all_article(),
+            'objs': Article.get_post_for_homepage(getAttr('ADMIN_POST_NUM')),
+            # 'objs': Article.get_all_article(),
             # TODO 后台文章管理要分页
             # 'objs': Article.get_page_posts(direction, page, base_id, 20),
         }, layout='_layout_admin.html')
@@ -397,7 +398,7 @@ class DelPost(BaseHandler):
             return
 
 
-class EditComment(BaseHandler):
+class CommentController(BaseHandler):
     @authorized()
     def get(self, id=''):
         obj = None
@@ -420,7 +421,7 @@ class EditComment(BaseHandler):
         self.echo('admin_comment.html', {
             'title': "评论管理",
             'obj': obj,
-            'comments': Comment.get_recent_comments(ADMIN_RECENT_COMMENT_NUM),
+            'comments': Comment.get_recent_comments(getAttr('ADMIN_COMMENT_NUM')),
         }, layout='_layout_admin.html')
 
     @authorized()
@@ -581,17 +582,10 @@ class BlogSetting3(BaseHandler):
 
     @authorized()
     def post(self):
+        # 文章相关
         EACH_PAGE_POST_NUM = self.get_argument("EACH_PAGE_POST_NUM", '')
         if EACH_PAGE_POST_NUM:
             setAttr('EACH_PAGE_POST_NUM', EACH_PAGE_POST_NUM)
-
-        EACH_PAGE_COMMENT_NUM = self.get_argument("EACH_PAGE_COMMENT_NUM", '')
-        if EACH_PAGE_COMMENT_NUM:
-            setAttr('EACH_PAGE_COMMENT_NUM', EACH_PAGE_COMMENT_NUM)
-
-        RELATIVE_POST_NUM = self.get_argument("RELATIVE_POST_NUM", '')
-        if RELATIVE_POST_NUM:
-            setAttr('RELATIVE_POST_NUM', RELATIVE_POST_NUM)
 
         SHORTEN_CONTENT_WORDS = self.get_argument("SHORTEN_CONTENT_WORDS", '')
         if SHORTEN_CONTENT_WORDS:
@@ -601,17 +595,22 @@ class BlogSetting3(BaseHandler):
         if DESCRIPTION_CUT_WORDS:
             setAttr('DESCRIPTION_CUT_WORDS', DESCRIPTION_CUT_WORDS)
 
+        RELATIVE_POST_NUM = self.get_argument("RELATIVE_POST_NUM", '')
+        if RELATIVE_POST_NUM:
+            setAttr('RELATIVE_POST_NUM', RELATIVE_POST_NUM)
+
+        # 评论相关
         EACH_PAGE_COMMENT_NUM = self.get_argument("EACH_PAGE_COMMENT_NUM", '')
         if EACH_PAGE_COMMENT_NUM:
             setAttr('EACH_PAGE_COMMENT_NUM', EACH_PAGE_COMMENT_NUM)
 
+        RECENT_COMMENT_NUM = self.get_argument("RECENT_COMMENT_NUM", '')
+        if RECENT_COMMENT_NUM:
+            setAttr('RECENT_COMMENT_NUM', RECENT_COMMENT_NUM)
+
         RECENT_COMMENT_CUT_WORDS = self.get_argument("RECENT_COMMENT_CUT_WORDS", '')
         if RECENT_COMMENT_CUT_WORDS:
             setAttr('RECENT_COMMENT_CUT_WORDS', RECENT_COMMENT_CUT_WORDS)
-
-        LINK_NUM = self.get_argument("LINK_NUM", '')
-        if LINK_NUM:
-            setAttr('LINK_NUM', LINK_NUM)
 
         MAX_COMMENT_NUM_A_DAY = self.get_argument("MAX_COMMENT_NUM_A_DAY", '')
         if MAX_COMMENT_NUM_A_DAY:
@@ -621,13 +620,15 @@ class BlogSetting3(BaseHandler):
         if COMMENT_DEFAULT_VISIBLE:
             setAttr('COMMENT_DEFAULT_VISIBLE', COMMENT_DEFAULT_VISIBLE)
 
+        # 缓存相关
         PAGE_CACHE_TIME = self.get_argument("PAGE_CACHE_TIME", '')
         if PAGE_CACHE_TIME:
-            setAttr('PAGE_CACHE_TIME', PAGE_CACHE_TIME)
+            setAttr('PAGE_CACHE_TIME', PAGE_CACHE_TIME * 3600)
 
-        POST_CACHE_TIME = self.get_argument("POST_CACHE_TIME", '')
-        if POST_CACHE_TIME:
-            setAttr('POST_CACHE_TIME', POST_CACHE_TIME)
+        # 其他设置
+        LINK_NUM = self.get_argument("LINK_NUM", '')
+        if LINK_NUM:
+            setAttr('LINK_NUM', LINK_NUM)
 
         HOT_TAGS_NUM = self.get_argument("HOT_TAGS_NUM", '')
         if HOT_TAGS_NUM:
@@ -637,9 +638,7 @@ class BlogSetting3(BaseHandler):
         if MAX_ARCHIVES_NUM:
             setAttr('MAX_ARCHIVES_NUM', MAX_ARCHIVES_NUM)
 
-        clear_cache_by_pathlist(['/'])
-
-        #self.redirect('%s/admin/setting3' % BASE_URL)
+        clear_all_cache()
         self.write(json_encode("OK"))
         return
 
@@ -665,9 +664,32 @@ class BlogSetting4(BaseHandler):
         if ADSENSE_CODE2:
             setAttr('ADSENSE_CODE2', ADSENSE_CODE2)
 
+        clear_all_cache()
+        self.write(json_encode("OK"))
+        return
+
+
+# 后台相关
+class BlogSetting5(BaseHandler):
+    @authorized()
+    def get(self):
+        self.echo('admin_setting5.html', {
+            'title': "详细参数",
+        }, layout='_layout_admin.html')
+
+    @authorized()
+    def post(self):
+        ADMIN_POST_NUM = self.get_argument("ADMIN_POST_NUM", '')
+        if ADMIN_POST_NUM:
+            setAttr('ADMIN_POST_NUM', ADMIN_POST_NUM)
+
+        ADMIN_COMMENT_NUM = self.get_argument("ADMIN_COMMENT_NUM", '')
+        if ADMIN_COMMENT_NUM:
+            setAttr('ADMIN_COMMENT_NUM', ADMIN_COMMENT_NUM)
+
         clear_cache_by_pathlist(['/'])
 
-        #self.redirect('%s/admin/setting4' % BASE_URL)
+        #self.redirect('%s/admin/setting3' % BASE_URL)
         self.write(json_encode("OK"))
         return
 
@@ -820,24 +842,25 @@ def Init():
         setAttr('SHORTEN_CONTENT_WORDS', SHORTEN_CONTENT_WORDS)
     if not getAttr('DESCRIPTION_CUT_WORDS'):
         setAttr('DESCRIPTION_CUT_WORDS', DESCRIPTION_CUT_WORDS)
+
     if not getAttr('RECENT_COMMENT_NUM'):
         setAttr('RECENT_COMMENT_NUM', RECENT_COMMENT_NUM)
     if not getAttr('RECENT_COMMENT_CUT_WORDS'):
         setAttr('RECENT_COMMENT_CUT_WORDS', RECENT_COMMENT_CUT_WORDS)
-    if not getAttr('LINK_NUM'):
-        setAttr('LINK_NUM', LINK_NUM)
     if not getAttr('MAX_COMMENT_NUM_A_DAY'):
         setAttr('MAX_COMMENT_NUM_A_DAY', MAX_COMMENT_NUM_A_DAY)
+    if not getAttr('COMMENT_DEFAULT_VISIBLE'):
+        setAttr('COMMENT_DEFAULT_VISIBLE', COMMENT_DEFAULT_VISIBLE)
+
     if not getAttr('PAGE_CACHE_TIME'):
         setAttr('PAGE_CACHE_TIME', PAGE_CACHE_TIME)
-    if not getAttr('POST_CACHE_TIME'):
-        setAttr('POST_CACHE_TIME', POST_CACHE_TIME)
+
+    if not getAttr('LINK_NUM'):
+        setAttr('LINK_NUM', LINK_NUM)
     if not getAttr('HOT_TAGS_NUM'):
         setAttr('HOT_TAGS_NUM', HOT_TAGS_NUM)
     if not getAttr('MAX_ARCHIVES_NUM'):
         setAttr('MAX_ARCHIVES_NUM', MAX_ARCHIVES_NUM)
-    if not getAttr('COMMENT_DEFAULT_VISIBLE'):
-        setAttr('COMMENT_DEFAULT_VISIBLE', COMMENT_DEFAULT_VISIBLE)
 
     if not getAttr('ANALYTICS_CODE'):
         setAttr('ANALYTICS_CODE', ANALYTICS_CODE)
@@ -898,26 +921,29 @@ urls = [
     (r"/admin/login", Login),
     (r"/admin/logout", Logout),
     (r"/admin/403", Forbidden),
+    # 文章相关
     (r"/admin/add_post", AddPost),
     (r"/admin/edit_post/(\d*)", EditPost),
-    (r"/admin/list_post", ListPost), # TODO 分页
+    (r"/admin/list_post", ListPost),  # TODO 分页
     (r"/admin/del_post/(\d+)", DelPost),
-    (r"/admin/comment/(\d*)", EditComment),
-    (r"/admin/flushdata", FlushData),
-    (r"/task/pingrpctask", PingRPCTask),
-    (r"/task/pingrpc/(\d+)", PingRPC),
-    (r"/task/sendmail", SendMail),
-    (r"/install", Install),
+    (r"/admin/comment/(\d*)", CommentController),
+    # 文件上传及管理
     (r"/admin/fileupload", FileUpload),
     (r"/admin/filelist", FileManager),
     (r"/admin/links", LinkBroll),
-    (r"/captcha/", GetCaptcha),
     (r"/admin/setting", BlogSetting),
     (r"/admin/setting2", BlogSetting2),
     (r"/admin/setting3", BlogSetting3),
     (r"/admin/setting4", BlogSetting4),
+    (r"/admin/setting5", BlogSetting5),  # 后台设置
     (r"/admin/profile", EditProfile),
-    (r"/admin/users", User),
+    #(r"/admin/users", ListUser),
     (r"/admin/kvdb", KVDBAdmin),
+    (r"/admin/flushdata", FlushData),
+    (r"/task/pingrpctask", PingRPCTask),
+    (r"/task/pingrpc/(\d+)", PingRPC),
+    (r"/task/sendmail", SendMail),
+    (r"/captcha/", GetCaptcha),
+    (r"/install", Install),
     (r".*", NotFoundPage)
 ]

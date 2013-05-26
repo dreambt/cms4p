@@ -70,6 +70,9 @@
             </div>
         </div>
     </div>
+    <div class="bb-alert alert" style="display:none;">
+        <span>默认提示信息</span>
+    </div>
     <img src="/static/themes/sdyspj/images/ads.jpg">
     #{_content}
     <hr>
@@ -85,7 +88,7 @@
             <address>
                 <strong>分类</strong><br/>
                 <?py for cat in cats: ?>
-                <span class="label label-info" onclick="location.href='#{{ BASE_URL }}/category/#{cat.name}/'">#{cat.name}(#{cat.id_num})</span>
+                <span class="label label-info" onclick="location.href='/category/#{cat.name}/'">#{cat.name}(#{cat.id_num})</span>
                 <?py #endfor ?>
             </address>
         </div>
@@ -93,7 +96,7 @@
             <address>
                 <strong>Tags</strong><br/>
                 <?py for tagi in tags: ?>
-                <span class="label label-info" onclick="location.href='#{{ BASE_URL }}/tag/#{tagi.name}/'">#{tagi.name}(#{tagi.id_num})</span>
+                <span class="label label-info" onclick="location.href='/tag/#{tagi.name}/'">#{tagi.name}(#{tagi.id_num})</span>
                 <?py #endfor ?>
             </address>
         </div>
@@ -101,7 +104,7 @@
             <address>
                 <strong>归档</strong><br/>
                 <?py for archive in archives: ?>
-                <span class="label label-info" onclick="location.href='#{{ BASE_URL }}/archive/#{archive.name}/'">#{archive.name}</span>
+                <span class="label label-info" onclick="location.href='/archive/#{archive.name}/'">#{archive.name}</span>
                 <?py #endfor ?>
             </address>
         </div>
@@ -180,6 +183,7 @@
     })
 </script>
 <script type="text/javascript" src="/static/js/vender/bootstrap.min.js"></script>
+<script type="text/javascript" src="/static/js/main.js"></script>
 #{getAttr('ANALYTICS_CODE')}
 </body>
 </html>

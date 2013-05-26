@@ -263,7 +263,7 @@ class Comment():
         sdb._ensure_connected()
         return sdb.get('SELECT * FROM `sp_comments` WHERE `id` = %s LIMIT 1' % str(id))
 
-    def get_recent_comments(self, limit=RECENT_COMMENT_NUM):
+    def get_recent_comments(self, limit=getAttr('RECENT_COMMENT_NUM')):
         sdb._ensure_connected()
         return comment_format(sdb.query('SELECT * FROM `sp_comments` ORDER BY `id` DESC LIMIT %s' % str(limit)))
 

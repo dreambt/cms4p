@@ -1,4 +1,4 @@
-<?py if obj is not None: ?>
+<?py if obj: ?>
 <form action="" class="form-horizontal" method="post" id="commentform">
     <fieldset>
         <legend>编辑评论</legend>
@@ -67,7 +67,7 @@
                target="_blank">(#{cobj.email})</a></td>
         <td>#{cobj.content}</td>
         <td>#{cobj.add_time}</td>
-        <td><a href="#{BASE_URL}/t/#{cobj.postid}#r#{cobj.id}" target="_blank">定位</a> <a
+        <td><a href="/t/#{cobj.postid}#r#{cobj.id}" target="_blank">定位</a> <a
                 href="/admin/comment/#{cobj.id}">编辑</a> <a href="/admin/comment/#{cobj.id}?act=del" class="ajax" data-remove-closest="tr">删除</a></td>
     </tr>
     <?py #endfor ?>
@@ -82,7 +82,7 @@
   <h4>评论列表</h4>
   <p>1.点击评论者的 <strong>邮箱</strong> 可以向其发送邮件(需要在本地系统中配置好邮箱客户端，同时保证本系统的邮箱设置是有效的)</p>
   <p>2.点击 <strong>定位</strong> 将定位该条评论在系统中出现的位置</p>
-  <p>3.本页最多显示 #{ADMIN_RECENT_COMMENT_NUM} 条评论, 你可以在 <a href="/admin/setting3">系统设置</a> 里面修改</p>
+  <p>3.本页最多显示 #{ADMIN_COMMENT_NUM} 条评论, 你可以在 <a href="/admin/setting3">系统设置</a> 里面修改</p>
   <h4>编辑评论</h4>
   <p>1.取消勾选 <strong>显示本条评论</strong> 将不再显示该条评论</p>
   <p><a href="#top" class="btn btn-primary">我明白了</a></p>

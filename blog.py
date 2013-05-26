@@ -12,7 +12,6 @@ from common import BaseHandler, unquoted_unicode, safe_encode, pagecache, clear_
 
 from model import Article, Comment, Link, Category, Tag, Archive
 
-
 class HomePage(BaseHandler):
     @pagecache()
     def get(self):
@@ -55,7 +54,7 @@ class HomePage(BaseHandler):
 
 
 class IndexPage(BaseHandler):
-    @pagecache('post_list_index', PAGE_CACHE_TIME, lambda self, direction, page, base_id: page)
+    @pagecache('post_list_index', getAttr('PAGE_CACHE_TIME'), lambda self, direction, page, base_id: page)
     def get(self, direction='next', page='2', base_id='1'):
         if page == '1':
             self.redirect(BASE_URL)
@@ -107,7 +106,7 @@ class PostDetailShort(BaseHandler):
 
 
 class PostDetail(BaseHandler):
-    @pagecache('post', POST_CACHE_TIME, lambda self, id, title: id)
+    @pagecache('post', getAttr('PAGE_CACHE_TIME'), lambda self, id, title: id)
     def get(self, id='', title=''):
         tmpl = ''
         obj = Article.get_article_by_id_detail(id)
@@ -212,6 +211,7 @@ class PostDetail(BaseHandler):
                 self.write(json.dumps(rspd))
             return
 
+        # 评论次数限制不好使
         usercomnum = self.get_secure_cookie("usercomnum")
         if usercomnum is not None and int(usercomnum) > getAttr('MAX_COMMENT_NUM_A_DAY'):
             rspd = {'status': 403, 'msg': '403: Forbidden'}
@@ -221,20 +221,19 @@ class PostDetail(BaseHandler):
             usercomnum = 0
 
         try:
-            timestamp = int(time())
             post_dic = {
                 'author': self.get_argument("author"),
                 'email': self.get_argument("email", ''),
-                'content': safe_encode(self.get_argument("con").replace('\r', '\n')),
+                'content': safe_encode(self.get_argument("comment").replace('\r', '\n')),
                 'url': self.get_argument("url", ''),
                 'postid': self.get_argument("postid"),
-                'add_time': timestamp,
+                'add_time': int(time()),
                 'toid': self.get_argument("toid", ''),
                 'visible': getAttr('COMMENT_DEFAULT_VISIBLE')
             }
         except:
             rspd['status'] = 500
-            rspd['msg'] = '错误： 注意必填的三项'
+            rspd['msg'] = '错误：请检查你提交的数据是否正确！'
             self.write(json.dumps(rspd))
             return
 
@@ -243,20 +242,23 @@ class PostDetail(BaseHandler):
             cobjid = Comment.add_new_comment(post_dic)
             if cobjid:
                 Article.update_post_comment(pobj.comment_num + 1, id)
-                self.set_secure_cookie("usercomnum", str(usercomnum + 1), expires_days=1)
+                self.set_secure_cookie("usercomnum", str(int(usercomnum) + 1), expires_days=1)
                 rspd['status'] = 200
-                #rspd['msg'] = '恭喜： 已成功提交评论'
+                rspd['msg'] = '恭喜您，已成功提交评论！'
 
                 rspd['msg'] = self.render('comment.html', {
+                    'postid': id,
                     'cobjid': cobjid,
                     'gravatar': 'http://www.gravatar.com/avatar/%s' % md5(post_dic['email']).hexdigest(),
                     'url': post_dic['url'],
                     'author': post_dic['author'],
+                    'add_time': int(time()),
                     'visible': post_dic['visible'],
                     'content': post_dic['content'],
                 })
 
                 clear_cache_by_pathlist(['/', 'post:%s' % id])
+
                 #send mail
                 if not debug:
                     try:
@@ -283,9 +285,9 @@ class PostDetail(BaseHandler):
                     except:
                         pass
             else:
-                rspd['msg'] = '错误： 未知错误'
+                rspd['msg'] = '保存评论失败！'
         else:
-            rspd['msg'] = '错误： 未知错误'
+            rspd['msg'] = '当前文章禁止评论！'
         self.write(json.dumps(rspd))
 
 
@@ -301,7 +303,7 @@ class CategoryDetailShort(BaseHandler):
 
 
 class CategoryDetail(BaseHandler):
-    @pagecache('cat', PAGE_CACHE_TIME, lambda self, name: name)
+    @pagecache('cat', getAttr('PAGE_CACHE_TIME'), lambda self, name: name)
     def get(self, name=''):
         objs = Category.get_cat_page_posts(name, 1)
         catobj = Category.get_cat_by_name(name)
@@ -340,7 +342,7 @@ class CategoryDetail(BaseHandler):
 
 
 class ArchiveDetail(BaseHandler):
-    @pagecache('archive', PAGE_CACHE_TIME, lambda self, name: name)
+    @pagecache('archive', getAttr('PAGE_CACHE_TIME'), lambda self, name: name)
     def get(self, name=''):
         if not name:
             print 'ArchiveDetail name null'
@@ -422,7 +424,7 @@ class TagDetail(BaseHandler):
 
 
 class ArticleList(BaseHandler):
-    @pagecache('post_list_tag', PAGE_CACHE_TIME, lambda self, list_type, direction, page, name: "%s_%s" % (name, page))
+    @pagecache('post_list_tag', getAttr('PAGE_CACHE_TIME'), lambda self, list_type, direction, page, name: "%s_%s" % (name, page))
     def get(self, list_type='', direction='next', page='1', name=''):
         if list_type == 'cat':
             objs = Category.get_cat_page_posts(name, page)

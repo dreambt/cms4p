@@ -1,0 +1,48 @@
+<form id="myForm" action="" class="form-horizontal" method="post">
+    <fieldset>
+        <div class="row">
+            <div class="span6">
+                <legend>后台设置</legend>
+                <div class="control-group">
+                    <label class="control-label" for="input41">后台每页文章数</label>
+                    <div class="controls">
+                        <input type="number" name="ADMIN_POST_NUM" value="#{getAttr('ADMIN_POST_NUM')}"
+                               class="input-xlarge" required id="input41" tabindex="41"/>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="input43">后台每页评论数</label>
+                    <div class="controls">
+                        <input type="number" name="ADMIN_COMMENT_NUM" value="#{getAttr('ADMIN_COMMENT_NUM')}"
+                               class="input-xlarge" required id="input43" tabindex="43"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary" tabindex="100">保 存</button>
+            <button type="reset" class="btn" tabindex="101">重 置</button>
+        </div>
+    </fieldset>
+</form>
+<script type="text/javascript">
+    $(function () {
+        $("#sys_page").addClass("active");
+        $("input,select,textarea").not("[type=submit]").not("[type=reset]").jqBootstrapValidation();
+        $('#myForm').submit(function () {
+            $.ajax({
+                type: 'POST',
+                url: "",
+                dataType: "json",
+                data: $("#myForm").serialize(),
+                success: function () {
+                    SiQiTip.show("success", "保存成功！");
+                },
+                error: function() {
+                    SiQiTip.show("error", "保存失败！");
+                }
+            });
+            return false;
+        });
+    });
+</script>

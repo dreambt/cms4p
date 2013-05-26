@@ -32,30 +32,36 @@ MAIL_SMTP = 'smtpcloud.sohu.com'
 MAIL_PORT = 25
 MAIL_KEY = 'GtNTClqI'
 
-#放在网页底部的统计代码
+# 放在网页底部的统计代码
 ANALYTICS_CODE = """"""
 ADSENSE_CODE1 = """"""
 ADSENSE_CODE2 = """"""
 
-COMMENT_DEFAULT_VISIBLE = 1  # 0/1 #发表评论时是否显示 设为0时则需要审核才显示
+# 文章相关
 EACH_PAGE_POST_NUM = 7  # 每页显示文章数
-EACH_PAGE_COMMENT_NUM = 10  # 每页评论数
-ADMIN_RECENT_COMMENT_NUM = 10  # 在admin界面显示的评论数
-RELATIVE_POST_NUM = 5  # 显示相关文章数
 SHORTEN_CONTENT_WORDS = 255  # 文章列表截取的字符数
 DESCRIPTION_CUT_WORDS = 100  # meta description 显示的字符数
+RELATIVE_POST_NUM = 5  # 显示相关文章数
+
+# 评论相关
+EACH_PAGE_COMMENT_NUM = 10  # 每页评论数
 RECENT_COMMENT_NUM = 5  # 边栏显示最近评论数
 RECENT_COMMENT_CUT_WORDS = 20  # 边栏评论显示字符数
-LINK_NUM = 30  # 边栏显示的友情链接数
 MAX_COMMENT_NUM_A_DAY = 30  # 客户端设置Cookie 限制每天发的评论数
+COMMENT_DEFAULT_VISIBLE = 1  # 0/1 #发表评论时是否显示 设为0时则需要审核才显示
 
+# 缓存相关
 PAGE_CACHE = True  # 本地没有 Memcache 服务
 PAGE_CACHE_TIME = 3600 * 24  # 默认页面缓存时间
-POST_CACHE_TIME = 3600 * 24  # 默认文章缓存时间
-COMMON_CACHE_TIME = 3600 * 24  # 通用缓存时间
 
+# 其他相关
+LINK_NUM = 30  # 边栏显示的友情链接数
 HOT_TAGS_NUM = 30  # 右侧热门标签显示数
 MAX_ARCHIVES_NUM = 50  # 右侧热门标签显示数
+
+# 后台界面设置
+ADMIN_COMMENT_NUM = 20
+ADMIN_POST_NUM = 20
 
 MAX_IDLE_TIME = 10  # 数据库最大空闲时间 SAE文档说是30 其实更小，设为5，没问题就不要改了
 
