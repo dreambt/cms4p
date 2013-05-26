@@ -706,7 +706,7 @@ CREATE TABLE IF NOT EXISTS `sp_posts` (
   `closecomment` tinyint(1) NOT NULL DEFAULT '0',
   `tags` varchar(100) NOT NULL,
   `archive` varchar(6) NOT NULL DEFAULT '209901',
-  `password` varchar(8) NOT NULL DEFAULT '',
+  `password` varchar(16) NOT NULL DEFAULT '',
   `add_time` int(10) unsigned NOT NULL DEFAULT '0',
   `edit_time` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),

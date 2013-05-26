@@ -180,8 +180,6 @@
     })
 </script>
 <script type="text/javascript" src="/static/js/vender/bootstrap.min.js"></script>
-<?PY if ANALYTICS_CODE: ?>
-#{{ ANALYTICS_CODE }}
-<?PY #endif ?>
+#{getAttr('ANALYTICS_CODE')}
 </body>
 </html>

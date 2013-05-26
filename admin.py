@@ -917,6 +917,7 @@ urls = [
     (r"/admin/setting3", BlogSetting3),
     (r"/admin/setting4", BlogSetting4),
     (r"/admin/profile", EditProfile),
+    (r"/admin/users", User),
     (r"/admin/kvdb", KVDBAdmin),
     (r".*", NotFoundPage)
 ]

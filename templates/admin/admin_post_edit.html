@@ -11,10 +11,9 @@
                         <?py #endfor ?>
                     </ul>
                 </div>
-                <input type="text" id="cat" class="span2" required value="${obj.category}" tabindex="1" placeholder="输入新分类名称">
+                <input type="text" id="cat" class="span2" required maxlength="17" value="${obj.category}" tabindex="1" placeholder="输入新分类名称">
             </div>
-            <span class="help-inline pull-right">可选设置：<input type="text" id="password" class="input-medium"
-                                                        value="${obj.password}" maxlength="8" placeholder="设置阅读密码"/>
+            <span class="help-inline">可选设置：<input type="text" id="password" class="input-medium" value="${obj.password}" maxlength="16" placeholder="设置阅读密码"/>
             <label class="checkbox help-inline" style="padding-left:30px;"><?py ck = ['','checked'] ?><input
                     type="checkbox" value="True" tabindex="5" #{ck[obj.closecomment]}/> 关闭评论</label></span>
         </div>
@@ -24,7 +23,7 @@
         <div class="controls">
             <input type="hidden" id="postid" name="postid" value="#{obj.id}"/>
             <input type="hidden" id="method" name="method" value="#{method}"/>
-            <input type="text" id="tit" class="span8" required value="${obj.title}" tabindex="2" maxlength="100"
+            <input type="text" id="tit" class="span8" required maxlength="100" value="${obj.title}" tabindex="2" maxlength="100"
                    placeholder="标题"/>
         </div>
     </div>
@@ -37,7 +36,7 @@
     <div class="control-group">
         <label class="control-label" for="tag">标签</label>
         <div class="controls">
-            <select data-placeholder="按住Ctrl可以一次选择多个标签,推荐选择 10 个左右" id="tag" class="span8 chzn-select" multiple>
+            <select data-placeholder="按住Ctrl可以选择多个标签，输入新标签后按空格键，推荐选择 10 个左右" id="tag" class="span8 chzn-select" multiple>
                 <option value=""></option>
                 <?py for tag in tags: ?>
                 <?py    if 0<=obj.tags.find(tag['name']): ?>
@@ -51,9 +50,27 @@
     </div>
     <div class="form-actions">
         <button type="submit" id="submit" class="btn btn-primary">保 存</button>
-        <button type="reset" class="btn">重 置</button>
+        <button type="reset" id="helper" class="btn">重 置</button>
     </div>
 </form>
+<hr/>
+<div class="well">
+  <a class="pull-right" href="#">
+    <img class="media-object" src="/static/images/helper-girl.jpg">
+  </a>
+  <h4>文章分类</h4>
+  <p>1.可以选择已有的文章分类</p>
+  <p>2.如果要新建分类可以直接输入新的分类名称</p>
+  <h4>标签</h4>
+  <p>1.按住 Ctrl 不放可以选择多个标签</p>
+  <p>2.新建标签：输入新标签后按空格键</p>
+  <p>3.删除标签：点击标签右侧的关闭符号</p>
+  <p>4.推荐选择 10 个左右的标签来优化搜索引擎的检索量</p>
+  <h4>可选设置</h4>
+  <p>1.设定密码可以只允许知道密码的人查看文章内容</p>
+  <p>2.勾选“关闭评论”将禁止用户发表评论，已有评论也将不再显示</p>
+  <p><a href="#top" class="btn btn-primary">我明白了</a></p>
+</div>
 <script type="text/javascript" src="/static/js/vender/chosen.jquery.min.js"></script>
 <script type="text/javascript" src="/static/kindeditor/kindeditor-min.js"></script>
 <script type="text/javascript">

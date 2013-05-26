@@ -26,7 +26,6 @@
                 <span class="icon-bar"></span>
             </button>
             <a class="brand" href="/">#{{ getAttr('SITE_TITLE') }}</a>
-
             <div class="nav-collapse collapse">
                 <ul class="nav">
                     <li id="admin_page"><a href="/admin/">后台首页</a></li>
@@ -70,6 +69,9 @@
 <header class="jumbotron subhead" id="overview">
     <div class="container">
         <h1>#{title}</h1>
+        <div id="carbonads-container">
+            <div class="carbonad"><a href="#helper">帮助信息</a></div>
+        </div>
     </div>
 </header>
 <div class="bb-alert alert" style="display:none;">
@@ -82,8 +84,7 @@
     <div class="container">
         <p>&copy; #{{ COPY_YEAR }} Copyright <a href="http://www.im47.cn/">思奇博客</a></p>
         <p>Powered by <a href="https://github.com/dreambt/cms4p" target="_blank">cms4p</a> - Time: <span
-                id="requesttime">#{ int(request.request_time()*1000) }</span> ms - <a class="fr" target="_blank"
-                                                                                      href="http://sae.sina.com.cn"><img
+                id="requesttime">#{ int(request.request_time()*1000) }</span> ms - <a class="fr" target="_blank" href="http://sae.sina.com.cn"><img
                 title="Powered by Sina App Engine" src="/static/images/sae.gif"></a></p>
     </div>
 </footer>

@@ -33,8 +33,17 @@
     <?py #endfor ?>
     </tbody>
 </table>
-<span class="label label-info">提示</span> 本页最多显示 #{EACH_PAGE_POST_NUM}  篇文章, 你可以在“<a
-        href="/admin/setting3">系统设置</a>”里面修改.
+<hr id="helper"/>
+<div class="well">
+  <a class="pull-right" href="#">
+    <img class="media-object" src="/static/images/helper-girl.jpg">
+  </a>
+  <h4>文章列表</h4>
+  <p>1.点击 <strong>标题</strong> 可以查看文章在系统中的显示效果</p>
+  <p>2.点击 <strong>编辑</strong> 可以修改文章内容</p>
+  <p>3.本页最多显示 #{EACH_PAGE_POST_NUM} 篇文章, 你可以在 <a href="/admin/setting3">系统设置</a> 里面修改</p>
+  <p><a href="#top" class="btn btn-primary">我明白了</a></p>
+</div>
 <script type="text/javascript">
     $(function () {
         $("#post_page").addClass("active");
