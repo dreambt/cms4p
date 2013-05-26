@@ -203,6 +203,7 @@ class AddPost(BaseHandler):
     @authorized()
     def get(self):
         obj = Article
+        obj.id = ''
         obj.category = ''
         obj.title = ''
         obj.content = ''
@@ -325,7 +326,7 @@ class EditPost(BaseHandler):
                 'category': self.get_argument("cat"),
                 'title': self.get_argument("tit"),
                 'content': self.get_argument("con"),
-                'tags': self.get_argument("tag", '').replace(u'，', ','),
+                'tags': ",".join(self.get_arguments("tag[]")),
                 'closecomment': self.get_argument("clo", 'false'),
                 'password': self.get_argument("password", ''),
                 'edit_time': timestamp,
