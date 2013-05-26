@@ -21,21 +21,20 @@
                     <div class="control-group">
                         <label class="control-label" for="input03">网站</label>
                         <div class="controls">
-                            <input type="text" name="url" value="#{obj.url}" class="input-xlarge" id="input03" tabindex="3"/>
+                            <input type="text" name="url" value="#{obj.url}" class="input-xlarge" id="input03" tabindex="3" placeholder="URL"/>
                         </div>
                     </div>
                     <div class="control-group">
                         <label class="control-label" for="commentbox">内容</label>
                         <div class="controls">
-                            <textarea name="content" class="input-xlarge" id="commentbox" tabindex="3"
-                                      rows="6">#{obj.content}</textarea>
+                            <textarea name="content" class="input-xlarge" id="commentbox" tabindex="4" rows="6">#{obj.content}</textarea>
                         </div>
                     </div>
                     <div class="control-group">
                         <label class="control-label" for="input04">显示本条评论</label>
                         <div class="controls">
                             <?py ck = ['','checked'] ?>
-                            <input type="checkbox" name="visible" value="True" class="input-xlarge" id="input04" tabindex="3"
+                            <input type="checkbox" name="visible" value="True" class="input-xlarge" id="input04" tabindex="5"
                             #{ck[obj.visible]} />
                         </div>
                     </div>
@@ -82,6 +81,20 @@
     <div id="page-selection"></div>
     </div>
 </div>
+<script type="text/javascript">
+    $(function () {
+        $("#comment_page").addClass("active");
+        $('#page-selection').bootpag({
+            total: #{total},
+            maxVisible: 10,
+            next: '下一组',
+            prev: '前一组'
+        }).on("page", function(event, /* page number here */ num){
+             // some ajax content loading...
+             $("#content").html("Insert content");
+        });
+    });
+</script>
 <?py #endif ?>
 <hr id="helper"/>
 <div class="well">
@@ -99,14 +112,5 @@
 <script type="text/javascript">
     $(function () {
         $("#comment_page").addClass("active");
-        $('#page-selection').bootpag({
-            total: #{total},
-            maxVisible: 10,
-            next: '下一组',
-            prev: '前一组'
-        }).on("page", function(event, /* page number here */ num){
-             // some ajax content loading...
-             $("#content").html("Insert content");
-        });
     });
 </script>
