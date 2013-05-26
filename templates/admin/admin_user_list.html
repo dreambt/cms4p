@@ -78,7 +78,7 @@
                 success: function () {
                     SiQiTip.show("success", "保存成功！");
                     if ($("input[name='act']").val()=="add") {
-                        $("#content").prepend("<tr><td>#</td><td><a href='"+url+"' title='Link to "+url+"' target='_blank'>"+name+"</a></td><td>"+sort+"</td><td>"+url+"</td><td><a href='/admin/links'>刷新</a></td></tr>");
+                        $("#links").prepend("<tr><td>#</td><td><a href='"+url+"' title='Link to "+url+"' target='_blank'>"+name+"</a></td><td>"+sort+"</td><td>"+url+"</td><td><a href='/admin/links'>刷新</a></td></tr>");
                     }
                     else {
                         var id = $("input[name='id']").val();

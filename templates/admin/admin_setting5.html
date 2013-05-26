@@ -4,17 +4,38 @@
             <div class="span6">
                 <legend>后台设置</legend>
                 <div class="control-group">
+                    <label class="control-label" for="input41">后台每页分类数</label>
+                    <div class="controls">
+                        <input type="number" name="ADMIN_CATEGORY_NUM" value="#{getAttr('ADMIN_CATEGORY_NUM')}"
+                               class="input-xlarge" required min="1" id="input41" tabindex="41"/>
+                    </div>
+                </div>
+                <div class="control-group">
                     <label class="control-label" for="input41">后台每页文章数</label>
                     <div class="controls">
                         <input type="number" name="ADMIN_POST_NUM" value="#{getAttr('ADMIN_POST_NUM')}"
-                               class="input-xlarge" required id="input41" tabindex="41"/>
+                               class="input-xlarge" required min="1" id="input41" tabindex="41"/>
                     </div>
                 </div>
                 <div class="control-group">
                     <label class="control-label" for="input43">后台每页评论数</label>
                     <div class="controls">
                         <input type="number" name="ADMIN_COMMENT_NUM" value="#{getAttr('ADMIN_COMMENT_NUM')}"
-                               class="input-xlarge" required id="input43" tabindex="43"/>
+                               class="input-xlarge" required min="1" id="input43" tabindex="43"/>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="input43">后台每页用户数</label>
+                    <div class="controls">
+                        <input type="number" name="ADMIN_USER_NUM" value="#{getAttr('ADMIN_USER_NUM')}"
+                               class="input-xlarge" required min="1" id="input45" tabindex="45"/>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="input43">后台每页友情链接数</label>
+                    <div class="controls">
+                        <input type="number" name="ADMIN_LINK_NUM" value="#{getAttr('ADMIN_LINK_NUM')}"
+                               class="input-xlarge" required min="1" id="input47" tabindex="47"/>
                     </div>
                 </div>
             </div>

@@ -27,7 +27,7 @@ class HomePage(BaseHandler):
             fromid = endid = ''
 
         each_page_post_num = int(getAttr('EACH_PAGE_POST_NUM'))
-        all_post = Article.count_all_post()
+        all_post = Article.count_all()
         all_page = all_post / each_page_post_num
         if all_post % each_page_post_num:
             all_page += 1
@@ -69,7 +69,7 @@ class IndexPage(BaseHandler):
             fromid = endid = ''
 
         each_page_post_num = int(getAttr('EACH_PAGE_POST_NUM'))
-        all_post = Article.count_all_post()
+        all_post = Article.count_all()
         all_page = all_post / each_page_post_num
         if all_post % each_page_post_num:
             all_page += 1

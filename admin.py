@@ -275,13 +275,14 @@ class AddPost(BaseHandler):
 
 class ListPost(BaseHandler):
     @authorized()
-    def get(self, direction='next', page='2', base_id='1'):
+    def get(self, page=1):
         self.echo('admin_post_list.html', {
             'title': "文章列表",
-            'objs': Article.get_post_for_homepage(getAttr('ADMIN_POST_NUM')),
+            # 'objs': Article.get_post_for_homepage(getAttr('ADMIN_POST_NUM')),
             # 'objs': Article.get_all_article(),
             # TODO 后台文章管理要分页
-            # 'objs': Article.get_page_posts(direction, page, base_id, 20),
+            'objs': Article.get_paged_posts(page, getAttr('ADMIN_POST_NUM')),
+            'total': Article.count_all(),
         }, layout='_layout_admin.html')
 
 
@@ -418,9 +419,12 @@ class CommentController(BaseHandler):
                         'obj': obj,
                     }, layout='_layout_admin.html')
                     return
+
+        # 评论列表
         self.echo('admin_comment.html', {
             'title': "评论管理",
             'obj': obj,
+            'total': Comment.count_all(),
             'comments': Comment.get_recent_comments(getAttr('ADMIN_COMMENT_NUM')),
         }, layout='_layout_admin.html')
 
@@ -449,6 +453,60 @@ class CommentController(BaseHandler):
         return
 
 
+class UserController(BaseHandler):
+    @authorized()
+    def get(self, id=''):
+        obj = None
+        if id:
+            obj = User.get_user_by_id(id)
+            if obj:
+                act = self.get_argument("act", '')
+                if act == 'del':
+                    User.del_user_by_id(id)
+                    clear_cache_by_pathlist(['post:%d' % obj.postid])
+                    #self.redirect('%s/admin/comment/' % (BASE_URL))
+                    self.write(json_encode("OK"))
+                    return
+                else:
+                    self.echo('admin_comment.html', {
+                        'title': "评论管理",
+                        'obj': obj,
+                    }, layout='_layout_admin.html')
+                    return
+
+        # 评论列表
+        self.echo('admin_comment.html', {
+            'title': "评论管理",
+            'obj': obj,
+            'total': User.count_all(),
+            'comments': User.get_recent_comments(getAttr('ADMIN_COMMENT_NUM')),
+        }, layout='_layout_admin.html')
+
+    @authorized()
+    def post(self, id=''):
+        act = self.get_argument("act", '')
+        if act == 'findid':
+            eid = self.get_argument("id", '')
+            self.redirect('%s/admin/comment/%s' % (BASE_URL, eid))
+            return
+
+        tf = {'true': 1, 'false': 0}
+        post_dic = {
+            'author': self.get_argument("author"),
+            'email': self.get_argument("email", ''),
+            'content': safe_encode(self.get_argument("content").replace('\r', '\n')),
+            'url': self.get_argument("url", ''),
+            'visible': self.get_argument("visible", 'false'),
+            'id': id
+        }
+        post_dic['visible'] = tf[post_dic['visible'].lower()]
+
+        User.update_user_edit(post_dic)
+        clear_cache_by_pathlist(['post:%s' % id])
+        self.redirect('%s/admin/comment/%s' % (BASE_URL, id))
+        return
+
+
 class LinkBroll(BaseHandler):
     @authorized()
     def get(self):
@@ -466,10 +524,13 @@ class LinkBroll(BaseHandler):
             if id:
                 obj = Link.get_link_by_id(id)
                 clear_cache_by_pathlist(['/'])
+
+        # 友情链接列表
         self.echo('admin_link.html', {
             'title': "友情链接",
             'objs': Link.get_all_links(),
             'obj': obj,
+            'total': Link.count_all(),
         }, layout='_layout_admin.html')
 
     @authorized()
@@ -679,6 +740,10 @@ class BlogSetting5(BaseHandler):
 
     @authorized()
     def post(self):
+        ADMIN_CATEGORY_NUM = self.get_argument("ADMIN_CATEGORY_NUM", '')
+        if ADMIN_CATEGORY_NUM:
+            setAttr('ADMIN_CATEGORY_NUM', ADMIN_CATEGORY_NUM)
+
         ADMIN_POST_NUM = self.get_argument("ADMIN_POST_NUM", '')
         if ADMIN_POST_NUM:
             setAttr('ADMIN_POST_NUM', ADMIN_POST_NUM)
@@ -686,6 +751,14 @@ class BlogSetting5(BaseHandler):
         ADMIN_COMMENT_NUM = self.get_argument("ADMIN_COMMENT_NUM", '')
         if ADMIN_COMMENT_NUM:
             setAttr('ADMIN_COMMENT_NUM', ADMIN_COMMENT_NUM)
+
+        ADMIN_USER_NUM = self.get_argument("ADMIN_USER_NUM", '')
+        if ADMIN_USER_NUM:
+            setAttr('ADMIN_USER_NUM', ADMIN_USER_NUM)
+
+        ADMIN_LINK_NUM = self.get_argument("ADMIN_LINK_NUM", '')
+        if ADMIN_LINK_NUM:
+            setAttr('ADMIN_LINK_NUM', ADMIN_LINK_NUM)
 
         clear_cache_by_pathlist(['/'])
 
@@ -869,6 +942,16 @@ def Init():
     if not getAttr('ADSENSE_CODE2'):
         setAttr('ADSENSE_CODE2', ADSENSE_CODE2)
 
+    if not getAttr('ADMIN_CATEGORY_NUM'):
+        setAttr('ADMIN_CATEGORY_NUM', ADMIN_CATEGORY_NUM)
+    if not getAttr('ADMIN_POST_NUM'):
+        setAttr('ADMIN_POST_NUM', ADMIN_POST_NUM)
+    if not getAttr('ADMIN_COMMENT_NUM'):
+        setAttr('ADMIN_COMMENT_NUM', ADMIN_COMMENT_NUM)
+    if not getAttr('ADMIN_COMMENT_NUM'):
+        setAttr('ADMIN_USER_NUM', ADMIN_USER_NUM)
+    if not getAttr('ADMIN_LINK_NUM'):
+        setAttr('ADMIN_LINK_NUM', ADMIN_LINK_NUM)
 
 class Install(BaseHandler):
     def get(self):
@@ -927,6 +1010,8 @@ urls = [
     (r"/admin/list_post", ListPost),  # TODO 分页
     (r"/admin/del_post/(\d+)", DelPost),
     (r"/admin/comment/(\d*)", CommentController),
+    # 用户管理
+    (r"/admin/users", UserController),
     # 文件上传及管理
     (r"/admin/fileupload", FileUpload),
     (r"/admin/filelist", FileManager),
@@ -937,7 +1022,6 @@ urls = [
     (r"/admin/setting4", BlogSetting4),
     (r"/admin/setting5", BlogSetting5),  # 后台设置
     (r"/admin/profile", EditProfile),
-    #(r"/admin/users", ListUser),
     (r"/admin/kvdb", KVDBAdmin),
     (r"/admin/flushdata", FlushData),
     (r"/task/pingrpctask", PingRPCTask),

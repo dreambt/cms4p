@@ -161,6 +161,10 @@ def comment_format(objs):
 
 
 class Article():
+    def count_all(self):
+        sdb._ensure_connected()
+        return sdb.query('SELECT COUNT(*) AS num FROM `sp_posts`')[0]['num']
+
     def get_max_id(self):
         sdb._ensure_connected()
         maxobj = sdb.query("select max(id) as maxid from `sp_posts`")
@@ -174,10 +178,6 @@ class Article():
         else:
             return datetime.utcnow() + timedelta(hours=+ 8)
 
-    def count_all_post(self):
-        sdb._ensure_connected()
-        return sdb.query('SELECT COUNT(*) AS postnum FROM `sp_posts`')[0]['postnum']
-
     def get_all_article(self):
         sdb._ensure_connected()
         return post_list_format(sdb.query("SELECT * FROM `sp_posts` ORDER BY `id` DESC"))
@@ -187,14 +187,11 @@ class Article():
         return post_list_format(
             sdb.query("SELECT * FROM `sp_posts` ORDER BY `id` DESC LIMIT %s" % limit))
 
-    def get_page_posts(self, direction='next', page=1, base_id='', limit=EACH_PAGE_POST_NUM):
+    # 分页
+    def get_paged_posts(self, page=1, limit=getAttr('EACH_PAGE_POST_NUM')):
         sdb._ensure_connected()
-        if direction == 'next':
-            return post_list_format(sdb.query("SELECT * FROM `sp_posts` WHERE `id` < %s ORDER BY `id` DESC LIMIT %s" % (
-                str(base_id), limit)))
-        else:
-            return post_list_format(sdb.query("SELECT * FROM `sp_posts` WHERE `id` > %s ORDER BY `id` ASC LIMIT %s" % (
-                str(base_id), limit)))
+        return post_list_format(sdb.query("SELECT * FROM `sp_posts` ORDER BY `id` DESC LIMIT %s,%s" % (
+            (page-1)*int(limit), limit)))
 
     def get_article_by_id_detail(self, id):
         sdb._ensure_connected()
@@ -203,7 +200,8 @@ class Article():
     def get_article_by_id_simple(self, id):
         sdb._ensure_connected()
         return sdb.get(
-            'SELECT `id`,`category`,`title`,`comment_num`,`closecomment`,`password` FROM `sp_posts` WHERE `id` = %s LIMIT 1' % str(id))
+            'SELECT `id`,`category`,`title`,`comment_num`,`closecomment`,`password` FROM `sp_posts` WHERE `id` = %s LIMIT 1' % str(
+                id))
 
     def get_article_by_id_edit(self, id):
         sdb._ensure_connected()
@@ -248,6 +246,10 @@ Article = Article()
 
 
 class Comment():
+    def count_all(self):
+        sdb._ensure_connected()
+        return sdb.query('SELECT COUNT(*) AS num FROM `sp_comments`')[0]['num']
+
     def del_comment_by_id(self, id):
         cobj = self.get_comment_by_id(id)
         postid = cobj.postid
@@ -299,6 +301,10 @@ Comment = Comment()
 
 
 class Link():
+    def count_all(self):
+        sdb._ensure_connected()
+        return sdb.query('SELECT COUNT(*) AS num FROM `sp_links`')[0]['num']
+
     def get_all_links(self, limit=LINK_NUM):
         sdb._ensure_connected()
         return sdb.query('SELECT * FROM `sp_links` ORDER BY `displayorder` DESC LIMIT %s' % str(limit))
@@ -326,6 +332,10 @@ Link = Link()
 
 
 class Category():
+    def count_all(self):
+        sdb._ensure_connected()
+        return sdb.query('SELECT COUNT(*) AS num FROM `sp_category`')[0]['num']
+
     def get_all_cat_name(self):
         sdb._ensure_connected()
         return sdb.query('SELECT `name`,`id_num` FROM `sp_category` WHERE id > 0 ORDER BY `id` DESC')
@@ -548,7 +558,7 @@ class Archive():
             sdb._ensure_connected()
             return post_list_format(sdb.query(
                 "SELECT * FROM `sp_posts` WHERE `id` in(%s) ORDER BY `id` DESC LIMIT %s" % (
-                ','.join(getids), str(len(getids)))))
+                    ','.join(getids), str(len(getids)))))
         else:
             return []
 
@@ -595,6 +605,10 @@ Archive = Archive()
 
 
 class User():
+    def count_all(self):
+        sdb._ensure_connected()
+        return sdb.query('SELECT COUNT(*) AS num FROM `sp_user`')[0]['num']
+
     def check_has_user(self):
         sdb._ensure_connected()
         return sdb.get('SELECT `id` FROM `sp_user` LIMIT 1')
@@ -602,6 +616,10 @@ class User():
     def get_all_user(self):
         sdb._ensure_connected()
         return sdb.query('SELECT * FROM `sp_user`')
+
+    def get_user_by_id(self, id):
+        sdb._ensure_connected()
+        return sdb.get('SELECT * FROM `sp_user` WHERE `id` = \'%d\' LIMIT 1' % id)
 
     def get_user_by_name(self, name):
         sdb._ensure_connected()

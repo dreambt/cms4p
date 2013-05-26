@@ -1,53 +1,59 @@
 <?py if obj: ?>
-<form action="" class="form-horizontal" method="post" id="commentform">
-    <fieldset>
-        <legend>编辑评论</legend>
-        <div class="row">
-            <div class="span6">
-                <div class="control-group">
-                    <label class="control-label" for="input01">姓名</label>
-                    <div class="controls">
-                        <input type="text" name="author" value="#{obj.author}" class="input-xlarge" required id="input01" tabindex="1"/>
+<div class="row">
+    <div class="span12">
+    <form action="" class="form-horizontal" method="post" id="commentform">
+        <fieldset>
+            <legend>编辑评论</legend>
+            <div class="row">
+                <div class="span6">
+                    <div class="control-group">
+                        <label class="control-label" for="input01">姓名</label>
+                        <div class="controls">
+                            <input type="text" name="author" value="#{obj.author}" class="input-xlarge" required id="input01" tabindex="1"/>
+                        </div>
                     </div>
-                </div>
-                <div class="control-group">
-                    <label class="control-label" for="input02">邮箱</label>
-                    <div class="controls">
-                        <input type="email" name="email" value="#{obj.email}" class="input-xlarge" required  id="input02" tabindex="2"/>
+                    <div class="control-group">
+                        <label class="control-label" for="input02">邮箱</label>
+                        <div class="controls">
+                            <input type="email" name="email" value="#{obj.email}" class="input-xlarge" required  id="input02" tabindex="2"/>
+                        </div>
                     </div>
-                </div>
-                <div class="control-group">
-                    <label class="control-label" for="input03">网站</label>
-                    <div class="controls">
-                        <input type="text" name="url" value="#{obj.url}" class="input-xlarge" id="input03" tabindex="3"/>
+                    <div class="control-group">
+                        <label class="control-label" for="input03">网站</label>
+                        <div class="controls">
+                            <input type="text" name="url" value="#{obj.url}" class="input-xlarge" id="input03" tabindex="3"/>
+                        </div>
                     </div>
-                </div>
-                <div class="control-group">
-                    <label class="control-label" for="commentbox">内容</label>
-                    <div class="controls">
-                        <textarea name="content" class="input-xlarge" id="commentbox" tabindex="3"
-                                  rows="6">#{obj.content}</textarea>
+                    <div class="control-group">
+                        <label class="control-label" for="commentbox">内容</label>
+                        <div class="controls">
+                            <textarea name="content" class="input-xlarge" id="commentbox" tabindex="3"
+                                      rows="6">#{obj.content}</textarea>
+                        </div>
                     </div>
-                </div>
-                <div class="control-group">
-                    <label class="control-label" for="input04">显示本条评论</label>
-                    <div class="controls">
-                        <?py ck = ['','checked'] ?>
-                        <input type="checkbox" name="visible" value="True" class="input-xlarge" id="input04" tabindex="3"
-                        #{ck[obj.visible]} />
+                    <div class="control-group">
+                        <label class="control-label" for="input04">显示本条评论</label>
+                        <div class="controls">
+                            <?py ck = ['','checked'] ?>
+                            <input type="checkbox" name="visible" value="True" class="input-xlarge" id="input04" tabindex="3"
+                            #{ck[obj.visible]} />
+                        </div>
                     </div>
-                </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">保 存</button>
-                    <button type="reset" class="btn">重 置</button>
-                    <button type="button" class="btn btn-inverse" onclick="window.location.href='/admin/comment/';">返 回</button>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">保 存</button>
+                        <button type="reset" class="btn">重 置</button>
+                        <button type="button" class="btn btn-inverse" onclick="window.location.href='/admin/comment/';">返 回</button>
+                    </div>
                 </div>
             </div>
-        </div>
-    </fieldset>
-</form>
+        </fieldset>
+    </form>
+    </div>
+</div>
 <?py else: ?>
-<table class="table table-striped table-bordered table-condensed">
+<div class="row">
+    <div class="span12">
+    <table class="table table-striped table-bordered table-condensed">
     <thead>
     <tr>
         <th style="width:48px">#</th>
@@ -58,7 +64,7 @@
         <th style="width:100px">可用操作</th>
     </tr>
     </thead>
-    <tbody>
+    <tbody id="content">
     <?py for cobj in comments: ?>
     <tr>
         <td>#{cobj.id}</td>
@@ -72,7 +78,10 @@
     </tr>
     <?py #endfor ?>
     </tbody>
-</table>
+    </table>
+    <div id="page-selection"></div>
+    </div>
+</div>
 <?py #endif ?>
 <hr id="helper"/>
 <div class="well">
@@ -90,5 +99,14 @@
 <script type="text/javascript">
     $(function () {
         $("#comment_page").addClass("active");
+        $('#page-selection').bootpag({
+            total: #{total},
+            maxVisible: 10,
+            next: '下一组',
+            prev: '前一组'
+        }).on("page", function(event, /* page number here */ num){
+             // some ajax content loading...
+             $("#content").html("Insert content");
+        });
     });
 </script>
