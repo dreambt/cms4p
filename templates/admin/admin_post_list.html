@@ -51,6 +51,10 @@
 </div>
 <script type="text/javascript" src="/static/js/vender/template.min.js"></script>
 <script type="text/javascript">
+    // artTemplate 扩展
+    template.helper('$format', function (content) {
+        return new Date(content*1000).toLocaleString().replace(/上|下|午/g,' ');
+    });
     $(function () {
         $("#post_page").addClass("active");
         $('#page-selection').bootpag({
