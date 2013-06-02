@@ -3,16 +3,16 @@
     <form id="myForm" action="" class="well form-inline" method="post">
         <?py if obj: ?>
         <span class="label label-info"><strong>编辑</strong></span>
-        <input type="text" name="name" value="#{obj.name}" class="input-xlarge" id="input01" required maxlength="100" tabindex="1" placeholder="网站名称"/>
-        <input type="number" name="sort" value="#{obj.displayorder}" min="0" max="255" class="input-medium" id="input02" tabindex="2" placeholder="排序"/>
-        <input type="text" name="url" value="#{obj.url}" class="input-xlarge" id="input03" required maxlength="200" tabindex="3" placeholder="URL"/>
+        <input type="text" name="name" value="#{obj.name}" class="span3" id="input01" required maxlength="100" tabindex="1" placeholder="网站名称"/>
+        <input type="number" name="sort" value="#{obj.displayorder}" min="0" max="255" class="span1" id="input02" tabindex="2" placeholder="排序"/>
+        <input type="text" name="url" value="#{obj.url}" class="span5" id="input03" required maxlength="200" tabindex="3" placeholder="URL"/>
         <input type='hidden' value='edit' name='act'/>
         <input type='hidden' value='#{obj.id}' name='id'/>
         <?py else: ?>
         <span class="label label-info">新建</span>
-        <input type="text" name="name" value="" class="input-xlarge" id="input11" required maxlength="100" tabindex="1" placeholder="网站名称"/>
-        <input type="number" name="sort" value="" class="input-medium" min="0" max="255" id="input12" tabindex="2" placeholder="排序"/>
-        <input type="text" name="url" value="" class="input-xlarge" id="input13" required maxlength="200" tabindex="3" placeholder="URL"/>
+        <input type="text" name="name" value="" class="span3" id="input11" required maxlength="100" tabindex="1" placeholder="网站名称"/>
+        <input type="number" name="sort" value="" class="span1" min="0" max="255" id="input12" tabindex="2" placeholder="排序"/>
+        <input type="text" name="url" value="" class="span5" id="input13" required maxlength="200" tabindex="3" placeholder="URL"/>
         <input type='hidden' value='add' name='act'/>
         <?py #endif ?>
         <button type="submit" class="btn btn-primary">保 存</button>
@@ -22,11 +22,11 @@
     <table class="table table-striped table-bordered table-condensed">
         <thead>
         <tr>
-            <th>#</th>
-            <th>网站名称</th>
-            <th>排序</th>
+            <th style="width:48px">#</th>
+            <th style="width:180px">网站名称</th>
+            <th style="width:30px">排序</th>
             <th>URL</th>
-            <th>可用操作</th>
+            <th style="width:60px">可用操作</th>
         </tr>
         </thead>
         <tbody id="content">
@@ -61,6 +61,7 @@
   <p>3.本页最多显示 #{LINK_NUM} 条友情链接, 你可以在 <a href="/admin/setting3">系统设置</a> 里面修改</p>
   <p><a href="#top" class="btn btn-primary">我明白了</a></p>
 </div>
+<script type="text/javascript" src="/static/js/vender/template.min.js"></script>
 <script type="text/javascript">
     $(function () {
         $("#link_page").addClass("active");
@@ -95,11 +96,31 @@
         $('#page-selection').bootpag({
             total: #{total},
             maxVisible: 10,
-            next: '下一组',
-            prev: '前一组'
-        }).on("page", function(event, /* page number here */ num){
-             // some ajax content loading...
-             $("#content").html("Insert content");
+            next: '下一页',
+            prev: '上一页'
+        }).on("page", function(event, num){
+             $.ajax({
+                url: '#{request.path}?page='+num,
+                success: function (data) {
+                    var html = template.render('linkTemplate', data);
+                    $("#content").html(html);
+                    SiQiTip.show("success", "加载友情链接成功！");
+                },
+                error: function() {
+                    SiQiTip.show("error", "加载友情链接失败！");
+                }
+            });
         });
     });
+</script>
+<script id="linkTemplate" type="text/html">
+<%for(i = 0; i < list.length; i ++) {%>
+<tr id="link-<%=list[i].id%>">
+    <td><%=list[i].id%></td>
+    <td><a href="<%=list[i].url%>" title="Link to <%=list[i].url%>" target="_blank"><%=list[i].name%></a></td>
+    <td><%=list[i].displayorder%></td>
+    <td><%=list[i].url%></td>
+    <td><a href="/admin/links?id=<%=list[i].id%>&act=edit">编辑</a> <a href="/admin/links?id=<%=list[i].id%>&act=del" class="ajax" data-remove-closest="tr">删除</a></td>
+</tr>
+<%}%>
 </script>

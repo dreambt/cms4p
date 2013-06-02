@@ -57,21 +57,25 @@
     <tr>
         <th style="width:48px">#</th>
         <th style="width:48px">头像</th>
-        <th style="width:200px">邮箱</th>
+        <th style="width:200px">评论人</th>
         <th>评论内容</th>
-        <th style="width:80px">评论时间</th>
+        <th style="width:170px">评论时间</th>
         <th style="width:100px">可用操作</th>
     </tr>
     </thead>
     <tbody id="content">
+    <?py import time ?>
     <?py for cobj in comments: ?>
     <tr>
         <td>#{cobj.id}</td>
         <td><img alt='' src='#{cobj.gravatar}?s=48&d=monsterid' height='48' width='48'/></td>
-        <td><strong>#{cobj.author}</strong><br /><a href="mailto:#{cobj.email}" title="Mail to #{cobj.email}"
-               target="_blank">(#{cobj.email})</a></td>
+        <?py if cobj.url: ?>
+        <td><a href="#{cobj.url}" target="_blank"><strong>#{cobj.author}</strong></a><br /><a href="mailto:#{cobj.email}" title="Mail to #{cobj.email}" target="_blank">(#{cobj.email})</a></td>
+        <?py else: ?>
+        <td><strong>#{cobj.author}</strong><br /><a href="mailto:#{cobj.email}" title="Mail to #{cobj.email}" target="_blank">(#{cobj.email})</a></td>
+        <?py #endif ?>
         <td>#{cobj.content}</td>
-        <td>#{cobj.add_time}</td>
+        <td>#{time.strftime('%Y年%m月%d日 %H:%M:%S', time.localtime(cobj.add_time))}</td>
         <td><a href="/t/#{cobj.postid}#r#{cobj.id}" target="_blank">定位</a> <a
                 href="/admin/comment/#{cobj.id}">编辑</a> <a href="/admin/comment/#{cobj.id}?act=del" class="ajax" data-remove-closest="tr">删除</a></td>
     </tr>
@@ -81,20 +85,6 @@
     <div id="page-selection"></div>
     </div>
 </div>
-<script type="text/javascript">
-    $(function () {
-        $("#comment_page").addClass("active");
-        $('#page-selection').bootpag({
-            total: #{total},
-            maxVisible: 10,
-            next: '下一组',
-            prev: '前一组'
-        }).on("page", function(event, /* page number here */ num){
-             // some ajax content loading...
-             $("#content").html("Insert content");
-        });
-    });
-</script>
 <?py #endif ?>
 <hr id="helper"/>
 <div class="well">
@@ -109,8 +99,43 @@
   <p>1.取消勾选 <strong>显示本条评论</strong> 将不再显示该条评论</p>
   <p><a href="#top" class="btn btn-primary">我明白了</a></p>
 </div>
+<script type="text/javascript" src="/static/js/vender/template.min.js"></script>
 <script type="text/javascript">
     $(function () {
         $("#comment_page").addClass("active");
+        $('#page-selection').bootpag({
+            total: #{total},
+            maxVisible: 10,
+            next: '下一页',
+            prev: '上一页'
+        }).on("page", function(event, num){
+            $.ajax({
+                url: '#{request.path}?page='+num,
+                success: function (data) {
+                    var html = template.render('commentTemplate', data);
+                    $("#content").html(html);
+                    SiQiTip.show("success", "加载评论列表成功！");
+                },
+                error: function() {
+                    SiQiTip.show("error", "加载评论列表失败！");
+                }
+            });
+        });
     });
+</script>
+<script id="commentTemplate" type="text/html">
+<%for(i = 0; i < list.length; i ++) {%>
+<tr>
+    <td><%=list[i].id%></td>
+    <td><img alt='' src='http://www.gravatar.com/avatar/<%=$md5(list[i].email)%>?s=48&d=monsterid' height='48' width='48'/></td>
+    <%if(list[i].url){%>
+    <td><a href="<%=list[i].url%>" target="_blank"><strong><%=list[i].author%></strong></a><br /><a href="mailto:<%=list[i].email%>" title="Mail to <%=list[i].email%>" target="_blank">(<%=list[i].email%>)</a></td>
+    <%}else{%>
+    <td><strong><%=list[i].author%></strong><br /><a href="mailto:<%=list[i].email%>" title="Mail to <%=list[i].email%>" target="_blank">(<%=list[i].email%>)</a></td>
+    <%}%>
+    <td><%=list[i].content%></td>
+    <td><%=$format(list[i].add_time)%></td>
+    <td><a href="/t/<%=list[i].postid%>#r<%=list[i].id%>" target="_blank">定位</a> <a href="/admin/comment/<%=list[i].id%>">编辑</a> <a href="/admin/comment/<%=list[i].id%>?act=del" class="ajax" data-remove-closest="tr">删除</a></td>
+</tr>
+<%}%>
 </script>

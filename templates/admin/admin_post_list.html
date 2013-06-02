@@ -6,8 +6,8 @@
             <th style="width:48px">#</th>
             <th>文章标题</th>
             <th style="width:100px">分类</th>
-            <th style="width:200px">创建时间</th>
-            <th style="width:200px">最后修改时间</th>
+            <th style="width:170px">创建时间</th>
+            <th style="width:170px">最后修改时间</th>
             <th style="width:30px">评论</th>
             <th style="width:30px">密码</th>
             <th style="width:60px">可用操作</th>
@@ -20,8 +20,8 @@
             <td>#{i.id}</td>
             <td><a href="/t/#{i.id}" title="Link to #{i.title}" target="_blank">#{i.title}</a></td>
             <td>#{i.category}</td>
-            <td>#{time.strftime('%Y年%m月%d日%H时%M分%S秒', time.localtime(i.add_time))}</td>
-            <td>#{time.strftime('%Y年%m月%d日%H时%M分%S秒', time.localtime(i.edit_time))}</td>
+            <td>#{time.strftime('%Y年%m月%d日 %H:%M:%S', time.localtime(i.add_time))}</td>
+            <td>#{time.strftime('%Y年%m月%d日 %H:%M:%S', time.localtime(i.edit_time))}</td>
             <td>
         <?py    if i.closecomment == 0: ?><span class="label label-success">允许</span>
         <?py    else: ?><span class="label">禁止</span>
@@ -49,17 +49,47 @@
   <p>3.本页最多显示 #{EACH_PAGE_POST_NUM} 篇文章, 你可以在 <a href="/admin/setting3">系统设置</a> 里面修改</p>
   <p><a href="#top" class="btn btn-primary">我明白了</a></p>
 </div>
+<script type="text/javascript" src="/static/js/vender/template.min.js"></script>
 <script type="text/javascript">
     $(function () {
         $("#post_page").addClass("active");
         $('#page-selection').bootpag({
             total: #{total},
             maxVisible: 10,
-            next: '下一组',
-            prev: '前一组'
-        }).on("page", function(event, /* page number here */ num){
-             // some ajax content loading...
-             $("#content").html("Insert content");
+            next: '下一页',
+            prev: '上一页'
+        }).on("page", function(event, num){
+            $.ajax({
+                url: '#{request.path}?page='+num,
+                success: function (data) {
+                    var html = template.render('articleTemplate', data);
+                    $("#content").html(html);
+                    SiQiTip.show("success", "加载文章列表成功！");
+                },
+                error: function() {
+                    SiQiTip.show("error", "加载文章列表失败！");
+                }
+            });
         });
     });
+</script>
+<script id="articleTemplate" type="text/html">
+<%for(i = 0; i < list.length; i ++) {%>
+<tr>
+    <td><%=list[i].id%></td>
+    <td><a href="/t/<%=list[i].id%>" title="Link to <%=list[i].title%>" target="_blank"><%=list[i].title%></a></td>
+    <td><%=list[i].category%></td>
+    <td><%=$format(list[i].add_time)%></td>
+    <td><%=$format(list[i].edit_time)%></td>
+    <td>
+        <?py    if i.closecomment == 0: ?><span class="label label-success">允许</span>
+        <?py    else: ?><span class="label">禁止</span>
+        <?py    #endif ?></td>
+    <td>
+        <?py    if i.password == 0: ?><span class="label label-success">开启</span>
+        <?py    else: ?><span class="label">关闭</span>
+        <?py    #endif ?></td>
+    <td><a href="/admin/edit_post/<%=list[i].id%>">编辑</a> <a href="/admin/del_post/<%=list[i].id%>" class="ajax" data-remove-closest="tr">删除</a></td>
+</tr>
+<%}%>
 </script>

@@ -141,7 +141,7 @@ def clear_all_cache():
 
 
 def format_date(dt):
-    return dt.strftime('%a, %d %b %Y %H:%M:%S GMT')
+    return dt.strftime('%Y年%m月%d日 %H:%M:%S')
 
 
 def memcached(key, cache_time=0, key_suffix_calc_func=None):

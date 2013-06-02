@@ -157,6 +157,13 @@ def comment_format(objs):
         obj.content = obj.content.replace('\n', '<br/>')
     return objs
 
+
+def comment_format_admin(objs):
+    for obj in objs:
+        obj.gravatar = 'http://www.gravatar.com/avatar/%s' % md5(obj.email).hexdigest()
+        obj.content = obj.content.replace('\n', '<br/>')
+    return objs
+
 ###以下是各个数据表的操作
 
 
@@ -188,10 +195,11 @@ class Article():
             sdb.query("SELECT * FROM `sp_posts` ORDER BY `id` DESC LIMIT %s" % limit))
 
     # 分页
-    def get_paged_posts(self, page=1, limit=getAttr('EACH_PAGE_POST_NUM')):
+    def get_paged(self, page=1, limit=getAttr('EACH_PAGE_POST_NUM')):
+        limit = int(limit)
         sdb._ensure_connected()
-        return post_list_format(sdb.query("SELECT * FROM `sp_posts` ORDER BY `id` DESC LIMIT %s,%s" % (
-            (page-1)*int(limit), limit)))
+        sql = "SELECT * FROM `sp_posts` ORDER BY `id` DESC LIMIT %s,%s" % ((int(page) - 1) * limit, limit)
+        return sdb.query(sql)
 
     def get_article_by_id_detail(self, id):
         sdb._ensure_connected()
@@ -249,6 +257,13 @@ class Comment():
     def count_all(self):
         sdb._ensure_connected()
         return sdb.query('SELECT COUNT(*) AS num FROM `sp_comments`')[0]['num']
+
+    # 分页
+    def get_paged(self, page=1, limit=getAttr('ADMIN_COMMENT_NUM')):
+        limit = int(limit)
+        sdb._ensure_connected()
+        sql = "SELECT * FROM `sp_comments` ORDER BY `id` DESC LIMIT %s,%s" % ((int(page) - 1) * limit, limit)
+        return comment_format_admin(sdb.query(sql))
 
     def del_comment_by_id(self, id):
         cobj = self.get_comment_by_id(id)
@@ -309,6 +324,13 @@ class Link():
         sdb._ensure_connected()
         return sdb.query('SELECT * FROM `sp_links` ORDER BY `displayorder` DESC LIMIT %s' % str(limit))
 
+    # 分页
+    def get_paged(self, page=1, limit=getAttr('ADMIN_LINK_NUM')):
+        limit = int(limit)
+        sdb._ensure_connected()
+        sql = "SELECT * FROM `sp_links` ORDER BY `id` DESC LIMIT %s,%s" % ((int(page) - 1) * limit, limit)
+        return sdb.query(sql)
+
     def add_new_link(self, params):
         query = "INSERT INTO `sp_links` (`displayorder`,`name`,`url`) values(%s,%s,%s)"
         mdb._ensure_connected()
@@ -335,6 +357,13 @@ class Category():
     def count_all(self):
         sdb._ensure_connected()
         return sdb.query('SELECT COUNT(*) AS num FROM `sp_category`')[0]['num']
+
+    # 分页
+    def get_paged(self, page=1, limit=getAttr('ADMIN_CATEGORY_NUM')):
+        limit = int(limit)
+        sdb._ensure_connected()
+        return sdb.query("SELECT * FROM `sp_category` ORDER BY `id` DESC LIMIT %s,%s" % (
+            (int(page) - 1) * limit, limit))
 
     def get_all_cat_name(self):
         sdb._ensure_connected()
@@ -608,6 +637,13 @@ class User():
     def count_all(self):
         sdb._ensure_connected()
         return sdb.query('SELECT COUNT(*) AS num FROM `sp_user`')[0]['num']
+
+    # 分页
+    def get_paged(self, page=1, limit=getAttr('ADMIN_USER_NUM')):
+        limit = int(limit)
+        sdb._ensure_connected()
+        return sdb.query("SELECT * FROM `sp_user` ORDER BY `id` DESC LIMIT %s,%s" % (
+            (int(page) - 1) * limit, limit))
 
     def check_has_user(self):
         sdb._ensure_connected()

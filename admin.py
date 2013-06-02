@@ -4,9 +4,9 @@ from hashlib import md5
 from time import time
 
 from PIL import Image
+import math
 from tornado import escape
 import sae.storage
-from tornado.escape import json_encode
 
 from common import BaseHandler, authorized, safe_encode, clear_cache_by_pathlist, quoted_string, clear_all_cache, genArchive, setAttr, clearAllKVDB, set_count, increment, getAttr
 from helpers import generate_random
@@ -275,15 +275,24 @@ class AddPost(BaseHandler):
 
 class ListPost(BaseHandler):
     @authorized()
-    def get(self, page=1):
-        self.echo('admin_post_list.html', {
-            'title': "文章列表",
-            # 'objs': Article.get_post_for_homepage(getAttr('ADMIN_POST_NUM')),
-            # 'objs': Article.get_all_article(),
-            # TODO 后台文章管理要分页
-            'objs': Article.get_paged_posts(page, getAttr('ADMIN_POST_NUM')),
-            'total': Article.count_all(),
-        }, layout='_layout_admin.html')
+    def get(self):
+        page = self.get_argument("page", 1)
+        article = Article.get_paged(page, getAttr('ADMIN_POST_NUM'))
+        total = math.ceil(Article.count_all() / float(getAttr('ADMIN_POST_NUM')))
+        if page == 1:
+            self.echo('admin_post_list.html', {
+                'title': "文章列表",
+                'objs': article,
+                'total': total,
+            }, layout='_layout_admin.html')
+        else:
+            result = {
+                'list': article,
+                'total': total,
+            }
+            self.set_header("Content-Type", "application/json")
+            self.write(json.dumps(result))
+            return
 
 
 class EditPost(BaseHandler):
@@ -391,11 +400,12 @@ class DelPost(BaseHandler):
                 cache_key_list = ['/', 'post:%s' % id, 'cat:%s' % quoted_string(oldobj.category)]
                 clear_cache_by_pathlist(cache_key_list)
                 clear_cache_by_pathlist(['post:%s' % id])
-                #self.redirect('%s/admin/list_post' % (BASE_URL))
-                self.write(json_encode("OK"))
+                self.set_header("Content-Type", "application/json")
+                self.write(json.dumps("OK"))
                 return
         except:
-            self.write(json_encode("error"))
+            self.set_header("Content-Type", "application/json")
+            self.write(json.dumps("error"))
             return
 
 
@@ -410,8 +420,8 @@ class CommentController(BaseHandler):
                 if act == 'del':
                     Comment.del_comment_by_id(id)
                     clear_cache_by_pathlist(['post:%d' % obj.postid])
-                    #self.redirect('%s/admin/comment/' % (BASE_URL))
-                    self.write(json_encode("OK"))
+                    self.set_header("Content-Type", "application/json")
+                    self.write(json.dumps("OK"))
                     return
                 else:
                     self.echo('admin_comment.html', {
@@ -421,12 +431,26 @@ class CommentController(BaseHandler):
                     return
 
         # 评论列表
-        self.echo('admin_comment.html', {
-            'title': "评论管理",
-            'obj': obj,
-            'total': Comment.count_all(),
-            'comments': Comment.get_recent_comments(getAttr('ADMIN_COMMENT_NUM')),
-        }, layout='_layout_admin.html')
+        page = self.get_argument("page", 1)
+        comments = Comment.get_paged(page, getAttr('ADMIN_COMMENT_NUM'))
+        total = math.ceil(Comment.count_all() / float(getAttr('ADMIN_COMMENT_NUM')))
+        if page == 1:
+            self.echo('admin_comment.html', {
+                'title': "评论管理",
+                'obj': obj,
+                'total': total,
+                'comments': comments,
+            }, layout='_layout_admin.html')
+            return
+        else:
+            result = {
+                'list': comments,
+                'total': total,
+            }
+            self.set_header("Content-Type", "application/json")
+            self.write(json.dumps(result))
+            return
+
 
     @authorized()
     def post(self, id=''):
@@ -464,8 +488,8 @@ class UserController(BaseHandler):
                 if act == 'del':
                     User.del_user_by_id(id)
                     clear_cache_by_pathlist(['post:%d' % obj.postid])
-                    #self.redirect('%s/admin/comment/' % (BASE_URL))
-                    self.write(json_encode("OK"))
+                    self.set_header("Content-Type", "application/json")
+                    self.write(json.dumps("OK"))
                     return
                 else:
                     self.echo('admin_comment.html', {
@@ -507,7 +531,7 @@ class UserController(BaseHandler):
         return
 
 
-class LinkBroll(BaseHandler):
+class LinkController(BaseHandler):
     @authorized()
     def get(self):
         act = self.get_argument("act", '')
@@ -518,7 +542,8 @@ class LinkBroll(BaseHandler):
             if id:
                 Link.del_link_by_id(id)
                 clear_cache_by_pathlist(['/'])
-            self.write(json_encode("OK"))
+            self.set_header("Content-Type", "application/json")
+            self.write(json.dumps("OK"))
             return
         elif act == 'edit':
             if id:
@@ -526,12 +551,25 @@ class LinkBroll(BaseHandler):
                 clear_cache_by_pathlist(['/'])
 
         # 友情链接列表
-        self.echo('admin_link.html', {
-            'title': "友情链接",
-            'objs': Link.get_all_links(),
-            'obj': obj,
-            'total': Link.count_all(),
-        }, layout='_layout_admin.html')
+        page = self.get_argument("page", 1)
+        links = Link.get_paged(page, getAttr('ADMIN_LINK_NUM'))
+        total = math.ceil(Link.count_all() / float(getAttr('ADMIN_LINK_NUM')))
+        if page == 1:
+            self.echo('admin_link.html', {
+                'title': "友情链接",
+                'objs': links,
+                'obj': obj,
+                'total': total,
+            }, layout='_layout_admin.html')
+        else:
+            result = {
+                'list': links,
+                'total': total,
+            }
+            self.set_header("Content-Type", "application/json")
+            self.write(json.dumps(result))
+            return
+
 
     @authorized()
     def post(self):
@@ -551,8 +589,8 @@ class LinkBroll(BaseHandler):
 
             clear_cache_by_pathlist(['/'])
 
-        #self.redirect('%s/admin/links' % BASE_URL)
-        self.write(json_encode("OK"))
+        self.set_header("Content-Type", "application/json")
+        self.write(json.dumps("OK"))
 
 
 class BlogSetting(BaseHandler):
@@ -597,8 +635,8 @@ class BlogSetting(BaseHandler):
 
         clear_cache_by_pathlist(['/'])
 
-        #self.redirect('%s/admin/setting' % BASE_URL)
-        self.write(json_encode("OK"))
+        self.set_header("Content-Type", "application/json")
+        self.write(json.dumps("OK"))
         return
 
 
@@ -629,8 +667,8 @@ class BlogSetting2(BaseHandler):
 
         clear_cache_by_pathlist(['/'])
 
-        #self.redirect('%s/admin/setting2' % BASE_URL)
-        self.write(json_encode("OK"))
+        self.set_header("Content-Type", "application/json")
+        self.write(json.dumps("OK"))
         return
 
 
@@ -700,7 +738,8 @@ class BlogSetting3(BaseHandler):
             setAttr('MAX_ARCHIVES_NUM', MAX_ARCHIVES_NUM)
 
         clear_all_cache()
-        self.write(json_encode("OK"))
+        self.set_header("Content-Type", "application/json")
+        self.write(json.dumps("OK"))
         return
 
 
@@ -726,7 +765,8 @@ class BlogSetting4(BaseHandler):
             setAttr('ADSENSE_CODE2', ADSENSE_CODE2)
 
         clear_all_cache()
-        self.write(json_encode("OK"))
+        self.set_header("Content-Type", "application/json")
+        self.write(json.dumps("OK"))
         return
 
 
@@ -762,8 +802,8 @@ class BlogSetting5(BaseHandler):
 
         clear_cache_by_pathlist(['/'])
 
-        #self.redirect('%s/admin/setting3' % BASE_URL)
-        self.write(json_encode("OK"))
+        self.set_header("Content-Type", "application/json")
+        self.write(json.dumps("OK"))
         return
 
 
@@ -787,7 +827,8 @@ class EditProfile(BaseHandler):
                 if user:
                     User.update_user(username, newPassword)
                     self.set_secure_cookie('userpw', '123', expires_days=1)
-                    self.write(escape.json_encode(1))
+                    self.set_header("Content-Type", "application/json")
+                    self.write(escape.json.dumps(1))
                     return
                 else:
                     pass
@@ -795,7 +836,8 @@ class EditProfile(BaseHandler):
                 pass
         else:
             pass
-        self.write(escape.json_encode(0))
+        self.set_header("Content-Type", "application/json")
+        self.write(escape.json.dumps(0))
 
 
 # TODO KVDB 管理
@@ -820,11 +862,13 @@ class FlushData(BaseHandler):
             MyData.flush_all_data()
             clear_all_cache()
             clearAllKVDB()
-            self.write(json_encode("OK"))
+            self.set_header("Content-Type", "application/json")
+            self.write(json.dumps("OK"))
             return
         elif act == 'flushcache':
             clear_all_cache()
-            self.write(json_encode("OK"))
+            self.set_header("Content-Type", "application/json")
+            self.write(json.dumps("OK"))
             return
 
 
@@ -1015,7 +1059,7 @@ urls = [
     # 文件上传及管理
     (r"/admin/fileupload", FileUpload),
     (r"/admin/filelist", FileManager),
-    (r"/admin/links", LinkBroll),
+    (r"/admin/links", LinkController),
     (r"/admin/setting", BlogSetting),
     (r"/admin/setting2", BlogSetting2),
     (r"/admin/setting3", BlogSetting3),
