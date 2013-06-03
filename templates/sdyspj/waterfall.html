@@ -1,42 +1,51 @@
-<div class="row" style="margin-top:20px">
-    <div class="span9">
-        <?py for obj in objs: ?>
-        <div class="media">
-            <a class="pull-left" href="#">
-                <img data-src="holder.js/180x120" alt="180x120" style="width:180px;height:120px;" src="data:image/png;base64,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oJ2AgNBu5BomQIAAAQK5gICQG6kgQIAAAQLtBASEdiPXMAECBAgQyAUEhNxIBQECBAgQaCcgILQbuYYJECBAgEAuICDkRioIECBAgEA7AQGh3cg1TIAAAQIEcgEBITdSQYAAAQIE2gkICO1GrmECBAgQIJALCAi5kQoCBAgQINBOQEBoN3INEyBAgACBXEBAyI1UECBAgACBdgICQruRa5gAAQIECOQCAkJupIIAAQIECLQTEBDajVzDBAgQIEAgFxAQciMVBAgQIECgnYCA0G7kGiZAgAABArmAgJAbqSBAgAABAu0EBIR2I9cwAQIECBDIBQSE3EgFAQIECBBoJyAgtBu5hgkQIECAQC4gIORGKggQIECAQDsBAaHdyDVMgAABAgRyAQEhN1JBgAABAgTaCQgI7UauYQIECBAgkAsICLmRCgIECBAg0E5AQGg3cg0TIECAAIFcQEDIjVQQIECAAIF2AgJCu5FrmAABAgQI5AICQm6kggABAgQItBMQENqNXMMECBAgQCAXEBByIxUECBAgQKCdgIDQbuQa3qjA33//Pbz77rvDBx98MPz2229rq/nf//43nH766cNll102HHPMMRtd/fDZZ58Ne/fuHa688srh/PPPT9fz888/D2+99dbwxRdfDH/++eda/Y4dO2bbcu6556brOBgFH3744fDXX3/tt6p478MPP7y8+tj+t99+e4h1zfdywQUXDBdddNFw2GGHpevbKibphiogsA0EBIRtMCSbeOgFvvnmm+HZZ589YEc4v2WxY46d2arLH3/8MTz44INr67/22muHs88+e+lqPvroo+GVV15Z921OOOGE4dZbby3tWFfd3rH+k08+GV566aX9Xh478rvuuqsclr788svh+eefHyKALVsibOzatWs48cQTt7zJRi29jsBWExAQttpEbM+WE/jqq6+G5557br/tOvbYY4f49+OPPw7xrXW6XHjhhcPll1++Uh+x/nifWI444ohh9+7dQxyZWLTEEYPYoU6XCAOxY44jG9PtiW288847NyUkxFGDBx544IDQFNtx9913D0cffXRqsG/fvlnwmi5HHXXUsHPnzuGnn34afvnll7U/xXpvv/324bjjjjtgvVvFJG1YAYFtJCAgbKNh2dR/XyC+2T/00ENrh71jp3fzzTfPdmDjEjuyPXv2zHZo4xI7suOPP760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CQgInaatVwIECBAgUBQQEIpQyggQIECAQCcBAaHTtPVKgAABAgSKAgJCEUoZAQIECBDoJCAgdJq2XgkQIECAQFFAQChCKSNAgAABAp0EBIRO09YrAQIECBAoCggIRShlBAgQIECgk4CA0GnaeiVAgAABAkUBAaEIpYwAAQIECHQSEBA6TVuvBAgQIECgKCAgFKGUESBAgACBTgICQqdp65UAAQIECBQFBIQilDICBAgQINBJQEDoNG29EiBAgACBooCAUIRSRoAAAQIEOgkICJ2mrVcCBAgQIFAUEBCKUMoIECBAgEAnAQGh07T1SoAAAQIEigICQhFKGQECBAgQ6CQgIHSatl4JECBAgEBRQEAoQikjQIAAAQKdBASETtPWKwECBAgQKAoICEUoZQQIECBAoJOAgNBp2nolQIAAAQJFAQGhCKWMAAECBAh0EhAQOk1brwQIECBAoCggIBShlBEgQIAAgU4CAkKnaeuVAAECBAgUBQSEIpQyAgQIECDQSUBA6DRtvRIgQIAAgaKAgFCEUkaAAAECBDoJCAidpq1XAgQIECBQFBAQilDKCBAgQIBAJwEBodO09UqAAAECBIoCAkIRShkBAgQIEOgkICB0mrZeCRAgQIBAUUBAKEIpI0CAAAECnQQEhE7T1isBAgQIECgKCAhFKGUECBAgQKCTgIDQadp6JUCAAAECRQEBoQiljAABAgQIdBIQEDpNW68ECBAgQKAoICAUoZQRIECAAIFOAgJCp2nrlQABAgQIFAUEhCKUMgIECBAg0ElAQOg0bb0SIECAAIGigIBQhFJGgAABAgQ6CQgInaatVwIECBAgUBQQEIpQyggQIECAQCcBAaHTtPVKgAABAgSKAgJCEUoZAQIECBDoJCAgdJq2XgkQIECAQFFAQChCKSNAgAABAp0EBIRO09YrAQIECBAoCggIRShlBAgQIECgk4CA0GnaeiVAgAABAkUBAaEIpYwAAQIECHQSEBA6TVuvBAgQIECgKCAgFKGUESBAgACBTgICQqdp65UAAQIECBQFBIQilDICBAgQINBJQEDoNG29EiBAgACBooCAUIRSRoAAAQIEOgkICJ2mrVcCBAgQIFAUEBCKUMoIECBAgEAnAQGh07T1SoAAAQIEigICQhFKGQECBAgQ6CQgIHSatl4JECBAgEBRQEAoQikjQIAAAQKdBASETtPWKwECBAgQKAoICEUoZQQIECBAoJOAgNBp2nolQIAAAQJFAQGhCKWMAAECBAh0EhAQOk1brwQIECBAoCggIBShlBEgQIAAgU4CAkKnaeuVAAECBAgUBQSEIpQyAgQIECDQSUBA6DRtvRIgQIAAgaKAgFCEUkaAAAECBDoJCAidpq1XAgQIECBQFBAQilDKCBAgQIBAJwEBodO09UqAAAECBIoCAkIRShkBAgQIEOgkICB0mrZeCRAgQIBAUUBAKEIpI0CAAAECnQQEhE7T1isBAgQIECgKCAhFKGUECBAgQKCTgIDQadp6JUCAAAECRQEBoQiljAABAgQIdBIQEDpNW68ECBAgQKAoICAUoZQRIECAAIFOAgJCp2nrlQABAgQIFAUEhCKUMgIECBAg0ElAQOg0bb0SIECAAIGigIBQhFJGgAABAgQ6CQgInaatVwIECBAgUBQQEIpQyggQIECAQCcBAaHTtPVKgAABAgSKAgJCEUoZAQIECBDoJCAgdJq2XgkQIECAQFFAQChCKSNAgAABAp0EBIRO09YrAQIECBAoCggIRShlBAgQIECgk4CA0GnaeiVAgAABAkUBAaEIpYwAAQIECHQSEBA6TVuvBAgQIECgKCAgFKGUESBAgACBTgICQqdp65UAAQIECBQFBIQilDICBAgQINBJQEDoNG29EiBAgACBooCAUIRSRoAAAQIEOgkICJ2mrVcCBAgQIFAUEBCKUMoIECBAgEAnAQGh07T1SoAAAQIEigICQhFKGQECBAgQ6CQgIHSatl4JECBAgEBRQEAoQikjQIAAAQKdBASETtPWKwECBAgQKAoICEUoZQQIECBAoJOAgNBp2nolQIAAAQJFAQGhCKWMAAECBAh0EhAQOk1brwQIECBAoCggIBShlBEgQIAAgU4CAkKnaeuVAAECBAgUBQSEIpQyAgQIECDQSUBA6DRtvRIgQIAAgaKAgFCEUkaAAAECBDoJCAidpq1XAgQIECBQFBAQilDKCBAgQIBAJwEBodO09UqAAAECBIoCAkIRShkBAgQIEOgkICB0mrZeCRAgQIBAUUBAKEIpI0CAAAECnQQEhE7T1isBAgQIECgKCAhFKGUECBAgQKCTgIDQadp6JUCAAAECRQEBoQiljAABAgQIdBIQEDpNW68ECBAgQKAoICAUoZQRIECAAIFOAgJCp2nrlQABAgQIFAUEhCKUMgIECBAg0ElAQOg0bb0SIECAAIGigIBQhFJGgAABAgQ6CQgInaatVwIECBAgUBT4PyXVd8WvbETaAAAAAElFTkSuQmCC">
-            </a>
-
-            <div class="media-body">
-                <h4 class="media-heading"><a href="#{obj.absolute_url}" rel="bookmark"
-                                             title="Permanent Link to #{obj.title}">#{obj.title}</a></h4>
-                <small>发表于 #{obj.add_time_fn}, <a href="#{obj.absolute_url}">评论(#{obj.comment_num})</a></small>
-                <div class="entry-content">#{escape(obj.shorten_content)}</div>
-                <?py if obj.tags: ?>
-                <small style="color:#999">Tags: #{obj.taglist}</small>
-                <?py #endif ?>
-                <div class="pull-right">
-                    <a class="btn btn-primary btn-mini" rel="full-article" href="#{obj.absolute_url}">查看更多</a>
-                </div>
-            </div>
-        </div>
-        <?py #endfor ?>
-
-        <ul class="pager">
-            <li class="previous">
-                <?py if 1< page <= allpage: ?>
-                <?py     tvar = fromid if (listtype == 'index') else name ?>
-                <a class="prev" href="#{{ BASE_URL }}/#{listtype}_prev_page/#{page-1}/#{tvar}/?type=list">&larr; 上一页</a>
-                <?py #endif ?>
-            </li>
-            <li class="next">
-                <?py if page< allpage: ?>
-                <?py     tvar = endid if (listtype == 'index') else name ?>
-                <a class="next" href="#{{ BASE_URL }}/#{listtype}_next_page/#{page+1}/#{tvar}/?type=list">下一页 &rarr;</a>
-                <?py #endif ?>
-            </li>
-        </ul>
-    </div>
-    <div class="span3">
-        <?py include("sider.html") ?>
-    </div>
+<div id="wall" class="row" style="margin-top:5px">
+    <?py for obj in objs: ?>
+    <div class="span3 item">
+		<div class="picture">
+	        <a class="image" href="#{obj.absolute_url}" title="#{obj.title}"><img src="http://clabs.co/projects/tabula/img/photo4.jpg" alt=""/></a>
+			<div class="description"><p>#{escape(obj.shorten_content)}</p></div>
+			<div class="meta">
+				<span><i class="icon-calendar"></i>#{obj.add_time_fn}</span>
+				<span><i class="icon-user"></i> <a href="#">#{{ ADMIN_NAME }}</a></span>
+				<span><i class="icon-heart"></i> #{obj.comment_num}</span>
+			</div>
+		</div>
+	</div>
+    <?py #endfor ?>
 </div>
+<ul class="pager">
+    <li class="previous">
+        <?py if 1< page <= allpage: ?>
+        <?py     tvar = fromid if (listtype == 'index') else name ?>
+        <a class="prev" href="#{{ BASE_URL }}/#{listtype}_prev_page/#{page-100}/#{tvar}/?type=list">&larr; 上一页</a>
+        <?py #endif ?>
+    </li>
+    <li class="next">
+        <?py if page< allpage: ?>
+        <?py     tvar = endid if (listtype == 'index') else name ?>
+        <a class="next" href="#{{ BASE_URL }}/#{listtype}_next_page/#{page+100}/#{tvar}/?type=list">下一页 &rarr;</a>
+        <?py #endif ?>
+    </li>
+</ul>
+<script type="text/javascript" src="/static/js/vender/jquery.infinitescroll.min.js"></script>
+<script type="text/javascript" src="/static/js/vender/jquery.masonry.min.js"></script>
+<script type="text/javascript">
+$(function(){
+var $container = $('#wall');
+$('#wall').infinitescroll({
+    navSelector  : "div.page .pages",
+    nextSelector : "div.page .pages a:first",
+    itemSelector : ".post"
+  }, function( newElements ) {
+		var $newElems = $( newElements );
+		$container.masonry( 'appended', $newElems );
+  });
+
+
+   $('#content').masonry({
+    itemSelector : '.post',
+    columnWidth : 251
+  });
+
+});
+</script>

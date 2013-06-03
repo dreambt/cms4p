@@ -175,7 +175,7 @@ RQT_RE = re.compile('<span id="requesttime">\d*</span>', re.I)
 PV_RE = re.compile('<span class="categories greyhref">PageView.*?</span>', re.I)
 
 
-def pagecache(key="", time=PAGE_CACHE_TIME, key_suffix_calc_func=None):
+def pagecache(key="", time=86400, key_suffix_calc_func=None):
     def _decorate(method):
         def _wrapper(*args, **kwargs):
             if not MC_Available:
@@ -216,8 +216,7 @@ def pagecache(key="", time=PAGE_CACHE_TIME, key_suffix_calc_func=None):
                 # req.write(RQT_RE.sub('<span id="requesttime">%d</span>'%request_time, html))
             else:
                 result = method(*args, **kwargs)
-                print time
-                mc.set(key_with_suffix, result, time)
+                mc.set(key_with_suffix, result, int(time))
 
         return _wrapper
 
