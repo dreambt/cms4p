@@ -720,9 +720,9 @@ class BlogSetting3(BaseHandler):
             setAttr('COMMENT_DEFAULT_VISIBLE', COMMENT_DEFAULT_VISIBLE)
 
         # 缓存相关
-        PAGE_CACHE_TIME = self.get_argument("PAGE_CACHE_TIME", '')
+        PAGE_CACHE_TIME = int(self.get_argument("PAGE_CACHE_TIME", 1)) * 3600
         if PAGE_CACHE_TIME:
-            setAttr('PAGE_CACHE_TIME', PAGE_CACHE_TIME * 3600)
+            setAttr('PAGE_CACHE_TIME', PAGE_CACHE_TIME)
 
         # 其他设置
         LINK_NUM = self.get_argument("LINK_NUM", '')
