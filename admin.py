@@ -479,6 +479,7 @@ class CommentController(BaseHandler):
     @authorized()
     def get(self, id=''):
         obj = None
+        total = math.ceil(Comment.count_all() / float(getAttr('ADMIN_COMMENT_NUM')))
         if id:
             obj = Comment.get_comment_by_id(id)
             if obj:
@@ -493,13 +494,13 @@ class CommentController(BaseHandler):
                     self.echo('admin_comment.html', {
                         'title': "评论管理",
                         'obj': obj,
+                        'total': total,
                     }, layout='_layout_admin.html')
                     return
 
         # 评论列表
         page = self.get_argument("page", 1)
         comments = Comment.get_paged(page, getAttr('ADMIN_COMMENT_NUM'))
-        total = math.ceil(Comment.count_all() / float(getAttr('ADMIN_COMMENT_NUM')))
         if page == 1:
             self.echo('admin_comment.html', {
                 'title': "评论管理",
