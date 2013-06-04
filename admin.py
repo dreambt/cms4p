@@ -199,6 +199,72 @@ class FileManager(BaseHandler):
         return
 
 
+class CategoryController(BaseHandler):
+    @authorized()
+    def get(self):
+        act = self.get_argument("act", '')
+        id = self.get_argument("id", '')
+
+        obj = None
+        if act == 'del':
+            if id:
+                Category.delete(id)
+                clear_cache_by_pathlist(['/'])
+            self.set_header("Content-Type", "application/json")
+            self.write(json.dumps("OK"))
+            return
+        elif act == 'edit':
+            if id:
+                obj = Category.get_by_id(id)
+
+        # 分类列表
+        page = self.get_argument("page", 1)
+        category = Category.get_paged(page, getAttr('ADMIN_CATEGORY_NUM'))
+        total = math.ceil(Category.count_all() / float(getAttr('ADMIN_CATEGORY_NUM')))
+        if page == 1:
+            self.echo('admin_category.html', {
+                'title': "分类列表",
+                'objs': category,
+                'obj': obj,
+                'total': total,
+            }, layout='_layout_admin.html')
+        else:
+            result = {
+                'list': category,
+                'total': total,
+            }
+            self.set_header("Content-Type", "application/json")
+            self.write(json.dumps(result))
+            return
+
+    @authorized()
+    def post(self):
+        act = self.get_argument("act", '')
+        id = self.get_argument("id", '')
+        name = self.get_argument("name", '')
+        showtype = self.get_argument("showtype", '')
+        sort = self.get_argument("sort", '0')
+
+        if id and (name or sort):
+            if act == 'add':
+                Category.save(name)
+
+            if act == 'edit':
+                params = {'id': id, 'name': name, 'showtype': showtype, 'displayorder': sort}
+                Category.update(params)
+
+            if act == 'del':
+                Category.delete(id)
+
+            clear_cache_by_pathlist(['/'])
+
+            self.set_header("Content-Type", "application/json")
+            self.write(json.dumps("OK"))
+        else:
+            self.set_header("Content-Type", "application/json")
+            self.write(json.dumps("参数异常"))
+
+
 class AddPost(BaseHandler):
     @authorized()
     def get(self):
@@ -477,60 +543,6 @@ class CommentController(BaseHandler):
         return
 
 
-class UserController(BaseHandler):
-    @authorized()
-    def get(self, id=''):
-        obj = None
-        if id:
-            obj = User.get_user_by_id(id)
-            if obj:
-                act = self.get_argument("act", '')
-                if act == 'del':
-                    User.del_user_by_id(id)
-                    clear_cache_by_pathlist(['post:%d' % obj.postid])
-                    self.set_header("Content-Type", "application/json")
-                    self.write(json.dumps("OK"))
-                    return
-                else:
-                    self.echo('admin_comment.html', {
-                        'title': "评论管理",
-                        'obj': obj,
-                    }, layout='_layout_admin.html')
-                    return
-
-        # 评论列表
-        self.echo('admin_comment.html', {
-            'title': "评论管理",
-            'obj': obj,
-            'total': User.count_all(),
-            'comments': User.get_recent_comments(getAttr('ADMIN_COMMENT_NUM')),
-        }, layout='_layout_admin.html')
-
-    @authorized()
-    def post(self, id=''):
-        act = self.get_argument("act", '')
-        if act == 'findid':
-            eid = self.get_argument("id", '')
-            self.redirect('%s/admin/comment/%s' % (BASE_URL, eid))
-            return
-
-        tf = {'true': 1, 'false': 0}
-        post_dic = {
-            'author': self.get_argument("author"),
-            'email': self.get_argument("email", ''),
-            'content': safe_encode(self.get_argument("content").replace('\r', '\n')),
-            'url': self.get_argument("url", ''),
-            'visible': self.get_argument("visible", 'false'),
-            'id': id
-        }
-        post_dic['visible'] = tf[post_dic['visible'].lower()]
-
-        User.update_user_edit(post_dic)
-        clear_cache_by_pathlist(['post:%s' % id])
-        self.redirect('%s/admin/comment/%s' % (BASE_URL, id))
-        return
-
-
 class LinkController(BaseHandler):
     @authorized()
     def get(self):
@@ -591,6 +603,60 @@ class LinkController(BaseHandler):
 
         self.set_header("Content-Type", "application/json")
         self.write(json.dumps("OK"))
+
+
+class UserController(BaseHandler):
+    @authorized()
+    def get(self, id=''):
+        obj = None
+        if id:
+            obj = User.get_user_by_id(id)
+            if obj:
+                act = self.get_argument("act", '')
+                if act == 'del':
+                    User.del_user_by_id(id)
+                    clear_cache_by_pathlist(['post:%d' % obj.postid])
+                    self.set_header("Content-Type", "application/json")
+                    self.write(json.dumps("OK"))
+                    return
+                else:
+                    self.echo('admin_comment.html', {
+                        'title': "评论管理",
+                        'obj': obj,
+                    }, layout='_layout_admin.html')
+                    return
+
+        # 评论列表
+        self.echo('admin_comment.html', {
+            'title': "评论管理",
+            'obj': obj,
+            'total': User.count_all(),
+            'comments': User.get_recent_comments(getAttr('ADMIN_COMMENT_NUM')),
+        }, layout='_layout_admin.html')
+
+    @authorized()
+    def post(self, id=''):
+        act = self.get_argument("act", '')
+        if act == 'findid':
+            eid = self.get_argument("id", '')
+            self.redirect('%s/admin/comment/%s' % (BASE_URL, eid))
+            return
+
+        tf = {'true': 1, 'false': 0}
+        post_dic = {
+            'author': self.get_argument("author"),
+            'email': self.get_argument("email", ''),
+            'content': safe_encode(self.get_argument("content").replace('\r', '\n')),
+            'url': self.get_argument("url", ''),
+            'visible': self.get_argument("visible", 'false'),
+            'id': id
+        }
+        post_dic['visible'] = tf[post_dic['visible'].lower()]
+
+        User.update_user_edit(post_dic)
+        clear_cache_by_pathlist(['post:%s' % id])
+        self.redirect('%s/admin/comment/%s' % (BASE_URL, id))
+        return
 
 
 class BlogSetting(BaseHandler):
@@ -1048,10 +1114,12 @@ urls = [
     (r"/admin/login", Login),
     (r"/admin/logout", Logout),
     (r"/admin/403", Forbidden),
+    # 分类管理
+    (r"/admin/category", CategoryController),
     # 文章相关
     (r"/admin/add_post", AddPost),
     (r"/admin/edit_post/(\d*)", EditPost),
-    (r"/admin/list_post", ListPost),  # TODO 分页
+    (r"/admin/list_post", ListPost),
     (r"/admin/del_post/(\d+)", DelPost),
     (r"/admin/comment/(\d*)", CommentController),
     # 用户管理

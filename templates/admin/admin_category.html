@@ -1,0 +1,137 @@
+<div class="row">
+    <div class="span12">
+    <form id="myForm" action="" class="well form-inline" method="post">
+        <?py if obj: ?>
+        <span class="label label-info"><strong>编辑</strong></span>
+        <input type="text" name="name" value="#{obj.name}" class="span3" id="input01" required maxlength="100" tabindex="1" placeholder="分类名称"/>
+        <select id="showtype" name="showtype" tabindex="2" class="span2">
+          <option value="default">默认显示</option>
+          <option value="list">简单列表</option>
+          <option value="digest">摘要列表</option>
+          <option value="pic">图片瀑布</option>
+          <option value="video">视频瀑布</option>
+        </select>
+        <input type="number" name="sort" value="#{obj.displayorder}" min="0" max="255" class="span1" id="input03" tabindex="3" placeholder="排序"/>
+        <input type='hidden' value='edit' name='act'/>
+        <input type='hidden' value='#{obj.id}' name='id'/>
+        <?py else: ?>
+        <span class="label label-info">新建</span>
+        <input type="text" name="name" value="" class="span3" id="input11" required maxlength="100" tabindex="1" placeholder="分类名称"/>
+        <select id="showtype" name="showtype" tabindex="2" class="span2">
+          <option value="default">默认显示</option>
+          <option value="list">简单列表</option>
+          <option value="digest">摘要列表</option>
+          <option value="pic">图片瀑布</option>
+          <option value="video">视频瀑布</option>
+        </select>
+        <input type="number" name="sort" value="" class="span1" min="0" max="255" id="input13" tabindex="2" placeholder="排序"/>
+        <input type='hidden' value='add' name='act'/>
+        <?py #endif ?>
+        <button type="submit" class="btn btn-primary">保 存</button>
+        <button type="reset" class="btn">重 置</button>
+        <button type="button" class="btn btn-success pull-right" onclick="window.location.href='/admin/category'">新 建</button>
+    </form>
+    <table class="table table-striped table-hover table-bordered table-condensed">
+        <thead>
+        <tr>
+            <th style="width:48px">#</th>
+            <th style="width:180px">分类名称</th>
+            <th style="width:80px">显示类型</th>
+            <th style="width:30px">排序</th>
+            <th>文章数</th>
+            <th style="width:60px">可用操作</th>
+        </tr>
+        </thead>
+        <tbody id="content">
+        <?py for i in objs: ?>
+        <tr id="category-#{i.id}">
+            <td>#{i.id}</td>
+            <td><a href="#{i.name}" title="Link to #{i.name}" target="_blank">#{i.name}</a></td>
+            <td>#{i.showtype}</td>
+            <td>#{i.displayorder}</td>
+            <td>#{i.id_num}</td>
+            <td><a href="/admin/category?id=#{i.id}&act=edit">编辑</a> <a href="/admin/category?id=#{i.id}&act=del" class="ajax" data-remove-closest="tr">删除</a></td>
+        </tr>
+        <?py #endfor ?>
+        </tbody>
+    </table>
+    <div id="page-selection"></div>
+    </div>
+</div>
+<hr id="helper"/>
+<div class="well">
+  <a class="pull-right" href="#">
+    <img class="media-object" src="/static/images/helper-boy.jpg">
+  </a>
+  <h4>新建/编辑文章分类</h4>
+  <p>1.<strong>显示类型</strong> 用于确定该分类下面的文章以什么样的形式展现</p>
+  <p>2.<strong>排序</strong> 用于确定分类的先后显示顺序，只接受 0~255 的数字</p>
+  <p>3.<strong>排序</strong> 可以不填写，默认为 0</p>
+  <p>4.输入框左侧显示当前的编辑模式 <strong>新建</strong> 和 <strong>编辑</strong></p>
+  <p>5.编辑模式下点击右侧绿色的 <strong>新建</strong> 按钮可以新建友情链接</p>
+  <p><a href="#top" class="btn btn-primary">我明白了</a></p>
+</div>
+<script type="text/javascript" src="/static/js/vender/template.min.js"></script>
+<script type="text/javascript">
+    $(function () {
+        $("#category_page").addClass("active");
+        $("input,select,textarea").not("[type=submit]").not("[type=reset]").jqBootstrapValidation();
+        $('#myForm').submit(function () {
+            var name = $("input[name='name']").val();
+            var showtype = $("#showtype").val();
+            var sort = $("input[name='sort']").val().trim();
+            if (sort=="") $("input[name='sort']").val("0");
+            $.ajax({
+                type: 'POST',
+                url: "",
+                dataType: "json",
+                data: $("#myForm").serialize(),
+                success: function () {
+                    SiQiTip.show("success", "保存成功！");
+                    if ($("input[name='act']").val()=="add") {
+                        $("#content").prepend("<tr><td>#</td><td><a href='"+name+"' title='Link to "+name+"' target='_blank'>"+name+"</a></td><td>"+showtype+"</td><td>"+sort+"</td><td>0</td><td><a href='/admin/category'>刷新</a></td></tr>");
+                        $("input").val("");
+                    }
+                    else {
+                        var id = $("input[name='id']").val();
+                        $("#category-"+id).html("<td>"+id+"</td><td><a href='"+name+"' title='Link to "+name+"' target='_blank'>"+name+"</a></td><td>"+showtype+"</td><td>"+sort+"</td><td>?</td><td><a href='/admin/category?id="+id+"&act=edit'>编辑</a> <a href='/admin/category?id="+id+"&act=del' class='ajax' data-remove-closest='tr'>删除</a></td>");
+                    }
+                },
+                error: function() {
+                    SiQiTip.show("error", "保存失败！");
+                }
+            });
+            return false;
+        });
+        $('#page-selection').bootpag({
+            total: #{total},
+            maxVisible: 10,
+            next: '下一页',
+            prev: '上一页'
+        }).on("page", function(event, num){
+             $.ajax({
+                url: '#{request.path}?page='+num,
+                success: function (data) {
+                    var html = template.render('categoryTemplate', data);
+                    $("#content").html(html);
+                    SiQiTip.show("success", "加载分类列表成功！");
+                },
+                error: function() {
+                    SiQiTip.show("error", "加载分类列表失败！");
+                }
+            });
+        });
+    });
+</script>
+<script id="categoryTemplate" type="text/html">
+<%for(i = 0; i < list.length; i ++) {%>
+<tr id="category-<%=list[i].id%>">
+    <td><%=list[i].id%></td>
+    <td><a href="<%=list[i].name%>" title="Link to <%=list[i].name%>" target="_blank"><%=list[i].name%></a></td>
+    <td><%=list[i].showtype%></td>
+    <td><%=list[i].displayorder%></td>
+    <td><%=list[i].id_num%></td>
+    <td><a href="/admin/category?id=<%=list[i].id%>&act=edit">编辑</a> <a href="/admin/category?id=<%=list[i].id%>&act=del" class="ajax" data-remove-closest="tr">删除</a></td>
+</tr>
+<%}%>
+</script>

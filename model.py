@@ -361,9 +361,24 @@ class Category():
     # 分页
     def get_paged(self, page=1, limit=getAttr('ADMIN_CATEGORY_NUM')):
         limit = int(limit)
+        sql = "SELECT * FROM `sp_category` ORDER BY `id` DESC LIMIT %s,%s" % ((int(page) - 1) * limit, limit)
         sdb._ensure_connected()
-        return sdb.query("SELECT * FROM `sp_category` ORDER BY `id` DESC LIMIT %s,%s" % (
-            (int(page) - 1) * limit, limit))
+        return sdb.query(sql)
+
+    def save(self, params):
+        mdb._ensure_connected()
+        query = "INSERT INTO `sp_category` (`name`,`showtype`,`displayorder`,`id_num`,`content`) values(%s,%s,%s,1,'')"
+        mdb.execute(query, params['name'], params['showtype'], params['displayorder'])
+
+    def update(self, params):
+        mdb._ensure_connected()
+        query = "UPDATE `sp_category` SET `name`=%s, `showtype`=%s, `displayorder`=%s WHERE ID=%s"
+        mdb.execute(query, params['name'], params['showtype'], params['displayorder'], params['id'])
+
+    def delete(self, id):
+        mdb._ensure_connected()
+        query = "DELETE FROM `sp_category` WHERE `id`=%s"
+        mdb.execute(query, id)
 
     def get_all_cat_name(self):
         sdb._ensure_connected()
@@ -373,23 +388,23 @@ class Category():
         sdb._ensure_connected()
         return sdb.query('SELECT * FROM `sp_category` ORDER BY `id` DESC')
 
-    def get_all_cat_id(self):
+    def get_by_id(self, id):
         sdb._ensure_connected()
-        return sdb.query('SELECT `id` FROM `sp_category` ORDER BY `id` DESC')
+        return sdb.get('SELECT * FROM `sp_category` WHERE id=%s LIMIT 1' % id)
 
-    def get_cat_by_name(self, name=''):
+    def get_by_name(self, name=''):
         sdb._ensure_connected()
         return sdb.get('SELECT * FROM `sp_category` WHERE `name` = \'%s\' LIMIT 1' % name)
 
     def get_all_post_num(self, name=''):
-        obj = self.get_cat_by_name(name)
+        obj = self.get_by_name(name)
         if obj and obj.content:
             return len(obj.content.split(','))
         else:
             return 0
 
     def get_cat_page_posts(self, name='', page=1, limit=EACH_PAGE_POST_NUM):
-        obj = self.get_cat_by_name(name)
+        obj = self.get_by_name(name)
         if obj:
             page = int(page)
             idlist = obj.content.split(',')
@@ -711,6 +726,8 @@ DROP TABLE IF EXISTS `sp_category`;
 CREATE TABLE IF NOT EXISTS `sp_category` (
   `id` smallint(6) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(17) NOT NULL DEFAULT '',
+  `showtype` varchar(7) NOT NULL DEFAULT 'default',
+  `displayorder` tinyint(3) NOT NULL DEFAULT '0',
   `id_num` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `content` mediumtext NOT NULL,
   PRIMARY KEY (`id`),

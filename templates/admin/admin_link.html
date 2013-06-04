@@ -80,12 +80,12 @@
                     SiQiTip.show("success", "保存成功！");
                     if ($("input[name='act']").val()=="add") {
                         $("#content").prepend("<tr><td>#</td><td><a href='"+url+"' title='Link to "+url+"' target='_blank'>"+name+"</a></td><td>"+sort+"</td><td>"+url+"</td><td><a href='/admin/links'>刷新</a></td></tr>");
+                        $("input").val("");
                     }
                     else {
                         var id = $("input[name='id']").val();
                         $("#link-"+id).html("<td>"+id+"</td><td><a href='"+url+"' title='Link to "+url+"' target='_blank'>"+name+"</a></td><td>"+sort+"</td><td>"+url+"</td><td><a href='/admin/links?id="+id+"&act=edit'>编辑</a> <a href='/admin/links?id="+id+"&act=del' class='ajax' data-remove-closest='tr'>删除</a></td>");
                     }
-                    $("input").val("");
                 },
                 error: function() {
                     SiQiTip.show("error", "保存失败！");

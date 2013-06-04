@@ -306,7 +306,7 @@ class CategoryDetail(BaseHandler):
     @pagecache('cat', getAttr('PAGE_CACHE_TIME'), lambda self, name: name)
     def get(self, name=''):
         objs = Category.get_cat_page_posts(name, 1)
-        catobj = Category.get_cat_by_name(name)
+        catobj = Category.get_by_name(name)
         show_type = self.get_argument('type', 'default')
 
         if catobj:
@@ -428,7 +428,7 @@ class ArticleList(BaseHandler):
     def get(self, list_type='', direction='next', page='1', name=''):
         if list_type == 'cat':
             objs = Category.get_cat_page_posts(name, page)
-            catobj = Category.get_cat_by_name(name)
+            catobj = Category.get_by_name(name)
         elif list_type == 'tag':
             objs = Tag.get_tag_page_posts(name, page)
             catobj = Tag.get_tag_by_name(name)
@@ -473,7 +473,7 @@ class ArticleList(BaseHandler):
 
 class Robots(BaseHandler):
     def get(self):
-        self.echo('robots.txt', {'cats': Category.get_all_cat_id()})
+        self.echo('robots.txt', {'cats': Category.get_by_id()})
 
 
 class Feed(BaseHandler):
