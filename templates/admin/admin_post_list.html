@@ -93,13 +93,13 @@
     <td><%=$format(list[i].add_time)%></td>
     <td><%=$format(list[i].edit_time)%></td>
     <td>
-        <?py    if i.closecomment == 0: ?><span class="label label-success">允许</span>
-        <?py    else: ?><span class="label">禁止</span>
-        <?py    #endif ?></td>
+        <%if(list[i].closecomment == 0){%><span class="label label-success">允许</span>
+        <%}else{%><span class="label">禁止</span>
+        <%}%></td>
     <td>
-        <?py    if i.password == 0: ?><span class="label label-success">开启</span>
-        <?py    else: ?><span class="label">关闭</span>
-        <?py    #endif ?></td>
+        <%if(list[i].password.length > 0){%><span class="label label-success">开启</span>
+        <%}else{%><span class="label">关闭</span>
+        <%}%></td>
     <td><a href="/admin/edit_post/<%=list[i].id%>">编辑</a> <a href="/admin/del_post/<%=list[i].id%>" class="ajax" data-remove-closest="tr">删除</a></td>
 </tr>
 <%}%>

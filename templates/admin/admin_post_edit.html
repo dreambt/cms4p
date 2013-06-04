@@ -14,8 +14,7 @@
                 <input type="text" id="cat" class="span2" required maxlength="17" value="${obj.category}" tabindex="1" placeholder="输入新分类名称">
             </div>
             <span class="help-inline">可选设置：<input type="text" id="password" class="input-medium" value="${obj.password}" maxlength="16" placeholder="设置阅读密码"/>
-            <label class="checkbox help-inline" style="padding-left:30px;"><?py ck = ['','checked'] ?><input
-                    type="checkbox" value="True" tabindex="5" #{ck[obj.closecomment]}/> 关闭评论</label></span>
+            <label class="checkbox help-inline" style="padding-left:30px;"><?py ck = ['','checked'] ?><input id="clo" type="checkbox" tabindex="5" #{ck[obj.closecomment]}/> 关闭评论</label></span>
         </div>
     </div>
     <div class="control-group">
@@ -23,8 +22,7 @@
         <div class="controls">
             <input type="hidden" id="postid" name="postid" value="#{obj.id}"/>
             <input type="hidden" id="method" name="method" value="#{method}"/>
-            <input type="text" id="tit" class="span8" required maxlength="100" value="${obj.title}" tabindex="2" maxlength="100"
-                   placeholder="标题"/>
+            <input type="text" id="tit" class="span8" required maxlength="100" value="${obj.title}" tabindex="2" placeholder="标题"/>
         </div>
     </div>
     <div class="control-group">
