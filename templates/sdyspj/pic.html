@@ -1,0 +1,98 @@
+<div id="wall" class="row" style="margin-top:5px">
+    <?py for obj in objs: ?>
+    <div class="span3 item">
+		<div class="picture">
+	        <a class="image" href="#{obj.absolute_url}" title="#{obj.title}"><img src="http://clabs.co/projects/tabula/img/photo4.jpg" alt=""/></a>
+			<div class="description"><p>#{escape(obj.shorten_content)}</p></div>
+			<div class="meta">
+				<span><i class="icon-calendar"></i>#{obj.add_time_fn}</span>
+				<span><i class="icon-user"></i> <a href="#">#{{ ADMIN_NAME }}</a></span>
+				<span><i class="icon-heart"></i> #{obj.comment_num}</span>
+			</div>
+		</div>
+	</div>
+    <?py #endfor ?>
+</div>
+<ul class="pager">
+    <li class="previous">
+        <?py if 1< page <= allpage: ?>
+        <?py     tvar = fromid if (listtype == 'index') else name ?>
+        <a class="prev" href="#{{ BASE_URL }}/#{listtype}_prev_page/#{page}/#{tvar}/">&larr; 上一页</a>
+        <?py #endif ?>
+    </li>
+    <li class="next">
+        <?py if page< allpage: ?>
+        <?py     tvar = endid if (listtype == 'index') else name ?>
+        <a class="next" href="#{{ BASE_URL }}/#{listtype}_next_page/#{page}/#{tvar}/">下一页 &rarr;</a>
+        <?py #endif ?>
+    </li>
+</ul>
+<script type="text/javascript" src="/static/js/vender/jquery.isotope.min.js"></script>
+<script type="text/javascript">
+$(function(){
+    $('#wall').imagesLoaded(function() {
+
+		var $container = $('#wall');
+			$select = $('#filters select');
+
+		// initialize Isotope
+		$container.isotope({
+		// options...
+		resizable: false, // disable normal resizing
+		// set columnWidth to a percentage of container width
+	  	masonry: { columnWidth: $container.width() / 12 }
+		});
+
+		// update columnWidth on window resize
+		$(window).smartresize(function(){
+			$container.isotope({
+			// update columnWidth to a percentage of container width
+				masonry: { columnWidth: $container.width() / 12 }
+			});
+		});
+
+		$container.isotope({
+			itemSelector : '.item'
+		});
+
+		$select.change(function() {
+
+			var filters = $(this).val();
+				$container.isotope({
+					filter: filters
+				});
+			});
+
+			var $optionSets = $('#filters .option-set'),
+		  	$optionLinks = $optionSets.find('a');
+
+		  	$optionLinks.click(function(){
+
+				var $this = $(this);
+				// don't proceed if already selected
+				if ( $this.hasClass('selected') ) {
+			  		return false;
+				}
+			var $optionSet = $this.parents('.option-set');
+			$optionSet.find('.selected').removeClass('selected');
+			$this.addClass('selected');
+
+			// make option object dynamically, i.e. { filter: '.my-filter-class' }
+			var options = {},
+				key = $optionSet.attr('data-option-key'),
+				value = $this.attr('data-option-value');
+			// parse 'false' as false boolean
+			value = value === 'false' ? false : value;
+			options[ key ] = value;
+			if ( key === 'layoutMode' && typeof changeLayoutMode === 'function' ) {
+			  // changes in layout modes need extra logic
+			  changeLayoutMode( $this, options )
+			} else {
+			  // otherwise, apply new options
+			  $container.isotope( options );
+			}
+			return false;
+		  });
+	});
+});
+</script>

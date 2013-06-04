@@ -403,10 +403,11 @@ class Category():
         else:
             return 0
 
-    def get_cat_page_posts(self, name='', page=1, limit=EACH_PAGE_POST_NUM):
+    def get_cat_page_posts(self, name='', page=1, limit=getAttr('EACH_PAGE_POST_NUM')):
         obj = self.get_by_name(name)
         if obj:
             page = int(page)
+            limit = int(limit)
             idlist = obj.content.split(',')
             getids = idlist[limit * (page - 1):limit * page]
             sdb._ensure_connected()

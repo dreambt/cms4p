@@ -307,7 +307,6 @@ class CategoryDetail(BaseHandler):
     def get(self, name=''):
         objs = Category.get_cat_page_posts(name, 1)
         catobj = Category.get_by_name(name)
-        show_type = self.get_argument('type', 'default')
 
         if catobj:
             pass
@@ -321,7 +320,7 @@ class CategoryDetail(BaseHandler):
         if all_post % each_page_post_num:
             all_page += 1
 
-        output = self.render(show_type+'.html', {
+        output = self.render(catobj.showtype+'.html', {
             'title': "%s - %s" % (catobj.name, getAttr('SITE_TITLE')),
             'keywords': catobj.name,
             'description': getAttr('SITE_DECR'),
@@ -436,7 +435,7 @@ class ArticleList(BaseHandler):
             objs = Archive.get_archive_page_posts(name, page)
             catobj = Archive.get_archive_by_name(name)
 
-        show_type = self.get_argument('type', 'default')
+        show_type = catobj.showtype
 
         if catobj:
             pass
