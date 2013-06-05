@@ -102,6 +102,7 @@ MAJOR_DOMAIN = '%s.sinaapp.com' % APP_NAME #主域名，默认是SAE 的二级�
 ##你也可以把自己喜欢的wp主题移植过来，
 #制作方法参见 http://saepy.sinaapp.com/t/49
 THEME = 'sdyspj'
+THEME = 'cloudprint'
 LANGUAGE = 'zh-CN'
 
 #使用disqus 评论系统，如果你使用就填 website shortname，

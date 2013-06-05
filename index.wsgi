@@ -7,8 +7,9 @@ sys.path.insert(0, os.path.join(root, 'site-packages'))
 import sae
 import tornado.wsgi
 
-from blog import urls as blogurls
+#from blog import urls as blogurls
 from admin import urls as adminurls
+from welcome import urls as blogurls
 
 saeurls = blogurls + adminurls
 
