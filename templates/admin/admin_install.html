@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <link href="/static/style/bootstrap.min.css" rel="stylesheet"/>
-    <link href="/static/style/bootstrap-wizard.css" rel="stylesheet"/>
-    <link href="/static/style/chosen.css" rel="stylesheet"/>
+    <link href="#{{ STATIC_URL }}/static/style/bootstrap.min.css" rel="stylesheet"/>
+    <link href="#{{ STATIC_URL }}/static/style/bootstrap-wizard.css" rel="stylesheet"/>
+    <link href="#{{ STATIC_URL }}/static/style/chosen.css" rel="stylesheet"/>
     <style type="text/css">
         .wizard-modal p {
             margin: 0 0 10px;
@@ -293,14 +293,14 @@
 
 </div>
 <!--[if lt IE 9]>
-<script type="text/javascript" src="/static/js/vender/jquery-1.10.1.min.js"></script>
+<script type="text/javascript" src="#{{ STATIC_URL }}/static/js/vender/jquery-1.10.1.min.js"></script>
 <![endif]-->
 <!--[if gte IE 9]><!-->
-<script type="text/javascript" src="/static/js/vender/jquery-2.0.2.min.js"></script>
+<script type="text/javascript" src="#{{ STATIC_URL }}/static/js/vender/jquery-2.0.2.min.js"></script>
 <!--<![endif]-->
-<script type="text/javascript" src="/static/js/vender/bootstrap.min.js"></script>
-<script src="/static/js/vender/chosen.jquery.min.js"></script>
-<script src="/static/js/vender/bootstrap-wizard.min.js"></script>
+<script type="text/javascript" src="#{{ STATIC_URL }}/static/js/vender/bootstrap.min.js"></script>
+<script src="#{{ STATIC_URL }}/static/js/vender/chosen.jquery.min.js"></script>
+<script src="#{{ STATIC_URL }}/static/js/vender/bootstrap-wizard.min.js"></script>
 <script type="text/javascript">
     function setServerName(card) {
         var host = $("#new-server-fqdn").val();

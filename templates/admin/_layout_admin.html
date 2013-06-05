@@ -4,16 +4,17 @@
     <meta charset='utf-8'>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <title>#{title} - #{{ getAttr('SITE_TITLE') }}</title>
-    <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon"/>
-    <link rel="stylesheet" href="/static/style/bootstrap.min.css" type="text/css"/>
-    <link rel="stylesheet" href="/static/style/bootstrap-responsive.min.css" type="text/css"/>
-    <link rel="stylesheet" href="/static/style/chosen.css" type="text/css"/>
-    <link rel="stylesheet" href="/static/style/admin.css" type="text/css"/>
+    <link rel="shortcut icon" href="#{{ STATIC_URL }}/static/favicon.ico" type="image/x-icon"/>
+    <link rel="stylesheet" href="#{{ STATIC_URL }}/static/style/bootstrap.min.css" type="text/css"/>
+    <link rel="stylesheet" href="#{{ STATIC_URL }}/static/style/bootstrap-responsive.min.css" type="text/css"/>
+    <link rel="stylesheet" href="#{{ STATIC_URL }}/static/style/bootstrap-switch.min.css" type="text/css"/>
+    <link rel="stylesheet" href="#{{ STATIC_URL }}/static/style/chosen.css" type="text/css"/>
+    <link rel="stylesheet" href="#{{ STATIC_URL }}/static/style/admin.css" type="text/css"/>
     <!--[if lt IE 9]>
-    <script type="text/javascript" src="/static/js/vender/jquery-1.10.1.min.js"></script>
+    <script type="text/javascript" src="#{{ STATIC_URL }}/static/js/vender/jquery-1.10.1.min.js"></script>
     <![endif]-->
     <!--[if gte IE 9]><!-->
-    <script type="text/javascript" src="/static/js/vender/jquery-2.0.2.min.js"></script>
+    <script type="text/javascript" src="#{{ STATIC_URL }}/static/js/vender/jquery-2.0.2.min.js"></script>
     <!--<![endif]-->
 </head>
 <body data-spy="scroll" data-target=".bs-docs-sidebar">
@@ -80,14 +81,15 @@
         <p>&copy; #{{ COPY_YEAR }} Copyright <a href="http://www.im47.cn/">思奇博客</a></p>
         <p>Powered by <a href="https://github.com/dreambt/cms4p" target="_blank">cms4p</a> - Time: <span
                 id="requesttime">#{ int(request.request_time()*1000) }</span> ms - <a class="fr" target="_blank" href="http://sae.sina.com.cn"><img
-                title="Powered by Sina App Engine" src="/static/images/sae.gif"></a></p>
+                title="Powered by Sina App Engine" src="#{{ STATIC_URL }}/static/images/sae.gif"></a></p>
     </div>
 </footer>
-<script type="text/javascript" src="/static/js/vender/bootstrap.min.js"></script>
-<script type="text/javascript" src="/static/js/vender/bootstrap-ajax.js"></script>
-<script type="text/javascript" src="/static/js/vender/jquery.bootpag.min.js"></script>
-<script type="text/javascript" src="/static/js/vender/jqBootstrapValidation-1.3.7.min.js"></script>
-<script type="text/javascript" src="/static/js/vender/bootbox.min.js"></script>
-<script type="text/javascript" src="/static/js/main.js"></script>
+<script type="text/javascript" src="#{{ STATIC_URL }}/static/js/vender/bootstrap.min.js"></script>
+<script type="text/javascript" src="#{{ STATIC_URL }}/static/js/vender/bootstrap-ajax.js"></script>
+<script type="text/javascript" src="#{{ STATIC_URL }}/static/js/vender/jquery.bootpag.min.js"></script>
+<script type="text/javascript" src="#{{ STATIC_URL }}/static/js/vender/jqBootstrapValidation-1.3.7.min.js"></script>
+<script type="text/javascript" src="#{{ STATIC_URL }}/static/js/vender/bootbox.min.js"></script>
+<script type="text/javascript" src="#{{ STATIC_URL }}/static/js/vender/bootstrap-switch.min.js"></script>
+<script type="text/javascript" src="#{{ STATIC_URL }}/static/js/custom.js"></script>
 </body>
 </html>

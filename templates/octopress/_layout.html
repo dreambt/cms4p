@@ -13,15 +13,15 @@
     <link rel="alternate" type="application/rss+xml" title="#{SITE_TITLE} RSS Feed" href="#{{ BASE_URL }}/feed"/>
     <link rel="shortcut icon" href="#{{ BASE_URL }}/static/favicon.ico" type="image"/>
 
-    <link href="/static/themes/octopress/css/screen.css" media="screen, projection" rel="stylesheet" type="text/css"/>
+    <link href="#{{ STATIC_URL }}/static/themes/octopress/css/screen.css" media="screen, projection" rel="stylesheet" type="text/css"/>
 
     <!--[if lt IE 9]>
-    <script type="text/javascript" src="/static/js/vender/jquery-1.10.1.min.js"></script>
+    <script type="text/javascript" src="#{{ STATIC_URL }}/static/js/vender/jquery-1.10.1.min.js"></script>
     <![endif]-->
     <!--[if gte IE 9]><!-->
-    <script type="text/javascript" src="/static/js/vender/jquery-2.0.2.min.js"></script>
+    <script type="text/javascript" src="#{{ STATIC_URL }}/static/js/vender/jquery-2.0.2.min.js"></script>
     <!--<![endif]-->
-    <script src="/static/themes/octopress/js/main.js"></script>
+    <script src="#{{ STATIC_URL }}/static/themes/octopress/js/main.js"></script>
 
     <link rel='index' title='#{SITE_TITLE}' href='#{{ BASE_URL }}/'/>
     <?py if 'postdetail' in _context and postdetail: ?>
@@ -129,8 +129,8 @@
 
 <?py if 'postdetail' in _context and postdetail: ?>
 <?py     if obj.highlight: ?>
-<link rel="stylesheet" title="Sunburst" href="/static/highlight/sunburst.min.css">
-<script src="/static/highlight/highlight.min.js"></script>
+<link rel="stylesheet" title="Sunburst" href="#{{ STATIC_URL }}/static/highlight/sunburst.min.css">
+<script src="#{{ STATIC_URL }}/static/highlight/highlight.min.js"></script>
 <script>
     hljs.tabReplace = '    ';
     hljs.initHighlightingOnLoad();

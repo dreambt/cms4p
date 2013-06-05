@@ -47,7 +47,7 @@
 <hr id="helper"/>
 <div class="well">
   <a class="pull-right" href="#">
-    <img class="media-object" src="/static/images/helper-girl.jpg">
+    <img class="media-object" src="#{{ STATIC_URL }}/static/images/helper-girl.jpg">
   </a>
   <h4>文章列表</h4>
   <p>1.点击 <strong>标题</strong> 可以查看文章在系统中的显示效果</p>
@@ -56,7 +56,7 @@
   <p>4.本页最多显示 #{EACH_PAGE_POST_NUM} 篇文章, 你可以在 <a href="/admin/setting3">系统设置</a> 里面修改</p>
   <p><a href="#top" class="btn btn-primary">我明白了</a></p>
 </div>
-<script type="text/javascript" src="/static/js/vender/template.min.js"></script>
+<script type="text/javascript" src="#{{ STATIC_URL }}/static/js/vender/template.min.js"></script>
 <script type="text/javascript">
     // artTemplate 扩展
     template.helper('$format', function (content) {

@@ -61,7 +61,7 @@
 <hr id="helper"/>
 <div class="well">
   <a class="pull-right" href="#">
-    <img class="media-object" src="/static/images/helper-boy.jpg">
+    <img class="media-object" src="#{{ STATIC_URL }}/static/images/helper-boy.jpg">
   </a>
   <h4>新建/编辑文章分类</h4>
   <p>1.<strong>显示类型</strong> 用于确定该分类下面的文章以什么样的形式展现</p>
@@ -71,7 +71,7 @@
   <p>5.编辑模式下点击右侧绿色的 <strong>新建</strong> 按钮可以新建友情链接</p>
   <p><a href="#top" class="btn btn-primary">我明白了</a></p>
 </div>
-<script type="text/javascript" src="/static/js/vender/template.min.js"></script>
+<script type="text/javascript" src="#{{ STATIC_URL }}/static/js/vender/template.min.js"></script>
 <script type="text/javascript">
     $(function () {
         $("#category_page").addClass("active");

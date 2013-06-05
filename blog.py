@@ -425,6 +425,7 @@ class TagDetail(BaseHandler):
 class ArticleList(BaseHandler):
     @pagecache('post_list_tag', getAttr('PAGE_CACHE_TIME'), lambda self, list_type, direction, page, name: "%s_%s" % (name, page))
     def get(self, list_type='', direction='next', page='1', name=''):
+        catobj = None
         if list_type == 'cat':
             objs = Category.get_cat_page_posts(name, page)
             catobj = Category.get_by_name(name)
@@ -435,14 +436,13 @@ class ArticleList(BaseHandler):
             objs = Archive.get_archive_page_posts(name, page)
             catobj = Archive.get_archive_by_name(name)
 
-        show_type = catobj.showtype
-
         if catobj:
             pass
         else:
             self.redirect(BASE_URL)
             return
 
+        show_type = catobj.showtype
         each_page_post_num = int(getAttr('EACH_PAGE_POST_NUM'))
         all_post = catobj.id_num
         all_page = all_post / each_page_post_num

@@ -4,14 +4,14 @@
     <meta charset='utf-8'>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <title>后台登录 - #{{ SITE_TITLE }}</title>
-    <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon"/>
-    <link rel="stylesheet" href="/static/style/bootstrap.min.css" type="text/css"/>
-    <link rel="stylesheet" href="/static/style/admin.css" type="text/css"/>
+    <link rel="shortcut icon" href="#{{ STATIC_URL }}/static/favicon.ico" type="image/x-icon"/>
+    <link rel="stylesheet" href="#{{ STATIC_URL }}/static/style/bootstrap.min.css" type="text/css"/>
+    <link rel="stylesheet" href="#{{ STATIC_URL }}/static/style/admin.css" type="text/css"/>
     <!--[if lt IE 9]>
-    <script type="text/javascript" src="/static/js/vender/jquery-1.10.1.min.js"></script>
+    <script type="text/javascript" src="#{{ STATIC_URL }}/static/js/vender/jquery-1.10.1.min.js"></script>
     <![endif]-->
     <!--[if gte IE 9]><!-->
-    <script type="text/javascript" src="/static/js/vender/jquery-2.0.2.min.js"></script>
+    <script type="text/javascript" src="#{{ STATIC_URL }}/static/js/vender/jquery-2.0.2.min.js"></script>
     <!--<![endif]-->
     <style type="text/css">
         .form-signin {
@@ -57,7 +57,7 @@
             <button class="btn btn-large btn-primary" type="submit">登录</button>
         </form>
     </div>
-<script type="text/javascript" src="/static/js/vender/bootstrap.min.js"></script>
+<script type="text/javascript" src="#{{ STATIC_URL }}/static/js/vender/bootstrap.min.js"></script>
 <script>
     $(function () {
         //验证码点击时显示

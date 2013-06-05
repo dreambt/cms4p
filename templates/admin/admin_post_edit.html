@@ -1,28 +1,25 @@
 <form id="myForm" class="form-horizontal">
     <div class="control-group">
-        <label class="control-label" for="cat">* 文章分类</label>
+        <label class="control-label" for="selectBtn">* 分类/标题</label>
         <div class="controls">
             <div class="input-prepend">
                 <div class="btn-group">
-                    <button class="btn dropdown-toggle" data-toggle="dropdown">选择分类 <span class="caret"></span></button>
+                    <?py if obj and obj.category: ?>
+                    <button id="selectBtn" class="btn dropdown-toggle" data-toggle="dropdown">${obj.category} <span class="caret"></span></button>
+                    <?py else: ?>
+                    <button id="selectBtn" class="btn dropdown-toggle" data-toggle="dropdown">选择分类 <span class="caret"></span></button>
+                    <?py #endif ?>
                     <ul class="dropdown-menu">
                         <?py for cat in cats: ?>
-                        <li><a href="#" onclick="$('#cat').val(($(this).text()));">#{cat.name}</a></li>
+                        <li><a href="#" onclick="$('#cat').val(($(this).text()));$('#selectBtn').html(($(this).text()+' <span class=caret></span>'));">#{cat.name}</a></li>
                         <?py #endfor ?>
                     </ul>
                 </div>
-                <input type="text" id="cat" class="span2" required maxlength="17" value="${obj.category}" tabindex="1" placeholder="输入新分类名称">
+                <input type="hidden" name="postid" value="#{obj.id}"/>
+                <input type="hidden" name="method" value="#{method}"/>
+                <input type="hidden" name="cat" value="${obj.category}" id="cat">
+                <input type="text" name="tit" class="span7" required maxlength="100" value="${obj.title}" tabindex="2" placeholder="标题"/>
             </div>
-            <span class="help-inline">可选设置：<input type="text" id="password" class="input-medium" value="${obj.password}" maxlength="16" placeholder="设置阅读密码"/>
-            <label class="checkbox help-inline" style="padding-left:30px;"><?py ck = ['','checked'] ?><input id="clo" type="checkbox" tabindex="5" #{ck[obj.closecomment]}/> 关闭评论</label></span>
-        </div>
-    </div>
-    <div class="control-group">
-        <label class="control-label" for="tit">* 文章标题</label>
-        <div class="controls">
-            <input type="hidden" id="postid" name="postid" value="#{obj.id}"/>
-            <input type="hidden" id="method" name="method" value="#{method}"/>
-            <input type="text" id="tit" class="span8" required maxlength="100" value="${obj.title}" tabindex="2" placeholder="标题"/>
         </div>
     </div>
     <div class="control-group">
@@ -34,7 +31,7 @@
     <div class="control-group">
         <label class="control-label" for="tag">标签</label>
         <div class="controls">
-            <select data-placeholder="按住Ctrl可以选择多个标签，输入新标签后按空格键，推荐选择 10 个左右" id="tag" class="span8 chzn-select" multiple>
+            <select data-placeholder="按住Ctrl可以选择多个标签，输入新标签后按空格键，推荐选择 10 个左右" id="tag" name="tag" class="span8 chzn-select" multiple>
                 <option value=""></option>
                 <?py for tag in tags: ?>
                 <?py    if 0<=obj.tags.find(tag['name']): ?>
@@ -46,6 +43,24 @@
             </select>
         </div>
     </div>
+    <div class="row">
+        <div class="span3">
+            <div class="control-group">
+                <label class="control-label" for="clo">评论功能</label>
+                <div class="controls">
+                    <div class="switch switch-small"><?py ck = ['checked',''] ?><input id="clo" name="clo" type="checkbox" value="true" tabindex="5" #{ck[obj.closecomment]}/></div>
+                </div>
+            </div>
+        </div>
+        <div class="span3">
+            <div class="control-group">
+                <label class="control-label" for="password">阅读密码</label>
+                <div class="controls">
+                    <input type="text" id="password" name="password" class="input-medium" value="${obj.password}" maxlength="16"/>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="form-actions">
         <button type="submit" id="submit" class="btn btn-primary">保 存</button>
         <button type="reset" id="helper" class="btn">重 置</button>
@@ -55,7 +70,7 @@
 <hr/>
 <div class="well">
   <a class="pull-right" href="#">
-    <img class="media-object" src="/static/images/helper-girl.jpg">
+    <img class="media-object" src="#{{ STATIC_URL }}/static/images/helper-girl.jpg">
   </a>
   <h4>文章分类</h4>
   <p>1.可以选择已有的文章分类</p>
@@ -70,8 +85,8 @@
   <p>2.勾选“关闭评论”将禁止用户发表评论，已有评论也将不再显示</p>
   <p><a href="#top" class="btn btn-primary">我明白了</a></p>
 </div>
-<script type="text/javascript" src="/static/js/vender/chosen.jquery.min.js"></script>
-<script type="text/javascript" src="/static/kindeditor/kindeditor-min.js"></script>
+<script type="text/javascript" src="#{{ STATIC_URL }}/static/js/vender/chosen.jquery.min.js"></script>
+<script type="text/javascript" src="#{{ STATIC_URL }}/static/kindeditor/kindeditor-min.js"></script>
 <script type="text/javascript">
     $(function () {
         $("#post_page").addClass("active");
@@ -86,18 +101,11 @@
         });
         $('#myForm').submit(function () {
             editor.sync();
-            var id = $('#postid').val();
-            var cat = $('#cat').val().replace(/(^\s*)|(\s*$)/g, "");
-            var tit = $('#tit').val().replace(/(^\s*)|(\s*$)/g, "");
-            var con = $('#html').val().replace(/(^\s*)|(\s*$)/g, "");
-            var tag = $('#tag').val();
-            var password = $('#password').val().replace(/(^\s*)|(\s*$)/g, "");
             $('#submit').attr('disabled', 'disabled');
             $.ajax({
                 type: 'POST',
                 url: $('#method').val(),
-                dataType: "json",
-                data: {'id': id, 'cat': cat, 'clo': $('#clo').is(":checked"), 'tit': tit, 'con': con, 'tag': tag, 'password': password},
+                data: $('#myForm').serialize(),
                 success: function (data) {
                     bootbox.dialog(data.msg+"，请选择下一步操作：", [{
                         "label" : "新建文章",

@@ -23,24 +23,25 @@ class UploadHandler(BaseHandler):
 
         for dirfile in glob.glob(udir + '/*'):
             filesize = os.path.getsize(dirfile)
-        filetype = os.path.splitext(dirfile)[-1].lower()
-        filename = os.path.basename(dirfile)
-        datetime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(os.path.getctime(dirfile)))
-        if re.match('\.gif|\.jpg|\.jpeg|\.png|\.bmp', filetype):
-            is_photo = True
-        else:
-            is_photo = False
-        file_list = {
-            "is_dir": False,
-            "has_file": False,
-            "filesize": filesize,
-            "dir_path": "",
-            "is_photo": is_photo,
-            "filetype": filetype,
-            "filename": filename,
-            "datetime": datetime,
-        }
-        upload["file_list"].append(file_list)
+            filetype = os.path.splitext(dirfile)[-1].lower()
+            filename = os.path.basename(dirfile)
+            datetime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(os.path.getctime(dirfile)))
+            if re.match('\.gif|\.jpg|\.jpeg|\.png|\.bmp', filetype):
+                is_photo = True
+            else:
+                is_photo = False
+            file_list = {
+                "is_dir": False,
+                "has_file": False,
+                "filesize": filesize,
+                "dir_path": "",
+                "is_photo": is_photo,
+                "filetype": filetype,
+                "filename": filename,
+                "datetime": datetime,
+            }
+            upload["file_list"].append(file_list)
+
         upload = json.dumps(upload)
         self.write(upload)
 

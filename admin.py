@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import StringIO
 from hashlib import md5
-from time import time
+import re
+import time
 
 from PIL import Image
 import math
@@ -13,7 +14,6 @@ from helpers import generate_random
 from setting import *
 from extensions.imagelib import Recaptcha
 from model import Article, Comment, Link, Category, Tag, User, MyData, Archive
-
 
 try:
     import json
@@ -131,17 +131,18 @@ class FileUpload(BaseHandler):
 
             # if myfile.size > max_size:
             #     self.write(json.dumps(
-            #         { 'error': 1, 'message': u'上传的文件大小不能超过2.5MB'}
+            #         { 'error': 1, 'message': u'上传的文件大小不能超过 10 MB'}
             #     ))
             #     return
 
+            file_type = myfile['filename'].split('.')[-1].lower()
+            new_file_name = "%s.%s" % (str(int(time.time())), file_type)
+
             try:
-                file_type = myfile['filename'].split('.')[-1].lower()
-                new_file_name = "%s.%s" % (str(int(time())), file_type)
                 # 缩放图片
-                if file_type in ['jpg', 'jpeg', 'png', 'gif']:
+                if file_type in ['jpg', 'jpeg', 'png', 'gif', 'bmp']:
                     im = Image.open(StringIO.StringIO(myfile['body']))
-                    im.show()
+                    # im.show()
                     width, height = im.size
                     if width > 750:
                         ratio = 1.0 * height / width
@@ -152,15 +153,15 @@ class FileUpload(BaseHandler):
                         myfile['body'] = out.toString('jpeg', 'RGB')
                         file_type = 'jpg'
                         print 750, new_height
-                        new_file_name = "%s-thumb.%s" % (str(int(time())), file_type)
+                        new_file_name = "%s-thumb.%s" % (str(int(time.time())), file_type)
                     else:
                         pass
                 else:
                     pass
             except:
-                file_type = ''
-                new_file_name = str(int(time()))
-                ##
+                im.c
+                pass
+
             mime_type = myfile['content_type']
             encoding = None
             ###
@@ -189,13 +190,38 @@ class FileUpload(BaseHandler):
 class FileManager(BaseHandler):
     @authorized()
     def get(self):
-        self.set_header('Content-Type', 'text/html')
-        rspd = {'moveup_dir_path': '/', 'current_dir_path': '/'}
         file_list = get_saestorage()
-        rspd['current_url'] = '/'
-        rspd['total_count'] = len(file_list)
-        rspd['file_list'] = file_list
-        self.write(json.dumps(rspd))
+
+        upload = {
+            "moveup_dir_path": "",
+            "current_dir_path": "/stor-stub/attachment/",
+            "current_url": BASE_URL+"/stor-stub/attachment/",
+            "file_list": [],
+        }
+
+        for dirfile in file_list:
+            filesize = dirfile['length']
+            filetype = dirfile['name'].split('.')[-1].lower()
+            filename = dirfile['name']
+            datetime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(dirfile['datetime']))
+            if re.match('gif|jpg|jpeg|png|bmp', filetype):
+                is_photo = True
+            else:
+                is_photo = False
+            file_list = {
+                "is_dir": False,
+                "has_file": False,
+                "filesize": filesize,
+                "dir_path": "/stor-stub/attachment/",
+                "is_photo": is_photo,
+                "filetype": filetype,
+                "filename": filename,
+                "datetime": datetime,
+            }
+            upload["file_list"].append(file_list)
+
+        self.set_header("Content-Type", "application/json")
+        self.write(json.dumps(upload))
         return
 
 
@@ -290,14 +316,14 @@ class AddPost(BaseHandler):
         rspd = {'status': 201, 'msg': 'ok'}
 
         try:
-            tf = {'true': 1, 'false': 0}
-            timestamp = int(time())
+            tf = {'true': 0, 'false': 1}
+            timestamp = int(time.time())
             post_dic = {
-                'category': self.get_argument("cat"),
+                'category': self.get_argument("cat", '-'),
                 'title': self.get_argument("tit"),
                 'content': self.get_argument("con"),
                 'tags': ','.join(self.get_arguments("tag[]")),
-                'closecomment': tf[self.get_argument("clo", '0').lower()],
+                'closecomment': tf[self.get_argument("clo", 'false')],
                 'password': self.get_argument("password", ''),
                 'add_time': timestamp,
                 'edit_time': timestamp,
@@ -388,14 +414,14 @@ class EditPost(BaseHandler):
         oldobj = Article.get_article_by_id_edit(id)
 
         try:
-            tf = {'true': 1, 'false': 0}
-            timestamp = int(time())
+            tf = {'true': 0, 'false': 1}
+            timestamp = int(time.time())
             post_dic = {
-                'category': self.get_argument("cat"),
+                'category': self.get_argument("cat", '-'),
                 'title': self.get_argument("tit"),
                 'content': self.get_argument("con"),
                 'tags': ",".join(self.get_arguments("tag[]")),
-                'closecomment': self.get_argument("clo", 'false'),
+                'closecomment': tf[self.get_argument("clo", 'false')],
                 'password': self.get_argument("password", ''),
                 'edit_time': timestamp,
                 'id': id
@@ -409,7 +435,6 @@ class EditPost(BaseHandler):
                     pass
                 if tagslist:
                     post_dic['tags'] = ','.join(tagslist)
-            post_dic['closecomment'] = tf[post_dic['closecomment'].lower()]
         except:
             rspd['status'] = 500
             rspd['msg'] = '错误： 注意必填的三项'
@@ -943,7 +968,7 @@ class PingRPCTask(BaseHandler):
     def get(self):
         for n in range(len(XML_RPC_ENDPOINTS)):
             add_task('default', '%s/task/pingrpc/%d' % (BASE_URL, n))
-        self.write(str(time()))
+        self.write(str(time.time()))
 
     post = get
 
@@ -971,7 +996,7 @@ class PingRPC(BaseHandler):
         except:
             tip = 'ping erro'
 
-        self.write(str(time()) + ": " + tip)
+        self.write(str(time.time()) + ": " + tip)
         #add_task('default', '%s/task/sendmail'%BASE_URL, urlencode({'subject': tip, 'content': tip + " " + str(n)}))
 
     post = get

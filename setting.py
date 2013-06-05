@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from os import environ
 
-SAEPY_LOG_VERSION = '0.0.2'
+SAEPY_LOG_VERSION = '0.0.3'
 APP_NAME = environ.get("APP_NAME", "")
 
 if 'SERVER_SOFTWARE' in environ:
@@ -130,6 +130,7 @@ COOKIE_SECRET = '7nVA0WeZSJSzTCUF8UZB/C3OfLrl7k26iHxfnVa9x0I='
 
 if debug:
     BASE_URL = 'http://127.0.0.1:8080'
+    STATIC_URL = BASE_URL
     MYSQL_DB = 'app_cms4p'
     MYSQL_USER = 'root'
     MYSQL_PASS = 'hisense2002j'
@@ -138,6 +139,7 @@ if debug:
     MYSQL_PORT = '3306'
 else:
     BASE_URL = 'http://%s' % MAJOR_DOMAIN
+    STATIC_URL = 'http://cms4p.sinaapp.com'
 
 ###############################
 # REDIS_SERVER = False

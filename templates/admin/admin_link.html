@@ -47,7 +47,7 @@
 <hr id="helper"/>
 <div class="well">
   <a class="pull-right" href="#">
-    <img class="media-object" src="/static/images/helper-girl.jpg">
+    <img class="media-object" src="#{{ STATIC_URL }}/static/images/helper-girl.jpg">
   </a>
   <h4>新建/编辑友情链接</h4>
   <p>1.<strong>排序</strong> 用于确定友情链接的先后显示顺序，只接受 0~255 的数字</p>
@@ -61,7 +61,7 @@
   <p>3.本页最多显示 #{LINK_NUM} 条友情链接, 你可以在 <a href="/admin/setting3">系统设置</a> 里面修改</p>
   <p><a href="#top" class="btn btn-primary">我明白了</a></p>
 </div>
-<script type="text/javascript" src="/static/js/vender/template.min.js"></script>
+<script type="text/javascript" src="#{{ STATIC_URL }}/static/js/vender/template.min.js"></script>
 <script type="text/javascript">
     $(function () {
         $("#link_page").addClass("active");
