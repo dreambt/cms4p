@@ -132,7 +132,7 @@ COOKIE_SECRET = '7nVA0WeZSJSzTCUF8UZB/C3OfLrl7k26iHxfnVa9x0I='
 if debug:
     BASE_URL = 'http://127.0.0.1:8080'
     STATIC_URL = BASE_URL
-    MYSQL_DB = 'app_cms4p'
+    MYSQL_DB = 'app_cloudprint'
     MYSQL_USER = 'root'
     MYSQL_PASS = 'hisense2002j'
     MYSQL_HOST_M = '127.0.0.1'

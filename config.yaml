@@ -1,4 +1,4 @@
-name: cms4p
+name: cloudprint
 version: 5
 handle:
 - expire: if( path ~ "(.*)\.(js|css|jpg|png|gif|ico)" ) time 31536000

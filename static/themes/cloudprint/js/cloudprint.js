@@ -9,21 +9,11 @@ var config = {
     },
 
     subscription_form_tooltips: {
-
-        /* On successful subscription */
-        success: "You have been subscribed!",
-
-        /* On some unknown error */
-        default_error: "Error! Please, contact administration.",
-
-        /* When email field is empty */
-        empty_email: "Please, enter your email.",
-
-        /* When email is invalid (for example, there is no @ character in it) */
-        invalid_email: "Email is invalid. Please, enter valid email address.",
-
-        /* When submitted email is already on the list */
-        already_subscribed: "You are already subscribed."
+        success: "恭喜您，订阅成功!",
+        default_error: "抱歉，请稍后重试.",
+        empty_email: "请输入您的 Email 邮箱地址.",
+        invalid_email: "Email 邮箱地址格式貌似有点奇葩.",
+        already_subscribed: "您貌似已经订阅过了, 感谢您的关注."
     }
 }
 
@@ -103,7 +93,7 @@ $(function() {
                 'email': email,
                 'ajax': 1
             }, function(data) {
-                if(data.status == 'success') {
+                if(data.status == 200) {
                     changeFormState('success', messages['success']);
                 } else {
                     switch(data.error) {
