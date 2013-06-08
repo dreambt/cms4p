@@ -5,38 +5,20 @@ from datetime import datetime, timedelta
 
 from tornado import database
 
-from common import slugfy, time_from_now, cnnow, timestamp_to_datetime, safe_encode, getAttr
+from common import slugfy, time_from_now, cnnow, timestamp_to_datetime, safe_encode
 from setting import *
 
 
 ##
-##数据库配置信息
-if debug:
-    #已经在setting里设置了
-    pass
-else:
-    import sae.const
-
-    MYSQL_DB = sae.const.MYSQL_DB
-    MYSQL_USER = sae.const.MYSQL_USER
-    MYSQL_PASS = sae.const.MYSQL_PASS
-    MYSQL_HOST_M = sae.const.MYSQL_HOST
-    MYSQL_HOST_S = sae.const.MYSQL_HOST_S
-    MYSQL_PORT = sae.const.MYSQL_PORT
+HTML_REG = re.compile(r"""<[^>]+>""", re.I | re.M | re.S)
+CODE_RE = re.compile(r"""\[code\](.+?)\[/code\]""", re.I | re.M | re.S)
 
 #主数据库 进行Create,Update,Delete 操作
 #从数据库 读取
-
-##
-HTML_REG = re.compile(r"""<[^>]+>""", re.I | re.M | re.S)
-
 mdb = database.Connection("%s:%s" % (MYSQL_HOST_M, str(MYSQL_PORT)), MYSQL_DB, MYSQL_USER, MYSQL_PASS,
                           max_idle_time=MAX_IDLE_TIME)
 sdb = database.Connection("%s:%s" % (MYSQL_HOST_S, str(MYSQL_PORT)), MYSQL_DB, MYSQL_USER, MYSQL_PASS,
                           max_idle_time=MAX_IDLE_TIME)
-
-###
-CODE_RE = re.compile(r"""\[code\](.+?)\[/code\]""", re.I | re.M | re.S)
 
 
 def n2br(text):
@@ -189,13 +171,17 @@ class Article():
         sdb._ensure_connected()
         return post_list_format(sdb.query("SELECT * FROM `sp_posts` ORDER BY `id` DESC"))
 
-    def get_post_for_homepage(self, limit=EACH_PAGE_POST_NUM):
+    def get_post_for_homepage(self, limit=None):
+        if limit is None:
+            limit = getAttr('EACH_PAGE_POST_NUM')
         sdb._ensure_connected()
         return post_list_format(
             sdb.query("SELECT * FROM `sp_posts` ORDER BY `id` DESC LIMIT %s" % limit))
 
     # 分页
-    def get_paged(self, page=1, limit=getAttr('EACH_PAGE_POST_NUM')):
+    def get_paged(self, page=1, limit=None):
+        if limit is None:
+            limit = getAttr('EACH_PAGE_POST_NUM')
         limit = int(limit)
         sdb._ensure_connected()
         sql = "SELECT * FROM `sp_posts` ORDER BY `id` DESC LIMIT %s,%s" % ((int(page) - 1) * limit, limit)
@@ -259,7 +245,9 @@ class Comment():
         return sdb.query('SELECT COUNT(*) AS num FROM `sp_comments`')[0]['num']
 
     # 分页
-    def get_paged(self, page=1, limit=getAttr('ADMIN_COMMENT_NUM')):
+    def get_paged(self, page=1, limit=None):
+        if limit is None:
+            limit = getAttr('ADMIN_COMMENT_NUM')
         limit = int(limit)
         sdb._ensure_connected()
         sql = "SELECT * FROM `sp_comments` ORDER BY `id` DESC LIMIT %s,%s" % ((int(page) - 1) * limit, limit)
@@ -280,9 +268,11 @@ class Comment():
         sdb._ensure_connected()
         return sdb.get('SELECT * FROM `sp_comments` WHERE `id` = %s LIMIT 1' % str(id))
 
-    def get_recent_comments(self, limit=getAttr('RECENT_COMMENT_NUM')):
+    def get_recent_comments(self, limit=None):
+        if limit is None:
+            limit = getAttr('RECENT_COMMENT_NUM')
         sdb._ensure_connected()
-        return comment_format(sdb.query('SELECT * FROM `sp_comments` ORDER BY `id` DESC LIMIT %s' % str(limit)))
+        return comment_format(sdb.query('SELECT * FROM `sp_comments` ORDER BY `id` DESC LIMIT %s' % limit))
 
     def get_post_page_comments_by_id(self, postid=0, min_comment_id=0, limit=EACH_PAGE_COMMENT_NUM):
 
@@ -325,7 +315,9 @@ class Link():
         return sdb.query('SELECT * FROM `sp_links` ORDER BY `displayorder` DESC LIMIT %s' % str(limit))
 
     # 分页
-    def get_paged(self, page=1, limit=getAttr('ADMIN_LINK_NUM')):
+    def get_paged(self, page=1, limit=None):
+        if limit is None:
+            limit = getAttr('ADMIN_LINK_NUM')
         limit = int(limit)
         sdb._ensure_connected()
         sql = "SELECT * FROM `sp_links` ORDER BY `id` DESC LIMIT %s,%s" % ((int(page) - 1) * limit, limit)
@@ -359,7 +351,9 @@ class Category():
         return sdb.query('SELECT COUNT(*) AS num FROM `sp_category`')[0]['num']
 
     # 分页
-    def get_paged(self, page=1, limit=getAttr('ADMIN_CATEGORY_NUM')):
+    def get_paged(self, page=1, limit=None):
+        if limit is None:
+            limit = getAttr('ADMIN_CATEGORY_NUM')
         limit = int(limit)
         sql = "SELECT * FROM `sp_category` ORDER BY `id` DESC LIMIT %s,%s" % ((int(page) - 1) * limit, limit)
         sdb._ensure_connected()
@@ -403,7 +397,9 @@ class Category():
         else:
             return 0
 
-    def get_cat_page_posts(self, name='', page=1, limit=getAttr('EACH_PAGE_POST_NUM')):
+    def get_cat_page_posts(self, name='', page=1, limit=None):
+        if limit is None:
+            limit = getAttr('EACH_PAGE_POST_NUM')
         obj = self.get_by_name(name)
         if obj:
             page = int(page)
@@ -655,7 +651,9 @@ class User():
         return sdb.query('SELECT COUNT(*) AS num FROM `sp_user`')[0]['num']
 
     # 分页
-    def get_paged(self, page=1, limit=getAttr('ADMIN_USER_NUM')):
+    def get_paged(self, page=1, limit=None):
+        if limit is None:
+            limit = getAttr('ADMIN_USER_NUM')
         limit = int(limit)
         sdb._ensure_connected()
         return sdb.query("SELECT * FROM `sp_user` ORDER BY `id` DESC LIMIT %s,%s" % (

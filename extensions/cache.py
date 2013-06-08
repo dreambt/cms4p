@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-#coding=utf-8
+# -*- coding: utf-8 -*-
 """
     extensions.cache
 
@@ -16,6 +15,8 @@ import hashlib
 from time import time
 from itertools import izip
 from functools import wraps
+
+_author__ = 'baitao.ji'
 
 try:
     import cPickle as pickle

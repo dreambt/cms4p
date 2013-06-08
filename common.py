@@ -1,36 +1,17 @@
 # -*- coding: utf-8 -*-
-import gzip
 import re
 import os.path
 import traceback
 from urllib import unquote, quote
 from datetime import datetime, timedelta
-import cStringIO
-import requests
-
 import tornado.web
+from extensions.mail import sendEmail
 
 import tenjin
 from tenjin.helpers import *
 from setting import *
 
 from extensions.sessions import Session, RedisSession
-
-#KVDB 要在后台初始化
-import sae.kvdb
-
-kv = sae.kvdb.KVClient()
-
-#Memcache 是否可用、用户是否在后台初始化Memcache
-MC_Available = False
-if PAGE_CACHE:
-    import pylibmc
-
-    mc = pylibmc.Client() #只需初始化一次？
-    try:
-        MC_Available = mc.set('mc_available', '1', 3600)
-    except:
-        pass
 
 
 def slugfy(text, separator='-'):
@@ -74,7 +55,6 @@ def cnnow():
 
 
 def genArchive():
-    #return "201207"
     return cnnow().strftime("%Y%m")
 
 
@@ -121,22 +101,18 @@ def time_from_now(time):
 
 
 def clear_cache_by_pathlist(pathlist=[]):
-    if pathlist and MC_Available:
+    if pathlist:
         try:
-            mc = pylibmc.Client()
             mc.delete_multi([str(p) for p in pathlist])
         except:
             pass
 
 
 def clear_all_cache():
-    if PAGE_CACHE:
-        try:
-            mc = pylibmc.Client()
-            mc.flush_all()
-        except:
-            pass
-    else:
+    try:
+        mc = pylibmc.Client()
+        mc.flush_all()
+    except:
         pass
 
 
@@ -147,16 +123,12 @@ def format_date(dt):
 def memcached(key, cache_time=0, key_suffix_calc_func=None):
     def wrap(func):
         def cached_func(*args, **kw):
-            if not MC_Available:
-                return func(*args, **kw)
-
             key_with_suffix = key
             if key_suffix_calc_func:
                 key_suffix = key_suffix_calc_func(*args, **kw)
                 if key_suffix is not None:
                     key_with_suffix = '%s:%s' % (key, key_suffix)
 
-            mc = pylibmc.Client()
             value = mc.get(key_with_suffix)
             if value is None:
                 value = func(*args, **kw)
@@ -178,10 +150,6 @@ PV_RE = re.compile('<span class="categories greyhref">PageView.*?</span>', re.I)
 def pagecache(key="", time=86400, key_suffix_calc_func=None):
     def _decorate(method):
         def _wrapper(*args, **kwargs):
-            if not MC_Available:
-                method(*args, **kwargs)
-                return
-
             req = args[0]
 
             key_with_suffix = key
@@ -195,7 +163,6 @@ def pagecache(key="", time=86400, key_suffix_calc_func=None):
             else:
                 key_with_suffix = req.request.path
 
-            mc = pylibmc.Client()
             html = mc.get(key_with_suffix)
             # request_time = int(req.request.request_time() * 1000)
             if html:
@@ -407,39 +374,6 @@ def increment(keyname, num_shards=NUM_SHARDS, value=1):
     return count
 
 
-# 发送邮件
-def sendEmail(subject, html, to=None):
-    url = "https://sendcloud.sohu.com/webapi/mail.send.xml"
-    if to is None:
-        to = MAIL_TO
-    params = {
-        "api_user": getAttr('MAIL_FROM'),
-        "api_key": getAttr('MAIL_KEY'),
-        "to": to,
-        "from": getAttr('MAIL_FROM'),
-        "formname": getAttr('SITE_TITLE'),
-        "subject": subject,
-        "html": html
-    }
-    r = requests.post(url, params)
-    print r.text
-
-
-# 邮件 html 压缩
-def gzip_compress(content):
-    out = cStringIO.StringIO()
-    gzipfile = gzip.GzipFile(fileobj=out, mode='w', compresslevel=9)
-    gzipfile.write(content)
-    gzipfile.close()
-    out.seek(0)
-    byte = out.read(1)
-    byteArr = []
-    while byte:
-        byteArr.append(byte)
-        byte = out.read(1)
-    return bytearray(byteArr).decode('iso-8859-1')
-
-
 # 清空 KVDB 缓存
 def clearAllKVDB():
     total = get_count('Totalblog', NUM_SHARDS, 0)
@@ -447,18 +381,3 @@ def clearAllKVDB():
         keyname = 'pv_%d' % (loop)
         kv.delete(keyname)
     kv.delete('Totalblog')
-
-
-# 设置属性
-def getAttr(keyname):
-    value = mc.get(keyname)
-    if value is None:
-        value = kv.get(keyname)
-        if value:
-            mc.set(keyname, value, PAGE_CACHE_TIME)
-    return value
-
-
-def setAttr(keyname, value):
-    mc.set(keyname, value, PAGE_CACHE_TIME)
-    kv.set(keyname, value)

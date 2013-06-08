@@ -51,7 +51,6 @@ MAX_COMMENT_NUM_A_DAY = 30  # 客户端设置Cookie 限制每天发的评论数
 COMMENT_DEFAULT_VISIBLE = 1  # 0/1 #发表评论时是否显示 设为0时则需要审核才显示
 
 # 缓存相关
-PAGE_CACHE = True  # 本地没有 Memcache 服务
 PAGE_CACHE_TIME = 3600 * 24  # 默认页面缓存时间
 
 # 其他相关
@@ -87,27 +86,20 @@ else:
 
 ############## 下面不建议修改 ###########################
 
-#使用SAE Storage 服务（保存上传的附件），需在SAE管理面板创建
-STORAGE_DOMAIN_NAME = 'attachment'
-
 ###设置容易调用的jquery 文件
 JQUERY = "http://lib.sinaapp.com/js/jquery/1.6.2/jquery.min.js"
 
 COPY_YEAR = '2011 - 2013'
 
-MAJOR_DOMAIN = '%s.sinaapp.com' % APP_NAME #主域名，默认是SAE 的二级域名
+MAJOR_DOMAIN = '%s.sinaapp.com' % APP_NAME  # 主域名，默认是SAE 的二级域名
 #MAJOR_DOMAIN = 'www.yourdomain.com'
 
 ##博客使用的主题，目前可选 default/octopress/octopress-disqus
 ##你也可以把自己喜欢的wp主题移植过来，
 #制作方法参见 http://saepy.sinaapp.com/t/49
 THEME = 'sdyspj'
-THEME = 'cloudprint'
+#THEME = 'cloudprint'
 LANGUAGE = 'zh-CN'
-
-#使用disqus 评论系统，如果你使用就填 website shortname，
-#申请地址 http://disqus.com/
-DISQUS_WEBSITE_SHORTNAME = ''
 
 LINK_BROLL = [
     {"text": '思奇博客', "url": 'http://www.im47.cn'},
@@ -129,10 +121,14 @@ COOKIE_SECRET = '7nVA0WeZSJSzTCUF8UZB/C3OfLrl7k26iHxfnVa9x0I='
 #import uuid
 #print base64.b64encode(uuid.uuid4().bytes + uuid.uuid4().bytes)
 
+###############
+# MySQL 数据库 #
+###############
 if debug:
-    BASE_URL = 'http://127.0.0.1:8080'
+    BASE_URL = 'http://localhost:8080'
+    STATIC_URL = 'http://localhost:8080'
     STATIC_URL = BASE_URL
-    MYSQL_DB = 'app_cloudprint'
+    MYSQL_DB = 'app_cms4p'
     MYSQL_USER = 'root'
     MYSQL_PASS = 'hisense2002j'
     MYSQL_HOST_M = '127.0.0.1'
@@ -141,15 +137,98 @@ if debug:
 else:
     BASE_URL = 'http://%s' % MAJOR_DOMAIN
     STATIC_URL = 'http://cms4p.sinaapp.com'
+    import sae.const
 
-###############################
-# REDIS_SERVER = False
+    MYSQL_DB = sae.const.MYSQL_DB
+    MYSQL_USER = sae.const.MYSQL_USER
+    MYSQL_PASS = sae.const.MYSQL_PASS
+    MYSQL_HOST_M = sae.const.MYSQL_HOST
+    MYSQL_HOST_S = sae.const.MYSQL_HOST_S
+    MYSQL_PORT = sae.const.MYSQL_PORT
 
-# If set to None or 0 the session will be deleted when the user closes the browser.
-# If set number the session lives for value days.
-PERMANENT_SESSION_LIFETIME = 1  # days
+#########
+# 云存储 #
+#########
+#使用SAE Storage 服务（保存上传的附件），需在SAE管理面板创建
+DEFAULT_BUCKET = 'attachment'
+from sae.storage import Bucket
 
-# redis connection config
-REDIS_HOST = 'localhost'
-REDIS_PORT = 6379
-REDIS_DB = 0
+bucket = Bucket(DEFAULT_BUCKET).conn
+
+
+##############
+# MC 临时缓存 #
+##############
+import pylibmc
+
+mc = pylibmc.Client()
+
+##############
+# KV 永久缓存 #
+##############
+# if debug:
+#     REDIS_HOST = "127.0.0.1"
+#     REDIS_PORT = 9867
+#     kv = redis.Redis(host=REDIS_HOST, port=int(REDIS_PORT), db=0)
+# else:
+import sae.kvdb
+
+kv = sae.kvdb.KVClient()
+
+
+# 设置属性
+def getAttr(key, want=''):
+    value = mc.get(key)
+    if not value:
+        value = kv.get(key)
+        if not value:
+            setAttr(key, want)
+            value = want
+    return value
+
+
+def setAttr(key, value):
+    mc.set(key, value, PAGE_CACHE_TIME)
+    kv.set(key, value)
+
+
+# 初始化一些参数
+def Init():
+    getAttr('SITE_TITLE', SITE_TITLE)
+    getAttr('SITE_TITLE2', SITE_TITLE2)
+    getAttr('SITE_SUB_TITLE', SITE_SUB_TITLE)
+    getAttr('KEYWORDS', KEYWORDS)
+    getAttr('SITE_DECR', SITE_DECR)
+    getAttr('ADMIN_NAME', ADMIN_NAME)
+    getAttr('NOTICE_MAIL', NOTICE_MAIL)
+    getAttr('MOVE_SECRET', MOVE_SECRET)
+
+    getAttr('MAIL_FROM', MAIL_FROM)
+    getAttr('MAIL_SMTP', MAIL_SMTP)
+    getAttr('MAIL_PORT', MAIL_PORT)
+    getAttr('MAIL_KEY', MAIL_KEY)
+
+    getAttr('EACH_PAGE_POST_NUM', EACH_PAGE_POST_NUM)
+    getAttr('EACH_PAGE_COMMENT_NUM', EACH_PAGE_COMMENT_NUM)
+    getAttr('RELATIVE_POST_NUM', RELATIVE_POST_NUM)
+    getAttr('SHORTEN_CONTENT_WORDS', SHORTEN_CONTENT_WORDS)
+    getAttr('DESCRIPTION_CUT_WORDS', DESCRIPTION_CUT_WORDS)
+
+    getAttr('RECENT_COMMENT_NUM', RECENT_COMMENT_NUM)
+    getAttr('RECENT_COMMENT_CUT_WORDS', RECENT_COMMENT_CUT_WORDS)
+    getAttr('MAX_COMMENT_NUM_A_DAY', MAX_COMMENT_NUM_A_DAY)
+    getAttr('COMMENT_DEFAULT_VISIBLE', COMMENT_DEFAULT_VISIBLE)
+
+    getAttr('LINK_NUM', LINK_NUM)
+    getAttr('HOT_TAGS_NUM', HOT_TAGS_NUM)
+    getAttr('MAX_ARCHIVES_NUM', MAX_ARCHIVES_NUM)
+
+    getAttr('ANALYTICS_CODE', ANALYTICS_CODE)
+    getAttr('ADSENSE_CODE1', ADSENSE_CODE1)
+    getAttr('ADSENSE_CODE2', ADSENSE_CODE2)
+
+    getAttr('ADMIN_CATEGORY_NUM', ADMIN_CATEGORY_NUM)
+    getAttr('ADMIN_POST_NUM', ADMIN_POST_NUM)
+    getAttr('ADMIN_COMMENT_NUM', ADMIN_COMMENT_NUM)
+    getAttr('ADMIN_USER_NUM', ADMIN_USER_NUM)
+    getAttr('ADMIN_LINK_NUM', ADMIN_LINK_NUM)

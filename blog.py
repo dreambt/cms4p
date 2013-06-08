@@ -12,6 +12,7 @@ from common import BaseHandler, unquoted_unicode, safe_encode, pagecache, clear_
 
 from model import Article, Comment, Link, Category, Tag, Archive
 
+
 class HomePage(BaseHandler):
     @pagecache()
     def get(self):
@@ -54,7 +55,7 @@ class HomePage(BaseHandler):
 
 
 class IndexPage(BaseHandler):
-    @pagecache('post_list_index', getAttr('PAGE_CACHE_TIME'), lambda self, direction, page, base_id: page)
+    @pagecache('post_list_index', PAGE_CACHE_TIME, lambda self, direction, page, base_id: page)
     def get(self, direction='next', page='2', base_id='1'):
         if page == '1':
             self.redirect(BASE_URL)
@@ -106,7 +107,7 @@ class PostDetailShort(BaseHandler):
 
 
 class PostDetail(BaseHandler):
-    @pagecache('post', getAttr('PAGE_CACHE_TIME'), lambda self, id, title: id)
+    @pagecache('post', PAGE_CACHE_TIME, lambda self, id, title: id)
     def get(self, id='', title=''):
         tmpl = ''
         obj = Article.get_article_by_id_detail(id)
@@ -141,7 +142,7 @@ class PostDetail(BaseHandler):
         if obj.category == '-':
             template_prefix = 'page'
 
-        output = self.render(template_prefix+'%s.html' % tmpl, {
+        output = self.render(template_prefix + '%s.html' % tmpl, {
             'title': "%s - %s" % (obj.title, getAttr('SITE_TITLE')),
             'keywords': obj.keywords,
             'description': obj.description,
@@ -303,7 +304,7 @@ class CategoryDetailShort(BaseHandler):
 
 
 class CategoryDetail(BaseHandler):
-    @pagecache('cat', getAttr('PAGE_CACHE_TIME'), lambda self, name: name)
+    @pagecache('cat', PAGE_CACHE_TIME, lambda self, name: name)
     def get(self, name=''):
         objs = Category.get_cat_page_posts(name, 1)
         catobj = Category.get_by_name(name)
@@ -320,7 +321,7 @@ class CategoryDetail(BaseHandler):
         if all_post % each_page_post_num:
             all_page += 1
 
-        output = self.render(catobj.showtype+'.html', {
+        output = self.render(catobj.showtype + '.html', {
             'title': "%s - %s" % (catobj.name, getAttr('SITE_TITLE')),
             'keywords': catobj.name,
             'description': getAttr('SITE_DECR'),
@@ -341,7 +342,7 @@ class CategoryDetail(BaseHandler):
 
 
 class ArchiveDetail(BaseHandler):
-    @pagecache('archive', getAttr('PAGE_CACHE_TIME'), lambda self, name: name)
+    @pagecache('archive', PAGE_CACHE_TIME, lambda self, name: name)
     def get(self, name=''):
         if not name:
             print 'ArchiveDetail name null'
@@ -423,7 +424,7 @@ class TagDetail(BaseHandler):
 
 
 class ArticleList(BaseHandler):
-    @pagecache('post_list_tag', getAttr('PAGE_CACHE_TIME'), lambda self, list_type, direction, page, name: "%s_%s" % (name, page))
+    @pagecache('post_list_tag', PAGE_CACHE_TIME, lambda self, list_type, direction, page, name: "%s_%s" % (name, page))
     def get(self, list_type='', direction='next', page='1', name=''):
         catobj = None
         if list_type == 'cat':
@@ -449,7 +450,7 @@ class ArticleList(BaseHandler):
         if all_post % each_page_post_num:
             all_page += 1
 
-        output = self.render(show_type+'.html', {
+        output = self.render(show_type + '.html', {
             'title': "%s - %s | Part %s" % ( catobj.name, getAttr('SITE_TITLE'), page),
             'keywords': catobj.name,
             'description': getAttr('SITE_DECR'),
@@ -494,7 +495,7 @@ class Sitemap(BaseHandler):
 
 class Attachment(BaseHandler):
     def get(self, name):
-        self.redirect('http://%s-%s.stor.sinaapp.com/%s' % (APP_NAME, STORAGE_DOMAIN_NAME, unquoted_unicode(name)), 301)
+        self.redirect('http://%s-%s.stor.sinaapp.com/%s' % (APP_NAME, DEFAULT_BUCKET, unquoted_unicode(name)), 301)
         return
 
 ########

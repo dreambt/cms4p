@@ -5,6 +5,7 @@
                 <legend>文章相关</legend>
                 <div class="control-group">
                     <label class="control-label" for="input01">每页显示文章数</label>
+
                     <div class="controls">
                         <input type="number" name="EACH_PAGE_POST_NUM" value="#{getAttr('EACH_PAGE_POST_NUM')}"
                                class="input-xlarge" required min="1" id="input01" tabindex="1"/>
@@ -12,6 +13,7 @@
                 </div>
                 <div class="control-group">
                     <label class="control-label" for="input04">文章列表显示字符数</label>
+
                     <div class="controls">
                         <input type="number" name="SHORTEN_CONTENT_WORDS" value="#{getAttr('SHORTEN_CONTENT_WORDS')}"
                                class="input-xlarge" required min="1" id="input04" tabindex="4"/>
@@ -19,6 +21,7 @@
                 </div>
                 <div class="control-group">
                     <label class="control-label" for="input05">描述显示的字符数</label>
+
                     <div class="controls">
                         <input type="number" name="DESCRIPTION_CUT_WORDS" value="#{getAttr('DESCRIPTION_CUT_WORDS')}"
                                class="input-xlarge" required min="1" id="input05" tabindex="5"/>
@@ -26,6 +29,7 @@
                 </div>
                 <div class="control-group">
                     <label class="control-label" for="input03">显示相关文章数</label>
+
                     <div class="controls">
                         <input type="number" name="RELATIVE_POST_NUM" value="#{getAttr('RELATIVE_POST_NUM')}"
                                class="input-xlarge" required min="1" id="input03" tabindex="3"/>
@@ -36,6 +40,7 @@
                 <legend>留言相关</legend>
                 <div class="control-group">
                     <label class="control-label" for="input11">每页显示评论数</label>
+
                     <div class="controls">
                         <input type="number" name="EACH_PAGE_COMMENT_NUM" value="#{getAttr('EACH_PAGE_COMMENT_NUM')}"
                                class="input-xlarge" required min="1" id="input11" tabindex="11"/>
@@ -43,6 +48,7 @@
                 </div>
                 <div class="control-group">
                     <label class="control-label" for="input06">显示最近评论数</label>
+
                     <div class="controls">
                         <input type="number" name="RECENT_COMMENT_NUM" value="#{getAttr('RECENT_COMMENT_NUM')}"
                                class="input-xlarge" required min="1" id="input06" tabindex="15"/>
@@ -50,13 +56,16 @@
                 </div>
                 <div class="control-group">
                     <label class="control-label" for="input07">最近评论显示字符数</label>
+
                     <div class="controls">
-                        <input type="number" name="RECENT_COMMENT_CUT_WORDS" value="#{getAttr('RECENT_COMMENT_CUT_WORDS')}"
+                        <input type="number" name="RECENT_COMMENT_CUT_WORDS"
+                               value="#{getAttr('RECENT_COMMENT_CUT_WORDS')}"
                                class="input-xlarge" id="input07" required min="1" tabindex="17"/>
                     </div>
                 </div>
                 <div class="control-group">
                     <label class="control-label" for="input09">用户每天最大评论数</label>
+
                     <div class="controls">
                         <input type="number" name="MAX_COMMENT_NUM_A_DAY" value="#{getAttr('MAX_COMMENT_NUM_A_DAY')}"
                                class="input-xlarge" id="input09" required min="1" tabindex="18"/>
@@ -64,8 +73,10 @@
                 </div>
                 <div class="control-group">
                     <label class="control-label" for="input18">评论显示无需审核(0/1)</label>
+
                     <div class="controls">
-                        <input type="number" name="COMMENT_DEFAULT_VISIBLE" value="#{getAttr('COMMENT_DEFAULT_VISIBLE')}"
+                        <input type="number" name="COMMENT_DEFAULT_VISIBLE"
+                               value="#{getAttr('COMMENT_DEFAULT_VISIBLE')}"
                                class="input-xlarge" id="input18" required min="1" tabindex="19"/>
                     </div>
                 </div>
@@ -73,19 +84,10 @@
         </div>
         <div class="row">
             <div class="span6">
-                <legend>缓存相关</legend>
-                <div class="control-group">
-                    <label class="control-label" for="input10">页面缓存时间(小时)</label>
-                    <div class="controls">
-                        <input type="number" name="PAGE_CACHE_TIME" value="#{int(getAttr('PAGE_CACHE_TIME'))/3600}"
-                               class="input-xlarge" id="input10" required min="1" tabindex="21"/>
-                    </div>
-                </div>
-            </div>
-            <div class="span6">
                 <legend>其他杂项</legend>
                 <div class="control-group">
                     <label class="control-label" for="input08">边栏显示友情链接数</label>
+
                     <div class="controls">
                         <input type="number" name="LINK_NUM" value="#{getAttr('LINK_NUM')}" class="input-xlarge"
                                id="input08" required min="1" tabindex="31"/>
@@ -93,6 +95,7 @@
                 </div>
                 <div class="control-group">
                     <label class="control-label" for="input12">热门标签显示数</label>
+
                     <div class="controls">
                         <input type="number" name="HOT_TAGS_NUM" value="#{getAttr('HOT_TAGS_NUM')}"
                                class="input-xlarge" id="input12" required min="1" tabindex="31"/>
@@ -100,6 +103,7 @@
                 </div>
                 <div class="control-group">
                     <label class="control-label" for="input32">归档显示数</label>
+
                     <div class="controls">
                         <input type="number" name="MAX_ARCHIVES_NUM" value="#{getAttr('MAX_ARCHIVES_NUM')}"
                                class="input-xlarge" id="input32" required min="1" tabindex="32"/>
@@ -126,7 +130,7 @@
                 success: function () {
                     SiQiTip.show("success", "保存成功！");
                 },
-                error: function() {
+                error: function () {
                     SiQiTip.show("error", "保存失败！");
                 }
             });

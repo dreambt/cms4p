@@ -3,17 +3,19 @@ import StringIO
 from hashlib import md5
 import re
 import time
+import math
 
 from PIL import Image
-import math
 from tornado import escape
-import sae.storage
 
+import sae.storage
 from common import BaseHandler, authorized, safe_encode, clear_cache_by_pathlist, quoted_string, clear_all_cache, genArchive, setAttr, clearAllKVDB, set_count, increment, getAttr
+from extensions.mail import sendEmail
 from helpers import generate_random
 from setting import *
 from extensions.imagelib import Recaptcha
 from model import Article, Comment, Link, Category, Tag, User, MyData, Archive
+
 
 try:
     import json
@@ -25,17 +27,15 @@ if not debug:
     from sae.taskqueue import add_task
 
 
-def put_saestorage(file_name='', data='', expires='365', type=None, encoding=None, domain_name=STORAGE_DOMAIN_NAME):
-    s = sae.storage.Client()
+def put_saestorage(file_name='', data='', expires='365', type=None, encoding=None, domain_name=DEFAULT_BUCKET):
     ob = sae.storage.Object(data=data, cache_control='access plus %s day' % expires, content_type=type,
                             content_encoding=encoding)
     #return s.put(domain_name, str(datetime.now().strftime("%Y%m") + "/" + file_name), ob)
-    return s.put(domain_name, file_name, ob)
+    return bucket.put(domain_name, file_name, ob)
 
 
-def get_saestorage(domain_name=STORAGE_DOMAIN_NAME):
-    s = sae.storage.Client()
-    filelist = s.list(domain_name)
+def get_saestorage(domain_name=DEFAULT_BUCKET):
+    filelist = bucket.list(domain_name)
     total_count = filelist
     return filelist
 
@@ -195,7 +195,7 @@ class FileManager(BaseHandler):
         upload = {
             "moveup_dir_path": "",
             "current_dir_path": "/stor-stub/attachment/",
-            "current_url": BASE_URL+"/stor-stub/attachment/",
+            "current_url": BASE_URL + "/stor-stub/attachment/",
             "file_list": [],
         }
 
@@ -353,8 +353,9 @@ class AddPost(BaseHandler):
             rspd['method'] = "/admin/edit_post"
             clear_cache_by_pathlist(['/', 'cat:%s' % quoted_string(post_dic['category'])])
 
-            if not debug:
-                add_task('default', '/task/pingrpctask')
+            # 起任务通知收录
+            #if not debug:
+            #    add_task('default', '/task/pingrpctask')
 
             self.write(json.dumps(rspd))
             return
@@ -811,11 +812,6 @@ class BlogSetting3(BaseHandler):
         if COMMENT_DEFAULT_VISIBLE:
             setAttr('COMMENT_DEFAULT_VISIBLE', COMMENT_DEFAULT_VISIBLE)
 
-        # 缓存相关
-        PAGE_CACHE_TIME = int(self.get_argument("PAGE_CACHE_TIME", 1)) * 3600
-        if PAGE_CACHE_TIME:
-            setAttr('PAGE_CACHE_TIME', PAGE_CACHE_TIME)
-
         # 其他设置
         LINK_NUM = self.get_argument("LINK_NUM", '')
         if LINK_NUM:
@@ -1008,89 +1004,12 @@ class SendMail(BaseHandler):
         content = self.get_argument("content", '')
 
         if subject and content:
-            sae.mail.send_mail(getAttr('NOTICE_MAIL'), subject, content,
-                               (getAttr('MAIL_SMTP'), int(getAttr('MAIL_PORT')), getAttr('MAIL_FROM'),
-                                getAttr('MAIL_KEY'), True))
+            sendEmail(subject, content, getAttr('NOTICE_MAIL'))
 
-
-# 初始化一些参数
-def Init():
-    if not getAttr('SITE_TITLE'):
-        setAttr('SITE_TITLE', SITE_TITLE)
-    if not getAttr('SITE_TITLE2'):
-        setAttr('SITE_TITLE2', SITE_TITLE2)
-    if not getAttr('SITE_SUB_TITLE'):
-        setAttr('SITE_SUB_TITLE', SITE_SUB_TITLE)
-    if not getAttr('KEYWORDS'):
-        setAttr('KEYWORDS', KEYWORDS)
-    if not getAttr('SITE_DECR'):
-        setAttr('SITE_DECR', SITE_DECR)
-    if not getAttr('ADMIN_NAME'):
-        setAttr('ADMIN_NAME', ADMIN_NAME)
-    if not getAttr('NOTICE_MAIL'):
-        setAttr('NOTICE_MAIL', NOTICE_MAIL)
-    if not getAttr('MOVE_SECRET'):
-        setAttr('MOVE_SECRET', MOVE_SECRET)
-
-    if not getAttr('MAIL_FROM'):
-        setAttr('MAIL_FROM', MAIL_FROM)
-    if not getAttr('MAIL_SMTP'):
-        setAttr('MAIL_SMTP', MAIL_SMTP)
-    if not getAttr('MAIL_PORT'):
-        setAttr('MAIL_PORT', MAIL_PORT)
-    if not getAttr('MAIL_KEY'):
-        setAttr('MAIL_KEY', MAIL_KEY)
-
-    if not getAttr('EACH_PAGE_POST_NUM'):
-        setAttr('EACH_PAGE_POST_NUM', EACH_PAGE_POST_NUM)
-    if not getAttr('EACH_PAGE_COMMENT_NUM'):
-        setAttr('EACH_PAGE_COMMENT_NUM', EACH_PAGE_COMMENT_NUM)
-    if not getAttr('RELATIVE_POST_NUM'):
-        setAttr('RELATIVE_POST_NUM', RELATIVE_POST_NUM)
-    if not getAttr('SHORTEN_CONTENT_WORDS'):
-        setAttr('SHORTEN_CONTENT_WORDS', SHORTEN_CONTENT_WORDS)
-    if not getAttr('DESCRIPTION_CUT_WORDS'):
-        setAttr('DESCRIPTION_CUT_WORDS', DESCRIPTION_CUT_WORDS)
-
-    if not getAttr('RECENT_COMMENT_NUM'):
-        setAttr('RECENT_COMMENT_NUM', RECENT_COMMENT_NUM)
-    if not getAttr('RECENT_COMMENT_CUT_WORDS'):
-        setAttr('RECENT_COMMENT_CUT_WORDS', RECENT_COMMENT_CUT_WORDS)
-    if not getAttr('MAX_COMMENT_NUM_A_DAY'):
-        setAttr('MAX_COMMENT_NUM_A_DAY', MAX_COMMENT_NUM_A_DAY)
-    if not getAttr('COMMENT_DEFAULT_VISIBLE'):
-        setAttr('COMMENT_DEFAULT_VISIBLE', COMMENT_DEFAULT_VISIBLE)
-
-    if not getAttr('PAGE_CACHE_TIME'):
-        setAttr('PAGE_CACHE_TIME', PAGE_CACHE_TIME)
-
-    if not getAttr('LINK_NUM'):
-        setAttr('LINK_NUM', LINK_NUM)
-    if not getAttr('HOT_TAGS_NUM'):
-        setAttr('HOT_TAGS_NUM', HOT_TAGS_NUM)
-    if not getAttr('MAX_ARCHIVES_NUM'):
-        setAttr('MAX_ARCHIVES_NUM', MAX_ARCHIVES_NUM)
-
-    if not getAttr('ANALYTICS_CODE'):
-        setAttr('ANALYTICS_CODE', ANALYTICS_CODE)
-    if not getAttr('ADSENSE_CODE1'):
-        setAttr('ADSENSE_CODE1', ADSENSE_CODE1)
-    if not getAttr('ADSENSE_CODE2'):
-        setAttr('ADSENSE_CODE2', ADSENSE_CODE2)
-
-    if not getAttr('ADMIN_CATEGORY_NUM'):
-        setAttr('ADMIN_CATEGORY_NUM', ADMIN_CATEGORY_NUM)
-    if not getAttr('ADMIN_POST_NUM'):
-        setAttr('ADMIN_POST_NUM', ADMIN_POST_NUM)
-    if not getAttr('ADMIN_COMMENT_NUM'):
-        setAttr('ADMIN_COMMENT_NUM', ADMIN_COMMENT_NUM)
-    if not getAttr('ADMIN_COMMENT_NUM'):
-        setAttr('ADMIN_USER_NUM', ADMIN_USER_NUM)
-    if not getAttr('ADMIN_LINK_NUM'):
-        setAttr('ADMIN_LINK_NUM', ADMIN_LINK_NUM)
 
 class Install(BaseHandler):
     def get(self):
+        Init()
         self.echo('admin_install.html')
         # try:
         #     self.write('如果出现错误请尝试刷新本页。')
@@ -1158,7 +1077,7 @@ urls = [
     (r"/admin/setting2", BlogSetting2),
     (r"/admin/setting3", BlogSetting3),
     (r"/admin/setting4", BlogSetting4),
-    (r"/admin/setting5", BlogSetting5),  # 后台设置
+    (r"/admin/setting5", BlogSetting5), # 后台设置
     (r"/admin/profile", EditProfile),
     (r"/admin/kvdb", KVDBAdmin),
     (r"/admin/flushdata", FlushData),
