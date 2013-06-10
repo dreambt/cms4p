@@ -68,7 +68,7 @@ class Subscribe(BaseHandler):
 
 class Robots(BaseHandler):
     def get(self):
-        self.echo('robots.txt', {'cats': Category.get_by_id()})
+        self.echo('robots.txt', {'cats': Category.get_category()})
 
 
 class Sitemap(BaseHandler):

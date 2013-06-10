@@ -40,7 +40,7 @@ def Recaptcha(text):
 
     # push data
     strIO = StringIO.StringIO()
-    img.save(strIO, 'PNG')
+    img.create_category(strIO, 'PNG')
     strIO.seek(0)
     return strIO
 
@@ -113,7 +113,7 @@ class Thumbnail(object):
             mark.paste(logo, position)
             layer = Image.composite(mark, layer, mark)
 
-        layer.save(outfile, quality=100) # 保存
+        layer.create_category(outfile, quality=100) # 保存
         return outfile
 
     def get_font(self, fontname, fontsize):
@@ -204,7 +204,7 @@ class Thumbnail(object):
         draw.text(position, commission, (255, 224, 0), font=font_temp)
 
         del draw
-        layer.save(outfile, quality=100) # 保存
+        layer.create_category(outfile, quality=100) # 保存
         return outfile
 
 

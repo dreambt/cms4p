@@ -1,17 +1,39 @@
 # -*- coding: utf-8 -*-
+import gzip
 import re
 import os.path
 import traceback
 from urllib import unquote, quote
 from datetime import datetime, timedelta
+import cStringIO
+import requests
 import tornado.web
-from extensions.mail import sendEmail
 
 import tenjin
 from tenjin.helpers import *
 from setting import *
 
 from extensions.sessions import Session, RedisSession
+
+
+##############
+# KV 永久缓存 #
+##############
+# if debug:
+#     REDIS_HOST = "localhost"
+#     REDIS_PORT = 6379
+#     kv = redis.Redis(host=REDIS_HOST, port=int(REDIS_PORT), db=0)
+# else:
+import sae.kvdb
+
+kv = sae.kvdb.KVClient()
+
+##############
+# MC 临时缓存 #
+##############
+import pylibmc
+
+mc = pylibmc.Client()
 
 
 def slugfy(text, separator='-'):
@@ -308,6 +330,39 @@ def client_cache(seconds, privacy=None):
     return wrap
 
 
+# 发送邮件
+def sendEmail(subject, html, to=None):
+    url = "https://sendcloud.sohu.com/webapi/mail.send.xml"
+    if to is None:
+        to = MAIL_TO
+    params = {
+        "api_user": getAttr('MAIL_FROM'),
+        "api_key": getAttr('MAIL_KEY'),
+        "to": to,
+        "from": getAttr('MAIL_FROM'),
+        "formname": getAttr('SITE_TITLE'),
+        "subject": subject,
+        "html": html
+    }
+    r = requests.post(url, params)
+    print r.text
+
+
+# 邮件 html 压缩
+def gzip_compress(content):
+    out = cStringIO.StringIO()
+    gzipfile = gzip.GzipFile(fileobj=out, mode='w', compresslevel=9)
+    gzipfile.write(content)
+    gzipfile.close()
+    out.seek(0)
+    byte = out.read(1)
+    byteArr = []
+    while byte:
+        byteArr.append(byte)
+        byte = out.read(1)
+    return bytearray(byteArr).decode('iso-8859-1')
+
+
 # 以下是在SAE上的计数器实现
 import random
 
@@ -379,5 +434,21 @@ def clearAllKVDB():
     total = get_count('Totalblog', NUM_SHARDS, 0)
     for loop in range(0, total + 1):
         keyname = 'pv_%d' % (loop)
-        kv.delete(keyname)
-    kv.delete('Totalblog')
+        kv.delete_category(keyname)
+    kv.delete_category('Totalblog')
+
+
+# 设置属性
+def getAttr(key, want=''):
+    value = mc.get(key)
+    if not value:
+        value = kv.get(key)
+        if not value:
+            setAttr(key, want)
+            value = want
+    return value
+
+
+def setAttr(key, value):
+    mc.set(key, value, PAGE_CACHE_TIME)
+    kv.set(key, value)

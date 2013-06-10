@@ -33,11 +33,14 @@ __version__  = "$Release: 1.1.1 $"[10:-2]
 __license__  = "$License: MIT License $"[10:-2]
 __all__      = ('Template', 'Engine', )
 
-
-import sys, os, re, time, marshal
+import sys
+import os
+import re
+import marshal
 from time import time as _time
 from os.path import getmtime as _getmtime
 from os.path import isfile as _isfile
+
 random = pickle = unquote = None   # lazy import
 python3 = sys.version_info[0] == 3
 python2 = sys.version_info[0] == 2
@@ -110,7 +113,7 @@ def create_module(module_name, dummy_func=None, **kwargs):
         mod = imp.new_module(module_name)
 
     mod.__file__ = __file__
-    mod.__dict__.update(kwargs)
+    mod.__dict__.update_category(kwargs)
     sys.modules[module_name] = mod
     if dummy_func:
         exec(dummy_func.func_code, mod.__dict__)
@@ -1928,7 +1931,7 @@ class Engine(object):
         context = locals['_context']
         #: if kwargs specified then add them into context.
         if kwargs:
-            context.update(kwargs)
+            context.update_category(kwargs)
         #: get template object with context data and global vars.
         ## (context and globals are passed to get_template() only for preprocessing.)
         template = self.get_template(template_name, context, globals)

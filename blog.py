@@ -5,6 +5,7 @@ import json
 from hashlib import md5
 from time import time
 from urlparse import unquote
+from admin import DEFAULT_BUCKET
 
 from setting import *
 
@@ -17,7 +18,9 @@ class HomePage(BaseHandler):
     @pagecache()
     def get(self):
         try:
-            objs = Article.get_post_for_homepage()
+            news1 = Category.get_paged_posts('新闻资讯', 1)
+            news2 = Category.get_paged_posts('行业资讯', 1)
+            prods = Category.get_paged_posts('产品展示', 1)
         except:
             self.redirect('/install')
             return
@@ -98,7 +101,7 @@ class IndexPage(BaseHandler):
 class PostDetailShort(BaseHandler):
     @client_cache(600, 'public')
     def get(self, id=''):
-        obj = Article.get_article_by_id_simple(id)
+        obj = Article.get_article_simple(id)
         if obj:
             self.redirect('%s/topic/%d/%s' % (BASE_URL, obj.id, obj.title), 301)
             return
@@ -110,7 +113,7 @@ class PostDetail(BaseHandler):
     @pagecache('post', PAGE_CACHE_TIME, lambda self, id, title: id)
     def get(self, id='', title=''):
         tmpl = ''
-        obj = Article.get_article_by_id_detail(id)
+        obj = Article.get_article_detail(id)
         if not obj:
             self.redirect(BASE_URL)
             return
@@ -179,7 +182,7 @@ class PostDetail(BaseHandler):
                 return
 
             pw = self.get_argument("pw", '')
-            pobj = Article.get_article_by_id_simple(id)
+            pobj = Article.get_article_simple(id)
             if pw:
                 if pobj.password == pw:
                     clear_cache_by_pathlist(['post:%s' % id])
@@ -238,11 +241,11 @@ class PostDetail(BaseHandler):
             self.write(json.dumps(rspd))
             return
 
-        pobj = Article.get_article_by_id_simple(id)
+        pobj = Article.get_article_simple(id)
         if pobj and not pobj.closecomment:
-            cobjid = Comment.add_new_comment(post_dic)
+            cobjid = Comment.create_comment(post_dic)
             if cobjid:
-                Article.update_post_comment(pobj.comment_num + 1, id)
+                Article.update_comment_num(pobj.comment_num + 1, id)
                 self.set_secure_cookie("usercomnum", str(int(usercomnum) + 1), expires_days=1)
                 rspd['status'] = 200
                 rspd['msg'] = '恭喜您，已成功提交评论！'
@@ -269,7 +272,7 @@ class PostDetail(BaseHandler):
                         else:
                             tolist = []
                         if post_dic['toid']:
-                            tcomment = Comment.get_comment_by_id(post_dic['toid'])
+                            tcomment = Comment.get_comment(post_dic['toid'])
                             if tcomment and tcomment.email:
                                 tolist.append(tcomment.email)
                         commenturl = "%s/t/%s#r%s" % (BASE_URL, str(pobj.id), str(cobjid))
@@ -295,7 +298,7 @@ class PostDetail(BaseHandler):
 class CategoryDetailShort(BaseHandler):
     @client_cache(3600, 'public')
     def get(self, id=''):
-        obj = Category.get_cat_by_id(id)
+        obj = Category.get_category(id)
         if obj:
             self.redirect('%s/category/%s' % (BASE_URL, obj.name), 301)
             return
@@ -306,7 +309,7 @@ class CategoryDetailShort(BaseHandler):
 class CategoryDetail(BaseHandler):
     @pagecache('cat', PAGE_CACHE_TIME, lambda self, name: name)
     def get(self, name=''):
-        objs = Category.get_cat_page_posts(name, 1)
+        objs = Category.get_paged_posts(name, 1)
         catobj = Category.get_by_name(name)
 
         if catobj:
@@ -428,7 +431,7 @@ class ArticleList(BaseHandler):
     def get(self, list_type='', direction='next', page='1', name=''):
         catobj = None
         if list_type == 'cat':
-            objs = Category.get_cat_page_posts(name, page)
+            objs = Category.get_paged_posts(name, page)
             catobj = Category.get_by_name(name)
         elif list_type == 'tag':
             objs = Tag.get_tag_page_posts(name, page)
@@ -473,12 +476,12 @@ class ArticleList(BaseHandler):
 
 class Robots(BaseHandler):
     def get(self):
-        self.echo('robots.txt', {'cats': Category.get_by_id()})
+        self.echo('robots.txt', {'cats': Category.get_category()})
 
 
 class Feed(BaseHandler):
     def get(self):
-        posts = Article.get_post_for_homepage()
+        posts = Article.get_last_post()
         output = self.render('index.xml', {
             'posts': posts,
             'site_updated': Article.get_last_post_add_time(),

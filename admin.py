@@ -9,8 +9,7 @@ from PIL import Image
 from tornado import escape
 
 import sae.storage
-from common import BaseHandler, authorized, safe_encode, clear_cache_by_pathlist, quoted_string, clear_all_cache, genArchive, setAttr, clearAllKVDB, set_count, increment, getAttr
-from extensions.mail import sendEmail
+from common import BaseHandler, authorized, safe_encode, clear_cache_by_pathlist, quoted_string, clear_all_cache, genArchive, setAttr, clearAllKVDB, set_count, increment, getAttr, sendEmail
 from helpers import generate_random
 from setting import *
 from extensions.imagelib import Recaptcha
@@ -26,16 +25,27 @@ if not debug:
     import sae.mail
     from sae.taskqueue import add_task
 
+#########
+# 云存储 #
+#########
+#使用SAE Storage 服务（保存上传的附件），需在SAE管理面板创建
+DEFAULT_BUCKET = 'attachment'
+from sae.storage import Bucket
 
-def put_saestorage(file_name='', data='', expires='365', type=None, encoding=None, domain_name=DEFAULT_BUCKET):
-    ob = sae.storage.Object(data=data, cache_control='access plus %s day' % expires, content_type=type,
+bucket = Bucket(DEFAULT_BUCKET).conn
+
+
+def put_saestorage(file_name='', data='', expires='365', con_type=None, encoding=None, domain_name=DEFAULT_BUCKET):
+    s = sae.storage.Client()
+    ob = sae.storage.Object(data=data, cache_control='access plus %s day' % expires, content_type=con_type,
                             content_encoding=encoding)
     #return s.put(domain_name, str(datetime.now().strftime("%Y%m") + "/" + file_name), ob)
-    return bucket.put(domain_name, file_name, ob)
+    return s.put(domain_name, file_name, ob)
 
 
 def get_saestorage(domain_name=DEFAULT_BUCKET):
-    filelist = bucket.list(domain_name)
+    s = sae.storage.Client()
+    filelist = s.list(domain_name)
     total_count = filelist
     return filelist
 
@@ -84,7 +94,7 @@ class Login(BaseHandler):
                     return
             else:
                 # add new user
-                newuser = User.add_user(name, password)
+                newuser = User.create_user(name, password)
                 if newuser:
                     self.set_secure_cookie('username', name, expires_days=365)
                     self.set_secure_cookie('userpw', md5(password.encode('utf-8')).hexdigest(), expires_days=365)
@@ -168,7 +178,7 @@ class FileUpload(BaseHandler):
 
             try:
                 attachment_url = put_saestorage(file_name=new_file_name, data=myfile['body'], expires='365',
-                                                type=mime_type, encoding=encoding)
+                                                con_type=mime_type, encoding=encoding)
             except:
                 attachment_url = ''
 
@@ -234,14 +244,14 @@ class CategoryController(BaseHandler):
         obj = None
         if act == 'del':
             if id:
-                Category.delete(id)
+                Category.delete_category(id)
                 clear_cache_by_pathlist(['/'])
             self.set_header("Content-Type", "application/json")
             self.write(json.dumps("OK"))
             return
         elif act == 'edit':
             if id:
-                obj = Category.get_by_id(id)
+                obj = Category.get_category(id)
 
         # 分类列表
         page = self.get_argument("page", 1)
@@ -273,14 +283,14 @@ class CategoryController(BaseHandler):
 
         if id and (name or sort):
             if act == 'add':
-                Category.save(name)
+                Category.create_category(name)
 
             if act == 'edit':
                 params = {'id': id, 'name': name, 'showtype': showtype, 'displayorder': sort}
-                Category.update(params)
+                Category.update_category(params)
 
             if act == 'del':
-                Category.delete(id)
+                Category.delete_category(id)
 
             clear_cache_by_pathlist(['/'])
 
@@ -335,7 +345,7 @@ class AddPost(BaseHandler):
             self.write(json.dumps(rspd))
             return
 
-        postid = Article.add_new_article(post_dic)
+        postid = Article.create_article(post_dic)
         if postid:
             keyname = 'pv_%s' % (str(postid))
             set_count(keyname, 0, 0)
@@ -353,9 +363,8 @@ class AddPost(BaseHandler):
             rspd['method'] = "/admin/edit_post"
             clear_cache_by_pathlist(['/', 'cat:%s' % quoted_string(post_dic['category'])])
 
-            # 起任务通知收录
-            #if not debug:
-            #    add_task('default', '/task/pingrpctask')
+            if not debug:
+                add_task('default', '/task/pingrpctask')
 
             self.write(json.dumps(rspd))
             return
@@ -487,7 +496,7 @@ class DelPost(BaseHandler):
                 Category.remove_postid_from_cat(oldobj.category, str(id))
                 Archive.remove_postid_from_archive(oldobj.archive, str(id))
                 Tag.remove_postid_from_tags(set(oldobj.tags.split(',')), str(id))
-                Article.del_post_by_id(id)
+                Article.delete_post(id)
                 increment('Totalblog', NUM_SHARDS, -1)
                 cache_key_list = ['/', 'post:%s' % id, 'cat:%s' % quoted_string(oldobj.category)]
                 clear_cache_by_pathlist(cache_key_list)
@@ -507,11 +516,11 @@ class CommentController(BaseHandler):
         obj = None
         total = math.ceil(Comment.count_all() / float(getAttr('ADMIN_COMMENT_NUM')))
         if id:
-            obj = Comment.get_comment_by_id(id)
+            obj = Comment.get_comment(id)
             if obj:
                 act = self.get_argument("act", '')
                 if act == 'del':
-                    Comment.del_comment_by_id(id)
+                    Comment.delete_comment(id)
                     clear_cache_by_pathlist(['post:%d' % obj.postid])
                     self.set_header("Content-Type", "application/json")
                     self.write(json.dumps("OK"))
@@ -564,7 +573,7 @@ class CommentController(BaseHandler):
         }
         post_dic['visible'] = tf[post_dic['visible'].lower()]
 
-        Comment.update_comment_edit(post_dic)
+        Comment.update_comment(post_dic)
         clear_cache_by_pathlist(['post:%s' % id])
         self.redirect('%s/admin/comment/%s' % (BASE_URL, id))
         return
@@ -579,14 +588,14 @@ class LinkController(BaseHandler):
         obj = None
         if act == 'del':
             if id:
-                Link.del_link_by_id(id)
+                Link.delete_link(id)
                 clear_cache_by_pathlist(['/'])
             self.set_header("Content-Type", "application/json")
             self.write(json.dumps("OK"))
             return
         elif act == 'edit':
             if id:
-                obj = Link.get_link_by_id(id)
+                obj = Link.get_link(id)
                 clear_cache_by_pathlist(['/'])
 
         # 友情链接列表
@@ -621,10 +630,10 @@ class LinkController(BaseHandler):
         if name and url:
             params = {'id': id, 'name': name, 'url': url, 'displayorder': sort}
             if act == 'add':
-                Link.add_new_link(params)
+                Link.create_link(params)
 
             if act == 'edit':
-                Link.update_link_edit(params)
+                Link.update_link(params)
 
             clear_cache_by_pathlist(['/'])
 
@@ -637,7 +646,7 @@ class UserController(BaseHandler):
     def get(self, id=''):
         obj = None
         if id:
-            obj = User.get_user_by_id(id)
+            obj = User.get_user(id)
             if obj:
                 act = self.get_argument("act", '')
                 if act == 'del':
@@ -1005,6 +1014,48 @@ class SendMail(BaseHandler):
 
         if subject and content:
             sendEmail(subject, content, getAttr('NOTICE_MAIL'))
+
+
+# 初始化一些参数
+def Init():
+    getAttr('SITE_TITLE', SITE_TITLE)
+    getAttr('SITE_TITLE2', SITE_TITLE2)
+    getAttr('SITE_SUB_TITLE', SITE_SUB_TITLE)
+    getAttr('KEYWORDS', KEYWORDS)
+    getAttr('SITE_DECR', SITE_DECR)
+    getAttr('ADMIN_NAME', ADMIN_NAME)
+    getAttr('NOTICE_MAIL', NOTICE_MAIL)
+    getAttr('MOVE_SECRET', MOVE_SECRET)
+
+    getAttr('MAIL_FROM', MAIL_FROM)
+    getAttr('MAIL_SMTP', MAIL_SMTP)
+    getAttr('MAIL_PORT', MAIL_PORT)
+    getAttr('MAIL_KEY', MAIL_KEY)
+
+    getAttr('EACH_PAGE_POST_NUM', EACH_PAGE_POST_NUM)
+    getAttr('EACH_PAGE_COMMENT_NUM', EACH_PAGE_COMMENT_NUM)
+    getAttr('RELATIVE_POST_NUM', RELATIVE_POST_NUM)
+    getAttr('SHORTEN_CONTENT_WORDS', SHORTEN_CONTENT_WORDS)
+    getAttr('DESCRIPTION_CUT_WORDS', DESCRIPTION_CUT_WORDS)
+
+    getAttr('RECENT_COMMENT_NUM', RECENT_COMMENT_NUM)
+    getAttr('RECENT_COMMENT_CUT_WORDS', RECENT_COMMENT_CUT_WORDS)
+    getAttr('MAX_COMMENT_NUM_A_DAY', MAX_COMMENT_NUM_A_DAY)
+    getAttr('COMMENT_DEFAULT_VISIBLE', COMMENT_DEFAULT_VISIBLE)
+
+    getAttr('LINK_NUM', LINK_NUM)
+    getAttr('HOT_TAGS_NUM', HOT_TAGS_NUM)
+    getAttr('MAX_ARCHIVES_NUM', MAX_ARCHIVES_NUM)
+
+    getAttr('ANALYTICS_CODE', ANALYTICS_CODE)
+    getAttr('ADSENSE_CODE1', ADSENSE_CODE1)
+    getAttr('ADSENSE_CODE2', ADSENSE_CODE2)
+
+    getAttr('ADMIN_CATEGORY_NUM', ADMIN_CATEGORY_NUM)
+    getAttr('ADMIN_POST_NUM', ADMIN_POST_NUM)
+    getAttr('ADMIN_COMMENT_NUM', ADMIN_COMMENT_NUM)
+    getAttr('ADMIN_USER_NUM', ADMIN_USER_NUM)
+    getAttr('ADMIN_LINK_NUM', ADMIN_LINK_NUM)
 
 
 class Install(BaseHandler):

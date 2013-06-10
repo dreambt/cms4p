@@ -4,3 +4,6 @@ handle:
 - expire: if( path ~ "(.*)\.(js|css|jpg|png|gif|ico)" ) time 31536000
 - compress: if ( out_header["Content-Length"]>=1240 ) compress
 - hostaccess:  if(path ~ "/task/") allow "10.0.0.0/8"
+libraries:
+- name: tornado
+  version: "2.4.1"
