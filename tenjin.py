@@ -113,7 +113,7 @@ def create_module(module_name, dummy_func=None, **kwargs):
         mod = imp.new_module(module_name)
 
     mod.__file__ = __file__
-    mod.__dict__.update_category(kwargs)
+    mod.__dict__.update(kwargs)
     sys.modules[module_name] = mod
     if dummy_func:
         exec(dummy_func.func_code, mod.__dict__)
@@ -1931,7 +1931,7 @@ class Engine(object):
         context = locals['_context']
         #: if kwargs specified then add them into context.
         if kwargs:
-            context.update_category(kwargs)
+            context.update(kwargs)
         #: get template object with context data and global vars.
         ## (context and globals are passed to get_template() only for preprocessing.)
         template = self.get_template(template_name, context, globals)

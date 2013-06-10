@@ -154,53 +154,6 @@ class Article():
         sdb._ensure_connected()
         return sdb.query('SELECT COUNT(*) AS num FROM `sp_posts`')[0]['num']
 
-    def get_max_id(self):
-        sdb._ensure_connected()
-        maxobj = sdb.query("select max(id) as maxid from `sp_posts`")
-        return str(maxobj[0]['maxid'])
-
-    def get_last_post_add_time(self):
-        sdb._ensure_connected()
-        obj = sdb.get('SELECT `add_time` FROM `sp_posts` ORDER BY `id` DESC LIMIT 1')
-        if obj:
-            return datetime.fromtimestamp(obj.add_time)
-        else:
-            return datetime.utcnow() + timedelta(hours=+ 8)
-
-    def get_all_article(self):
-        sdb._ensure_connected()
-        return post_list_format(sdb.query("SELECT * FROM `sp_posts` ORDER BY `id` DESC"))
-
-    def get_last_post(self, limit=None):
-        if limit is None:
-            limit = getAttr('EACH_PAGE_POST_NUM')
-        sdb._ensure_connected()
-        return post_list_format(
-            sdb.query("SELECT * FROM `sp_posts` ORDER BY `id` DESC LIMIT %s" % limit))
-
-    # 分页
-    def get_paged(self, page=1, limit=None):
-        if limit is None:
-            limit = getAttr('EACH_PAGE_POST_NUM')
-        limit = int(limit)
-        sdb._ensure_connected()
-        sql = "SELECT * FROM `sp_posts` ORDER BY `id` DESC LIMIT %s,%s" % ((int(page) - 1) * limit, limit)
-        return sdb.query(sql)
-
-    def get_article_detail(self, id):
-        sdb._ensure_connected()
-        return post_detail_formate(sdb.get('SELECT * FROM `sp_posts` WHERE `id` = %s LIMIT 1' % str(id)))
-
-    def get_article_simple(self, id):
-        sdb._ensure_connected()
-        return sdb.get(
-            'SELECT `id`,`category`,`title`,`comment_num`,`closecomment`,`password` FROM `sp_posts` WHERE `id` = %s LIMIT 1' % str(
-                id))
-
-    def get_article_by_id_edit(self, id):
-        sdb._ensure_connected()
-        return sdb.get('SELECT * FROM `sp_posts` WHERE `id` = %s LIMIT 1' % str(id))
-
     def create_article(self, params):
         query = "INSERT INTO `sp_posts` (`category`,`title`,`content`,`closecomment`,`tags`,`password`,`add_time`,`edit_time`,`archive`) values(%s,%s,%s,%s,%s,%s,%s,%s,%s)"
         mdb._ensure_connected()
@@ -221,11 +174,6 @@ class Article():
         mdb._ensure_connected()
         return mdb.execute(query, num, id)
 
-    def get_post_for_sitemap(self, ids=[]):
-        sdb._ensure_connected()
-        return sdb.query("SELECT `id`,`edit_time` FROM `sp_posts` WHERE `id` in(%s) ORDER BY `id` DESC LIMIT %s" % (
-            ','.join(ids), str(len(ids))))
-
     def delete_post(self, id=''):
         if id:
             obj = self.get_article_simple(id)
@@ -234,6 +182,58 @@ class Article():
                 mdb._ensure_connected()
                 mdb.execute("DELETE FROM `sp_posts` WHERE `id` = %s LIMIT 1", id)
                 mdb.execute("DELETE FROM `sp_comments` WHERE `postid` = %s LIMIT %s", id, limit)
+
+    def get_article(self, id):
+        sdb._ensure_connected()
+        return sdb.get('SELECT * FROM `sp_posts` WHERE `id` = %s LIMIT 1' % str(id))
+
+    def get_all(self):
+        sdb._ensure_connected()
+        return post_list_format(sdb.query("SELECT * FROM `sp_posts` ORDER BY `id` DESC"))
+
+    # 分页
+    def get_paged(self, page=1, limit=None):
+        if limit is None:
+            limit = getAttr('EACH_PAGE_POST_NUM')
+        limit = int(limit)
+        sdb._ensure_connected()
+        sql = "SELECT * FROM `sp_posts` ORDER BY `id` DESC LIMIT %s,%s" % ((int(page) - 1) * limit, limit)
+        return sdb.query(sql)
+
+    def get_max_id(self):
+        sdb._ensure_connected()
+        maxobj = sdb.query("select max(id) as maxid from `sp_posts`")
+        return str(maxobj[0]['maxid'])
+
+    def get_last_post_add_time(self):
+        sdb._ensure_connected()
+        obj = sdb.get('SELECT `add_time` FROM `sp_posts` ORDER BY `id` DESC LIMIT 1')
+        if obj:
+            return datetime.fromtimestamp(obj.add_time)
+        else:
+            return datetime.utcnow() + timedelta(hours=+ 8)
+
+    def get_last_post(self, limit=None):
+        if limit is None:
+            limit = getAttr('EACH_PAGE_POST_NUM')
+        sdb._ensure_connected()
+        return post_list_format(
+            sdb.query("SELECT * FROM `sp_posts` ORDER BY `id` DESC LIMIT %s" % limit))
+
+    def get_article_detail(self, id):
+        sdb._ensure_connected()
+        return post_detail_formate(sdb.get('SELECT * FROM `sp_posts` WHERE `id` = %s LIMIT 1' % str(id)))
+
+    def get_article_simple(self, id):
+        sdb._ensure_connected()
+        return sdb.get(
+            'SELECT `id`,`category`,`title`,`comment_num`,`closecomment`,`password` FROM `sp_posts` WHERE `id` = %s LIMIT 1' % str(
+                id))
+
+    def get_post_for_sitemap(self, ids=[]):
+        sdb._ensure_connected()
+        return sdb.query("SELECT `id`,`edit_time` FROM `sp_posts` WHERE `id` in(%s) ORDER BY `id` DESC LIMIT %s" % (
+            ','.join(ids), str(len(ids))))
 
 
 Article = Article()
@@ -244,19 +244,24 @@ class Comment():
         sdb._ensure_connected()
         return sdb.query('SELECT COUNT(*) AS num FROM `sp_comments`')[0]['num']
 
-    # 分页
-    def get_paged(self, page=1, limit=None):
-        if limit is None:
-            limit = getAttr('ADMIN_COMMENT_NUM')
-        limit = int(limit)
-        sdb._ensure_connected()
-        sql = "SELECT * FROM `sp_comments` ORDER BY `id` DESC LIMIT %s,%s" % ((int(page) - 1) * limit, limit)
-        return comment_format_admin(sdb.query(sql))
+    def create_comment(self, params):
+        query = "INSERT INTO `sp_comments` (`postid`,`author`,`email`,`url`,`visible`,`add_time`,`content`) values(%s,%s,%s,%s,%s,%s,%s)"
+        mdb._ensure_connected()
+        return mdb.execute(query, params['postid'], params['author'], params['email'], params['url'], params['visible'],
+                           params['add_time'], params['content'])
+
+    def update_comment(self, params):
+        query = "UPDATE `sp_comments` SET `author` = %s, `email` = %s, `url` = %s, `visible` = %s, `content` = %s WHERE `id` = %s LIMIT 1"
+        mdb._ensure_connected()
+        mdb.execute(query, params['author'], params['email'], params['url'], params['visible'], params['content'],
+                    params['id'])
+        ### update 返回不了 lastrowid，直接返回 id
+        return params['id']
 
     def delete_comment(self, id):
         cobj = self.get_comment(id)
         postid = cobj.postid
-        pobj = Article.get_article_by_id_edit(postid)
+        pobj = Article.get_article(postid)
 
         mdb._ensure_connected()
         mdb.execute("DELETE FROM `sp_comments` WHERE `id` = %s LIMIT 1", id)
@@ -267,6 +272,15 @@ class Comment():
     def get_comment(self, id):
         sdb._ensure_connected()
         return sdb.get('SELECT * FROM `sp_comments` WHERE `id` = %s LIMIT 1' % str(id))
+
+    # 分页
+    def get_paged(self, page=1, limit=None):
+        if limit is None:
+            limit = getAttr('ADMIN_COMMENT_NUM')
+        limit = int(limit)
+        sdb._ensure_connected()
+        sql = "SELECT * FROM `sp_comments` ORDER BY `id` DESC LIMIT %s,%s" % ((int(page) - 1) * limit, limit)
+        return comment_format_admin(sdb.query(sql))
 
     def get_recent_comments(self, limit=None):
         if limit is None:
@@ -287,20 +301,6 @@ class Comment():
                 'SELECT * FROM `sp_comments` WHERE `postid`= %s AND `id` < %s ORDER BY `id` DESC LIMIT %s' % (
                     str(postid), str(min_comment_id), str(limit))))
 
-    def create_comment(self, params):
-        query = "INSERT INTO `sp_comments` (`postid`,`author`,`email`,`url`,`visible`,`add_time`,`content`) values(%s,%s,%s,%s,%s,%s,%s)"
-        mdb._ensure_connected()
-        return mdb.execute(query, params['postid'], params['author'], params['email'], params['url'], params['visible'],
-                           params['add_time'], params['content'])
-
-    def update_comment(self, params):
-        query = "UPDATE `sp_comments` SET `author` = %s, `email` = %s, `url` = %s, `visible` = %s, `content` = %s WHERE `id` = %s LIMIT 1"
-        mdb._ensure_connected()
-        mdb.execute(query, params['author'], params['email'], params['url'], params['visible'], params['content'],
-                    params['id'])
-        ### update 返回不了 lastrowid，直接返回 id
-        return params['id']
-
 
 Comment = Comment()
 
@@ -309,19 +309,6 @@ class Link():
     def count_all(self):
         sdb._ensure_connected()
         return sdb.query('SELECT COUNT(*) AS num FROM `sp_links`')[0]['num']
-
-    def get_all_links(self, limit=LINK_NUM):
-        sdb._ensure_connected()
-        return sdb.query('SELECT * FROM `sp_links` ORDER BY `displayorder` DESC LIMIT %s' % str(limit))
-
-    # 分页
-    def get_paged(self, page=1, limit=None):
-        if limit is None:
-            limit = getAttr('ADMIN_LINK_NUM')
-        limit = int(limit)
-        sdb._ensure_connected()
-        sql = "SELECT * FROM `sp_links` ORDER BY `id` DESC LIMIT %s,%s" % ((int(page) - 1) * limit, limit)
-        return sdb.query(sql)
 
     def create_link(self, params):
         query = "INSERT INTO `sp_links` (`displayorder`,`name`,`url`) values(%s,%s,%s)"
@@ -341,6 +328,19 @@ class Link():
         sdb._ensure_connected()
         return sdb.get('SELECT * FROM `sp_links` WHERE `id` = %s LIMIT 1' % str(id))
 
+    def get_all_links(self, limit=LINK_NUM):
+        sdb._ensure_connected()
+        return sdb.query('SELECT * FROM `sp_links` ORDER BY `displayorder` DESC LIMIT %s' % str(limit))
+
+    # 分页
+    def get_paged(self, page=1, limit=None):
+        if limit is None:
+            limit = getAttr('ADMIN_LINK_NUM')
+        limit = int(limit)
+        sdb._ensure_connected()
+        sql = "SELECT * FROM `sp_links` ORDER BY `id` DESC LIMIT %s,%s" % ((int(page) - 1) * limit, limit)
+        return sdb.query(sql)
+
 
 Link = Link()
 
@@ -349,6 +349,29 @@ class Category():
     def count_all(self):
         sdb._ensure_connected()
         return sdb.query('SELECT COUNT(*) AS num FROM `sp_category`')[0]['num']
+
+    def create_category(self, params):
+        mdb._ensure_connected()
+        query = "INSERT INTO `sp_category` (`name`,`showtype`,`displayorder`,`id_num`,`content`) values(%s,%s,%s,1,'')"
+        mdb.execute(query, params['name'], params['showtype'], params['displayorder'])
+
+    def update_cat(self, params):
+        mdb._ensure_connected()
+        query = "UPDATE `sp_category` SET `name`=%s, `showtype`=%s, `displayorder`=%s WHERE ID=%s"
+        mdb.execute(query, params['name'], params['showtype'], params['displayorder'], params['id'])
+
+    def delete_category(self, id):
+        mdb._ensure_connected()
+        query = "DELETE FROM `sp_category` WHERE `id`=%s"
+        mdb.execute(query, id)
+
+    def get_category(self, id=''):
+        sdb._ensure_connected()
+        return sdb.get('SELECT * FROM `sp_category` WHERE `id` = %s LIMIT 1' % str(id))
+
+    def get_all(self):
+        sdb._ensure_connected()
+        return sdb.query('SELECT * FROM `sp_category` ORDER BY `id` DESC')
 
     # 分页
     def get_paged(self, page=1, limit=None):
@@ -359,45 +382,7 @@ class Category():
         sdb._ensure_connected()
         return sdb.query(sql)
 
-    def create_category(self, params):
-        mdb._ensure_connected()
-        query = "INSERT INTO `sp_category` (`name`,`showtype`,`displayorder`,`id_num`,`content`) values(%s,%s,%s,1,'')"
-        mdb.execute(query, params['name'], params['showtype'], params['displayorder'])
-
-    def update_category(self, params):
-        mdb._ensure_connected()
-        query = "UPDATE `sp_category` SET `name`=%s, `showtype`=%s, `displayorder`=%s WHERE ID=%s"
-        mdb.execute(query, params['name'], params['showtype'], params['displayorder'], params['id'])
-
-    def delete_category(self, id):
-        mdb._ensure_connected()
-        query = "DELETE FROM `sp_category` WHERE `id`=%s"
-        mdb.execute(query, id)
-
-    def get_all_cat_name(self):
-        sdb._ensure_connected()
-        return sdb.query('SELECT `name`,`id_num` FROM `sp_category` WHERE id > 0 ORDER BY `id` DESC')
-
-    def get_all_cat(self):
-        sdb._ensure_connected()
-        return sdb.query('SELECT * FROM `sp_category` ORDER BY `id` DESC')
-
-    def get_category(self, id=''):
-        sdb._ensure_connected()
-        return sdb.get('SELECT * FROM `sp_category` WHERE `id` = %s LIMIT 1' % str(id))
-
-    def get_by_name(self, name=''):
-        sdb._ensure_connected()
-        return sdb.get('SELECT * FROM `sp_category` WHERE `name` = \'%s\' LIMIT 1' % name)
-
-    def get_all_post_num(self, name=''):
-        obj = self.get_by_name(name)
-        if obj and obj.content:
-            return len(obj.content.split(','))
-        else:
-            return 0
-
-    def get_paged_posts(self, name='', page=1, limit=None):
+    def get_paged_posts_by_name(self, name='', page=1, limit=None):
         if limit is None:
             limit = getAttr('EACH_PAGE_POST_NUM')
         obj = self.get_by_name(name)
@@ -413,9 +398,24 @@ class Category():
         else:
             return []
 
+    def get_all_cat_name(self):
+        sdb._ensure_connected()
+        return sdb.query('SELECT `name`,`id_num` FROM `sp_category` WHERE id > 0 ORDER BY `id` DESC')
+
+    def get_by_name(self, name=''):
+        sdb._ensure_connected()
+        return sdb.get('SELECT * FROM `sp_category` WHERE `name` = \'%s\' LIMIT 1' % name)
+
+    def get_all_post_num(self, name=''):
+        obj = self.get_by_name(name)
+        if obj and obj.content:
+            return len(obj.content.split(','))
+        else:
+            return 0
+
     def add_postid_to_cat(self, name='', postid=''):
         mdb._ensure_connected()
-        #因为 UPDATE 时无论有没有影响行数，都返回0，所以这里要多读一次（从主数据库读）
+        # 因为 UPDATE 时无论有没有影响行数，都返回0，所以这里要多读一次（从主数据库读）
         obj = mdb.get('SELECT * FROM `sp_category` WHERE `name` = \'%s\' LIMIT 1' % name)
 
         if obj:
@@ -643,31 +643,6 @@ class User():
         sdb._ensure_connected()
         return sdb.query('SELECT COUNT(*) AS num FROM `sp_user`')[0]['num']
 
-    # 分页
-    def get_paged(self, page=1, limit=None):
-        if limit is None:
-            limit = getAttr('ADMIN_USER_NUM')
-        limit = int(limit)
-        sdb._ensure_connected()
-        return sdb.query("SELECT * FROM `sp_user` ORDER BY `id` DESC LIMIT %s,%s" % (
-            (int(page) - 1) * limit, limit))
-
-    def check_has_user(self):
-        sdb._ensure_connected()
-        return sdb.get('SELECT `id` FROM `sp_user` LIMIT 1')
-
-    def get_all(self):
-        sdb._ensure_connected()
-        return sdb.query('SELECT * FROM `sp_user`')
-
-    def get_user(self, id):
-        sdb._ensure_connected()
-        return sdb.get('SELECT * FROM `sp_user` WHERE `id` = \'%d\' LIMIT 1' % id)
-
-    def get_user_by_name(self, name):
-        sdb._ensure_connected()
-        return sdb.get('SELECT * FROM `sp_user` WHERE `name` = \'%s\' LIMIT 1' % str(name))
-
     def create_user(self, name='', pw=''):
         if name and pw:
             query = "insert into `sp_user` (`name`,`password`) values(%s,%s)"
@@ -683,6 +658,31 @@ class User():
             return mdb.execute(query, md5(pw.encode('utf-8')).hexdigest(), name)
         else:
             return None
+
+    def get_user(self, id):
+        sdb._ensure_connected()
+        return sdb.get('SELECT * FROM `sp_user` WHERE `id` = \'%d\' LIMIT 1' % id)
+
+    def get_all(self):
+        sdb._ensure_connected()
+        return sdb.query('SELECT * FROM `sp_user`')
+
+    # 分页
+    def get_paged(self, page=1, limit=None):
+        if limit is None:
+            limit = getAttr('ADMIN_USER_NUM')
+        limit = int(limit)
+        sdb._ensure_connected()
+        return sdb.query("SELECT * FROM `sp_user` ORDER BY `id` DESC LIMIT %s,%s" % (
+            (int(page) - 1) * limit, limit))
+
+    def check_has_user(self):
+        sdb._ensure_connected()
+        return sdb.get('SELECT `id` FROM `sp_user` LIMIT 1')
+
+    def get_user_by_name(self, name):
+        sdb._ensure_connected()
+        return sdb.get('SELECT * FROM `sp_user` WHERE `name` = \'%s\' LIMIT 1' % str(name))
 
     def check_user(self, name='', pw=''):
         if name and pw:
@@ -708,6 +708,8 @@ class MyData():
         TRUNCATE TABLE `sp_tags`;
         TRUNCATE TABLE `sp_archive`;
         TRUNCATE TABLE `sp_user`;
+        TRUNCATE TABLE `sp_role`;
+        TRUNCATE TABLE `sp_user_role`;
         """
         mdb._ensure_connected()
         mdb.execute(sql)

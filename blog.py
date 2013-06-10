@@ -18,17 +18,12 @@ class HomePage(BaseHandler):
     @pagecache()
     def get(self):
         try:
-            news1 = Category.get_paged_posts('新闻资讯', 1)
-            news2 = Category.get_paged_posts('行业资讯', 1)
-            prods = Category.get_paged_posts('产品展示', 1)
+            news1 = Category.get_paged_posts_by_name('新闻资讯', 1)
+            news2 = Category.get_paged_posts_by_name('行业资讯', 1)
+            prods = Category.get_paged_posts_by_name('产品展示', 1)
         except:
             self.redirect('/install')
             return
-        if objs:
-            fromid = objs[0].id
-            endid = objs[-1].id
-        else:
-            fromid = endid = ''
 
         each_page_post_num = int(getAttr('EACH_PAGE_POST_NUM'))
         all_post = Article.count_all()
@@ -40,15 +35,15 @@ class HomePage(BaseHandler):
             'title': "%s - %s" % (getAttr('SITE_TITLE'), getAttr('SITE_SUB_TITLE')),
             'keywords': getAttr('KEYWORDS'),
             'description': getAttr('SITE_DECR'),
-            'objs': objs,
+            'news1': news1,
+            'news2': news2,
+            'prods': prods,
             'cats': Category.get_all_cat_name(),
             'tags': Tag.get_hot_tag_name(),
             'archives': Archive.get_all_archive_name(),
             'page': 1,
             'allpage': all_page,
             'listtype': 'index',
-            'fromid': fromid,
-            'endid': endid,
             'comments': Comment.get_recent_comments(),
             'links': Link.get_all_links(),
             'Totalblog': get_count('Totalblog', NUM_SHARDS, 0),
@@ -309,7 +304,7 @@ class CategoryDetailShort(BaseHandler):
 class CategoryDetail(BaseHandler):
     @pagecache('cat', PAGE_CACHE_TIME, lambda self, name: name)
     def get(self, name=''):
-        objs = Category.get_paged_posts(name, 1)
+        objs = Category.get_paged_posts_by_name(name, 1)
         catobj = Category.get_by_name(name)
 
         if catobj:
@@ -431,7 +426,7 @@ class ArticleList(BaseHandler):
     def get(self, list_type='', direction='next', page='1', name=''):
         catobj = None
         if list_type == 'cat':
-            objs = Category.get_paged_posts(name, page)
+            objs = Category.get_paged_posts_by_name(name, page)
             catobj = Category.get_by_name(name)
         elif list_type == 'tag':
             objs = Tag.get_tag_page_posts(name, page)

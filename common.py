@@ -9,8 +9,6 @@ import cStringIO
 import requests
 import tornado.web
 
-import tenjin
-from tenjin.helpers import *
 from setting import *
 
 from extensions.sessions import Session, RedisSession
@@ -25,6 +23,7 @@ from extensions.sessions import Session, RedisSession
 #     kv = redis.Redis(host=REDIS_HOST, port=int(REDIS_PORT), db=0)
 # else:
 import sae.kvdb
+import tenjin
 
 kv = sae.kvdb.KVClient()
 

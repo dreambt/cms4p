@@ -287,7 +287,7 @@ class CategoryController(BaseHandler):
 
             if act == 'edit':
                 params = {'id': id, 'name': name, 'showtype': showtype, 'displayorder': sort}
-                Category.update_category(params)
+                Category.update_cat(params)
 
             if act == 'del':
                 Category.delete_category(id)
@@ -402,7 +402,7 @@ class EditPost(BaseHandler):
     def get(self, id=''):
         obj = None
         if id:
-            obj = Article.get_article_by_id_edit(id)
+            obj = Article.get_article(id)
         self.echo('admin_post_edit.html', {
             'title': "编辑文章",
             'method': "/admin/edit_post/" + id,
@@ -421,7 +421,7 @@ class EditPost(BaseHandler):
 
         self.set_header('Content-Type', 'application/json')
         rspd = {'status': 201, 'msg': 'ok'}
-        oldobj = Article.get_article_by_id_edit(id)
+        oldobj = Article.get_article(id)
 
         try:
             tf = {'true': 0, 'false': 1}
@@ -492,7 +492,7 @@ class DelPost(BaseHandler):
     def get(self, id=''):
         try:
             if id:
-                oldobj = Article.get_article_by_id_edit(id)
+                oldobj = Article.get_article(id)
                 Category.remove_postid_from_cat(oldobj.category, str(id))
                 Archive.remove_postid_from_archive(oldobj.archive, str(id))
                 Tag.remove_postid_from_tags(set(oldobj.tags.split(',')), str(id))

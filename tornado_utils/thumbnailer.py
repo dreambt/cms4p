@@ -29,14 +29,14 @@ def get_thumbnail(save_path, image_data, (max_width, max_height),
     )
     format = None
     try:
-        image.create_category(save_path,
+        image.save(save_path,
                    format=format,
                    quality=quality,
                    optimize=1)
     except IOError:
         # Try again, without optimization (PIL can't optimize an image
         # larger than ImageFile.MAXBLOCK, which is 64k by default)
-        image.create_category(save_path,
+        image.save(save_path,
                    format=format,
                    quality=quality)
 

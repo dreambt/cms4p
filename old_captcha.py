@@ -146,7 +146,7 @@ class Code(object):
         del x
         del draw
         buf = StringIO.StringIO()
-        im.create_category(buf, 'gif')
+        im.save(buf, 'gif')
         buf.closed
         return HTTPResponse(buf.getvalue(), 'image/gif')
 
