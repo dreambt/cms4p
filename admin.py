@@ -73,6 +73,7 @@ class Login(BaseHandler):
         except:
             self.redirect('%s/admin/login' % BASE_URL)
             return
+
         if self.get_secure_cookie("captcha") != captcha:
             self.redirect('%s/admin/' % BASE_URL)
             return
@@ -763,20 +764,31 @@ class DelUser(BaseHandler):
 
 
 class RePassword(BaseHandler):
-    @authorized()
     def get(self):
-        name = self.get_argument("name")
-        email = self.get_argument("email")
+        self.echo('admin_repass.html')
+
+    def post(self):
+        self.set_header("Content-Type", "application/json")
+        try:
+            name = self.get_argument("name")
+            email = self.get_argument("email")
+            captcha = self.get_argument("captcha")
+        except:
+            self.write(json.dumps("用户名、邮箱、验证码均为必填项！"))
+            return
+
+        if self.get_secure_cookie("captcha") != captcha:
+            self.write(json.dumps("验证码填写错误！"))
+            return
+
         if name and email and User.check_name_email(name, email):
             pw = "".join(random.sample('zAyBxCwDvEuFtGsHrIqJpKoLnMmNlOkPjQiRhSgTfUeVdWcXbYaZ1928374650', 16))
             User.update_user(name, email, pw)
             sendEmail(u"密码重置通知 - " + SITE_TITLE, u"您的新密码是：" + pw + u"<br /><br />请及时登录并修改密码！", str(email))
 
-            self.set_header("Content-Type", "application/json")
             self.write(json.dumps("OK"))
             return
         else:
-            self.set_header("Content-Type", "application/json")
             self.write(json.dumps("重置密码失败！"))
             return
 
@@ -1218,7 +1230,7 @@ urls = [
     (r"/admin/setting2", BlogSetting2),
     (r"/admin/setting3", BlogSetting3),
     (r"/admin/setting4", BlogSetting4),
-    (r"/admin/setting5", BlogSetting5), # 后台设置
+    (r"/admin/setting5", BlogSetting5),  # 后台设置
     (r"/admin/profile", EditProfile),
     (r"/admin/kvdb", KVDBAdmin),
     (r"/admin/flushdata", FlushData),

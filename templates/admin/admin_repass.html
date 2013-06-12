@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>找回密码 - #{{ SITE_TITLE }}</title>
+    <link rel="shortcut icon" href="#{{ STATIC_URL }}/favicon.ico" type="image/x-icon"/>
+    <link rel="stylesheet" href="#{{ STATIC_URL }}/static/style/bootstrap.min.css" type="text/css"/>
+    <link rel="stylesheet" href="#{{ STATIC_URL }}/static/style/admin.css" type="text/css"/>
+    <!--[if lt IE 9]><script type="text/javascript" src="#{{ STATIC_URL }}/static/js/vender/jquery-1.10.1.min.js"></script><![endif]-->
+    <!--[if gte IE 9]><!--><script type="text/javascript" src="#{{ STATIC_URL }}/static/js/vender/jquery-2.0.2.min.js"></script><!--<![endif]-->
+</head>
+<body style="padding-bottom:0;background-color:#f5f5f5;">
+<div class="bb-alert alert" style="display:none;">
+    <span>默认提示信息</span>
+</div>
+<div class="container">
+    <form id="myForm" action="" method="post" class="form-signin">
+        <h2 class="form-signin-heading">找回密码</h2>
+        <input type="text" name="name" size="25" class="input-block-level required" required placeholder="Username">
+        <input type="text" name="email" size="25" class="input-block-level required" required placeholder="Email">
+        <div id="imgid" style="display:block;margin:1px 0 0 160px;position:absolute;z-index:999;"></div>
+        <input type="text" id="captcha" name='captcha' size="6" class="input-block-level required" required placeholder="Captcha" autocomplete="off">
+        <button class="btn btn-large btn-primary" type="submit">找回密码</button>
+        <button class="btn btn-large" onclick="window.location.href='/admin/login';">登录</button>
+    </form>
+</div>
+<script type="text/javascript" src="#{{ STATIC_URL }}/static/js/vender/bootstrap.min.js"></script>
+<script type="text/javascript" src="#{{ STATIC_URL }}/static/js/vender/bootbox.min.js"></script>
+<script type="text/javascript" src="#{{ STATIC_URL }}/static/js/custom.js"></script>
+<script>
+    $(function () {
+        //验证码点击时显示
+        $('#captcha').focus(function () {
+            var img = $("<img id='checkNum' alt='验证码' style='cursor:pointer;vertical-align:text-bottom;height:33px'/>");
+            img.attr("src", "/captcha/?seed=" + Math.random());
+            $('#imgid').append(img);
+        }).blur(function () {
+                    $('#imgid').contents().remove();
+                });
+        $('#myForm').submit(function () {
+            $('#submit').attr('disabled', 'disabled');
+            $.ajax({
+                type: 'POST',
+                data: $('#myForm').serialize(),
+                success: function (data) {
+                    if(data == "OK") {
+                        SiQiTip.show("success", "重置密码成功！请注意查收邮件！");
+                    }
+                    else {
+                        SiQiTip.show("error", data);
+                    }
+                    $('#submit').removeAttr('disabled');
+                }
+            });
+            return false;
+        });
+    });
+</script>
+</body>
+</html>

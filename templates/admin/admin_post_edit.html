@@ -126,9 +126,11 @@
                             window.location.href = "/admin/list_post";
                         }
                     }]);
+                    $('#submit').removeAttr('disabled');
                 },
                 error: function(){
                     SiQiTip.show("block", "服务器貌似出现问题，请稍后重试！");
+                    $('#submit').removeAttr('disabled');
                 }
             });
             return false;
