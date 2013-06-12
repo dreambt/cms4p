@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
+import random
 import re
+import time
 from hashlib import md5
 from datetime import datetime, timedelta
 
@@ -146,6 +148,12 @@ def comment_format_admin(objs):
         obj.content = obj.content.replace('\n', '<br/>')
     return objs
 
+
+def user_format(objs):
+    for obj in objs:
+        obj.gravatar = 'http://www.gravatar.com/avatar/%s' % md5(obj.name).hexdigest()  # TODO 改为 email
+    return objs
+
 ###以下是各个数据表的操作
 
 
@@ -169,23 +177,28 @@ class Article():
         ### update 返回不了 lastrowid，直接返回 post id
         return params['id']
 
-    def update_comment_num(self, num=1, id=''):
+    def update_post_edit_author(self, userid, author):
+        sql = "UPDATE `sp_posts` SET `author` = %s WHERE `id` = %s LIMIT 1" % (author, userid)
+        mdb._ensure_connected()
+        mdb.execute(sql)
+
+    def update_comment_num(self, num=1, userid=''):
         query = "UPDATE `sp_posts` SET `comment_num` = %s WHERE `id` = %s LIMIT 1"
         mdb._ensure_connected()
-        return mdb.execute(query, num, id)
+        return mdb.execute(query, num, userid)
 
-    def delete_post(self, id=''):
-        if id:
-            obj = self.get_article_simple(id)
+    def delete_post(self, userid=''):
+        if userid:
+            obj = self.get_article_simple(userid)
             if obj:
                 limit = obj.comment_num
                 mdb._ensure_connected()
-                mdb.execute("DELETE FROM `sp_posts` WHERE `id` = %s LIMIT 1", id)
-                mdb.execute("DELETE FROM `sp_comments` WHERE `postid` = %s LIMIT %s", id, limit)
+                mdb.execute("DELETE FROM `sp_posts` WHERE `id` = %s LIMIT 1", userid)
+                mdb.execute("DELETE FROM `sp_comments` WHERE `postid` = %s LIMIT %s", userid, limit)
 
-    def get_article(self, id):
+    def get_article(self, userid):
         sdb._ensure_connected()
-        return sdb.get('SELECT * FROM `sp_posts` WHERE `id` = %s LIMIT 1' % str(id))
+        return sdb.get('SELECT * FROM `sp_posts` WHERE `id` = %s LIMIT 1' % str(userid))
 
     def get_all(self):
         sdb._ensure_connected()
@@ -196,8 +209,14 @@ class Article():
         if limit is None:
             limit = getAttr('EACH_PAGE_POST_NUM')
         limit = int(limit)
-        sdb._ensure_connected()
         sql = "SELECT * FROM `sp_posts` ORDER BY `id` DESC LIMIT %s,%s" % ((int(page) - 1) * limit, limit)
+        sdb._ensure_connected()
+        return sdb.query(sql)
+
+    '''获取指定用户发表的所有文章'''
+    def get_article_by_author(self, author):
+        sql = "SELECT * FROM `sp_posts` where `author` = '%s'" % author
+        sdb._ensure_connected()
         return sdb.query(sql)
 
     def get_max_id(self):
@@ -220,15 +239,15 @@ class Article():
         return post_list_format(
             sdb.query("SELECT * FROM `sp_posts` ORDER BY `id` DESC LIMIT %s" % limit))
 
-    def get_article_detail(self, id):
+    def get_article_detail(self, userid):
         sdb._ensure_connected()
-        return post_detail_formate(sdb.get('SELECT * FROM `sp_posts` WHERE `id` = %s LIMIT 1' % str(id)))
+        return post_detail_formate(sdb.get('SELECT * FROM `sp_posts` WHERE `id` = %s LIMIT 1' % str(userid)))
 
-    def get_article_simple(self, id):
+    def get_article_simple(self, userid):
         sdb._ensure_connected()
         return sdb.get(
             'SELECT `id`,`category`,`title`,`comment_num`,`closecomment`,`password` FROM `sp_posts` WHERE `id` = %s LIMIT 1' % str(
-                id))
+                userid))
 
     def get_post_for_sitemap(self, ids=[]):
         sdb._ensure_connected()
@@ -643,25 +662,49 @@ class User():
         sdb._ensure_connected()
         return sdb.query('SELECT COUNT(*) AS num FROM `sp_user`')[0]['num']
 
-    def create_user(self, name='', pw=''):
-        if name and pw:
-            query = "insert into `sp_user` (`name`,`password`) values(%s,%s)"
+    def create_user(self, name='', email='', pw='', status=1):
+        if name and email and pw:
+            salt = ''.join(random.sample('zAyBxCwDvEuFtGsHrIqJpKoLnMmNlOkPjQiRhSgTfUeVdWcXbYaZ1928374650', 8))
+            pw += salt
+            timestamp = int(time.time())
+            sql = "insert into `sp_user` (`name`,`email`, `password`, `salt`, `status`, `add_time`, `edit_time`)"
+            sql += " values(%s,%s,%s,%s,%s,%s,%s)"
             mdb._ensure_connected()
-            return mdb.execute(query, name, md5(pw.encode('utf-8')).hexdigest())
+            return mdb.execute(sql, name, email, md5(pw.encode('utf-8')).hexdigest(), salt, status, timestamp, timestamp)
         else:
             return None
 
-    def update_user(self, name='', pw=''):
-        if name and pw:
-            query = "update `sp_user` set `password` = %s where `name` = %s LIMIT 1"
+    def delete_user(self, id):
+        mdb._ensure_connected()
+        query = "DELETE FROM `sp_user` WHERE `id`=%s"
+        mdb.execute(query, id)
+
+    def update_user(self, name='', email=None, pw=None, status=None):
+        if name:
+            timestamp = int(time.time())
+            sql = "update `sp_user` set `name`= \'%s\'" % name
+            if email is not None:
+                sql += ", `email` = \'%s\'" % email
+            if pw is not None:
+                salt = ''.join(random.sample('zAyBxCwDvEuFtGsHrIqJpKoLnMmNlOkPjQiRhSgTfUeVdWcXbYaZ1928374650', 8))
+                pw += salt
+                sql += ", `password` = \'%s\', `salt` = \'%s\'" % (md5(pw.encode('utf-8')).hexdigest(), salt)
+            if status is not None:
+                sql += ", `status` = %s" % status
+            sql += ", `edit_time` = %s where `name` = \'%s\' LIMIT 1" % (timestamp, name)
             mdb._ensure_connected()
-            return mdb.execute(query, md5(pw.encode('utf-8')).hexdigest(), name)
+            return mdb.execute(sql)
         else:
             return None
+
+    def update_user_audit(self, id, status=''):
+        sql = "update `sp_user` set `status` = %s where `id` = %s LIMIT 1"
+        mdb._ensure_connected()
+        return mdb.execute(sql, status, id)
 
     def get_user(self, id):
         sdb._ensure_connected()
-        return sdb.get('SELECT * FROM `sp_user` WHERE `id` = \'%d\' LIMIT 1' % id)
+        return sdb.get('SELECT * FROM `sp_user` WHERE `id` = %s LIMIT 1' % id)
 
     def get_all(self):
         sdb._ensure_connected()
@@ -673,8 +716,8 @@ class User():
             limit = getAttr('ADMIN_USER_NUM')
         limit = int(limit)
         sdb._ensure_connected()
-        return sdb.query("SELECT * FROM `sp_user` ORDER BY `id` DESC LIMIT %s,%s" % (
-            (int(page) - 1) * limit, limit))
+        sql = "SELECT * FROM `sp_user` ORDER BY `id` DESC LIMIT %s,%s" % ((int(page) - 1) * limit, limit)
+        return user_format(sdb.query(sql))
 
     def check_has_user(self):
         sdb._ensure_connected()
@@ -682,7 +725,16 @@ class User():
 
     def get_user_by_name(self, name):
         sdb._ensure_connected()
-        return sdb.get('SELECT * FROM `sp_user` WHERE `name` = \'%s\' LIMIT 1' % str(name))
+        return sdb.get('SELECT * FROM `sp_user` WHERE `name` = \'%s\' LIMIT 1' % name)
+
+    def check_name_email(self, name='', email=''):
+        sql = "SELECT * FROM `sp_user` WHERE `name` = %s and `email` = %s LIMIT 1"
+        sdb._ensure_connected()
+        user = sdb.get(sql, name, email)
+        if user:
+            return True
+        else:
+            return False
 
     def check_user(self, name='', pw=''):
         if name and pw:
@@ -766,6 +818,7 @@ CREATE TABLE IF NOT EXISTS `sp_posts` (
   `id` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
   `category` varchar(17) NOT NULL DEFAULT '',
   `title` varchar(100) NOT NULL DEFAULT '',
+  `author` varchar(20) NOT NULL DEFAULT '',
   `content` mediumtext NOT NULL,
   `comment_num` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `closecomment` tinyint(1) NOT NULL DEFAULT '0',
@@ -793,7 +846,12 @@ DROP TABLE IF EXISTS `sp_user`;
 CREATE TABLE IF NOT EXISTS `sp_user` (
   `id` smallint(6) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(20) NOT NULL DEFAULT '',
+  `email` varchar(40) NOT NULL DEFAULT '',
   `password` varchar(32) NOT NULL DEFAULT '',
+  `salt` varchar(8) NOT NULL DEFAULT '',
+  `status` tinyint(1) NOT NULL DEFAULT '0',
+  `add_time` int(10) unsigned NOT NULL DEFAULT '0',
+  `edit_time` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 

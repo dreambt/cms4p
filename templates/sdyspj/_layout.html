@@ -152,9 +152,9 @@
             var top = $(document).scrollTop();
             var g = $("#toTop");
             if (top > 300 && g.is(":hidden")) {
-                g.fadeIn();
+                g.fadeIn(1500);
             } else if (top < 300 && g.is(":visible")) {
-                g.fadeOut();
+                g.fadeOut(1500);
             }
         });
         // fix sub nav on scroll

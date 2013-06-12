@@ -12,6 +12,7 @@
 import os
 import random
 import StringIO
+import ImageFilter
 
 from PIL import Image
 from PIL import ImageFont
@@ -22,25 +23,69 @@ root_path = os.path.dirname(__file__)
 
 
 def Recaptcha(text):
-    img = Image.new('RGB', size=(110, 26), color=(255, 255, 255))
+    img_width = 100
+    img_height = 30
+    font_size = 25
+    font_style = random.choice(
+        ['AGENTRED.TTF', 'CRUSOGP.TTF', 'FontfabricFree.otf', 'FacesAndCaps.ttf', 'KINKEE.TTF', 'VITAMINOUTLINE.TTF'])
+    font = ImageFont.truetype(os.path.join(os.path.dirname(__file__), font_style), font_size)
+    #background = (random.randrange(230, 255), random.randrange(230, 255), random.randrange(230, 255))
+    colors = [
+        (random.randrange(0, 127), random.randrange(0, 127), random.randrange(128, 255)),
+        (random.randrange(0, 127), random.randrange(128, 255), random.randrange(0, 127)),
+        (random.randrange(128, 255), random.randrange(0, 127), random.randrange(0, 127)),
+        # (255, 116, 0),
+        # (255, 0, 132),
+        # (250, 125, 30),
+        # (210, 30, 90),
+        # (205, 235, 139),
+        # (195, 217, 255),
+        # (95, 0, 16),
+        # (64, 150, 238),
+        # (64, 25, 90),
+        # (15, 65, 150),
+        # (10, 120, 40),
+    ]
 
-    # set font
-    font = ImageFont.truetype(os.path.join(os.path.dirname(__file__), 'FacesAndCaps.ttf'), 25)
+    img = Image.new('RGB', size=(img_width, img_height), color=(255, 255, 255))
     draw = ImageDraw.Draw(img)
-    colors = [(250, 125, 30), (15, 65, 150), (210, 30, 90), (64, 25, 90), (10, 120, 40), (95, 0, 16)]
+
+    # 画随机干扰线,字数越少,干扰线越多
+    c = int(8 / len(text) * 5) or 5
+    for i in range(random.randrange(c - 2, c)):
+        line_color = (random.randrange(180, 255), random.randrange(180, 255), random.randrange(180, 255))
+        xy = (
+            random.randrange(0, int(img_width * 0.2)),
+            random.randrange(0, img_height),
+            random.randrange(3 * img_width / 4, img_width),
+            random.randrange(0, img_height)
+        )
+        draw.line(xy, fill=line_color, width=int(font_size * 0.01))
+        #draw.arc(xy, fill=line_color, width=int(font_size * 0.1))
+        draw.arc(xy, 0, 5400, fill=line_color)
 
     # write text
     for i, s in enumerate(text):
-        position = (i * 25 + 4, 0)
+        position = (i * 25 + 4, random.randint(0, 6))
         draw.text(position, s, fill=random.choice(colors), font=font)
 
+    # 干扰点
+    for w in xrange(img_width):
+        for h in xrange(img_height):
+            tmp = random.randint(0, 93) / 3
+            if tmp > img_height:
+                draw.point((w, h), fill=(0, 0, 0))
+
     # set border
-    #draw.line([(0,0),(99,0),(99,29),(0,29),(0,0)], fill=(180,180,180))
+    #draw.line([(0, 0), (99, 0), (99, 29), (0, 29), (0, 0)], fill=(180, 180, 180))
     del draw
+
+    img = img.filter(ImageFilter.EDGE_ENHANCE_MORE)  # 滤镜，边界加强（阈值更大）
 
     # push data
     strIO = StringIO.StringIO()
-    img.create_category(strIO, 'PNG')
+    #img.save(strIO, 'JPEG', quality=95)
+    img.save(strIO, 'PNG')
     strIO.seek(0)
     return strIO
 
@@ -82,23 +127,20 @@ class Thumbnail(object):
             print 'must be have a image to process'
             return
 
-        if not outfile:
-            outfile = self.path
-
-        #原图复制
+        # 原图复制
         part = self.img
-        part.thumbnail(size, Image.ANTIALIAS) # 按比例缩略
+        part.thumbnail(size, Image.ANTIALIAS)  # 按比例缩略
 
-        size = size if bg else part.size # 如果没有白底则正常缩放
+        size = size if bg else part.size  # 如果没有白底则正常缩放
         w, h = size
 
-        layer = Image.new('RGBA', size, (255, 255, 255)) # 白色底图
+        layer = Image.new('RGBA', size, (255, 255, 255))  # 白色底图
 
         # 计算粘贴的位置
         pw, ph = part.size
         left = (h - ph) / 2
         upper = (w - pw) / 2
-        layer.paste(part, (upper, left)) # 粘贴原图
+        layer.paste(part, (upper, left))  # 粘贴原图
 
         # 如果有watermark参数则加水印
         if watermark:
@@ -113,7 +155,13 @@ class Thumbnail(object):
             mark.paste(logo, position)
             layer = Image.composite(mark, layer, mark)
 
-        layer.create_category(outfile, quality=100) # 保存
+        if not outfile:
+            outfile = StringIO.StringIO()
+            layer.save(outfile, quality=100)
+            outfile.seek(0)
+        else:
+            layer.save(outfile, quality=100)
+
         return outfile
 
     def get_font(self, fontname, fontsize):
@@ -204,7 +252,7 @@ class Thumbnail(object):
         draw.text(position, commission, (255, 224, 0), font=font_temp)
 
         del draw
-        layer.create_category(outfile, quality=100) # 保存
+        layer.save(outfile, quality=100)
         return outfile
 
 

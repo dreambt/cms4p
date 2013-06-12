@@ -18,9 +18,9 @@ class HomePage(BaseHandler):
     @pagecache()
     def get(self):
         try:
-            news1 = Category.get_paged_posts_by_name('新闻资讯', 1)
-            news2 = Category.get_paged_posts_by_name('行业资讯', 1)
-            prods = Category.get_paged_posts_by_name('产品展示', 1)
+            news1 = Category.get_paged_posts_by_name('新闻资讯')
+            news2 = Category.get_paged_posts_by_name('行业资讯')
+            prods = Category.get_paged_posts_by_name('产品展示')
         except:
             self.redirect('/install')
             return

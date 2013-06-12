@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
 import StringIO
 from hashlib import md5
+import random
 import re
 import time
 import math
 
-from PIL import Image
+from sae.storage import Bucket
 from tornado import escape
+import tornado
+from tornado.database import OperationalError
 
-import sae.storage
 from common import BaseHandler, authorized, safe_encode, clear_cache_by_pathlist, quoted_string, clear_all_cache, genArchive, setAttr, clearAllKVDB, set_count, increment, getAttr, sendEmail
 from helpers import generate_random
 from setting import *
-from extensions.imagelib import Recaptcha
+from extensions.imagelib import Recaptcha, Thumbnail
 from model import Article, Comment, Link, Category, Tag, User, MyData, Archive
 
 
@@ -25,28 +27,24 @@ if not debug:
     import sae.mail
     from sae.taskqueue import add_task
 
-#########
-# 云存储 #
-#########
-#使用SAE Storage 服务（保存上传的附件），需在SAE管理面板创建
-DEFAULT_BUCKET = 'attachment'
-from sae.storage import Bucket
-
-bucket = Bucket(DEFAULT_BUCKET).conn
+bucket = Bucket(DEFAULT_BUCKET)
 
 
 def put_saestorage(file_name='', data='', expires='365', con_type=None, encoding=None, domain_name=DEFAULT_BUCKET):
-    s = sae.storage.Client()
-    ob = sae.storage.Object(data=data, cache_control='access plus %s day' % expires, content_type=con_type,
-                            content_encoding=encoding)
+    bucket.put_object(file_name, data)
+    return bucket.generate_url(file_name)
+    #s = sae.storage.Client()
+    #ob = sae.storage.Object(data=data, cache_control='access plus %s day' % expires, content_type=con_type,
+    #                        content_encoding=encoding)
     #return s.put(domain_name, str(datetime.now().strftime("%Y%m") + "/" + file_name), ob)
-    return s.put(domain_name, file_name, ob)
+    #return s.put(domain_name, file_name, ob)
 
 
 def get_saestorage(domain_name=DEFAULT_BUCKET):
-    s = sae.storage.Client()
-    filelist = s.list(domain_name)
-    total_count = filelist
+    #s = sae.storage.Client()
+    #filelist = s.list(domain_name)
+    filelist = bucket.list()
+    #total_count = len(filelist)
     return filelist
 
 
@@ -113,12 +111,6 @@ class Logout(BaseHandler):
         self.redirect('%s/admin/login' % BASE_URL)
 
 
-class AddUser(BaseHandler):
-    @authorized()
-    def get(self):
-        pass
-
-
 class Forbidden(BaseHandler):
     def get(self):
         self.write('Forbidden page')
@@ -129,7 +121,7 @@ class FileUpload(BaseHandler):
     def post(self):
         self.set_header('Content-Type', 'text/html')
         rspd = {'status': 201, 'msg': 'ok'}
-        max_size = 10240000 # 10MB
+        max_size = 10240000  # 10MB
         fileupload = self.request.files['imgFile']
         if fileupload:
             myfile = fileupload[0]
@@ -146,37 +138,38 @@ class FileUpload(BaseHandler):
             #     return
 
             file_type = myfile['filename'].split('.')[-1].lower()
-            new_file_name = "%s.%s" % (str(int(time.time())), file_type)
+            file_name = str(int(time.time() * 1000))
+            mime_type = myfile['content_type']
+            encoding = None
 
+            # 缩放图片
             try:
-                # 缩放图片
                 if file_type in ['jpg', 'jpeg', 'png', 'gif', 'bmp']:
-                    im = Image.open(StringIO.StringIO(myfile['body']))
+                    new_file_name = "%s-thumb.%s" % (file_name, file_type)
+                    img_data = Thumbnail(StringIO.StringIO(myfile['body'])).thumb((100, 100))
+                    put_saestorage(file_name=new_file_name, data=img_data, expires='365',
+                                   con_type=mime_type, encoding=encoding)
+                    #im = Image.open(StringIO.StringIO(myfile['body']))
                     # im.show()
-                    width, height = im.size
-                    if width > 750:
-                        ratio = 1.0 * height / width
-                        new_height = int(750 * ratio)
-                        new_size = (750, new_height)
-                        out = im.resize(new_size, Image.ANTIALIAS)
-                        print "Before"
-                        myfile['body'] = out.toString('jpeg', 'RGB')
-                        file_type = 'jpg'
-                        print 750, new_height
-                        new_file_name = "%s-thumb.%s" % (str(int(time.time())), file_type)
-                    else:
-                        pass
+                    #width, height = im.size
+                    #if width > 750:
+                    #    ratio = 1.0 * height / width
+                    #    new_height = int(750 * ratio)
+                    #    new_size = (750, new_height)
+                    #    out = im.resize(new_size, Image.ANTIALIAS)
+                    #    myfile['body'] = out.toString('jpeg', 'RGB')
+                    #    file_type = 'jpg'
+                    #    print 750, new_height
+                    #    new_file_name = "%s-thumb.%s" % (str(int(time.time())), file_type)
+                    #else:
+                    #    pass
                 else:
                     pass
             except:
-                im.c
                 pass
 
-            mime_type = myfile['content_type']
-            encoding = None
-            ###
-
             try:
+                new_file_name = "%s.%s" % (file_name, file_type)
                 attachment_url = put_saestorage(file_name=new_file_name, data=myfile['body'], expires='365',
                                                 con_type=mime_type, encoding=encoding)
             except:
@@ -641,58 +634,151 @@ class LinkController(BaseHandler):
         self.write(json.dumps("OK"))
 
 
-class UserController(BaseHandler):
+class AddUser(BaseHandler):
+    @authorized()
+    def get(self):
+        obj = User
+        obj.id = ''
+        obj.name = ''
+        obj.email = ''
+        obj.status = 1
+        self.echo('admin_user_edit.html', {
+            'title': "添加用户",
+            'method': "/admin/add_user",
+            'obj': obj,
+        }, layout='_layout_admin.html')
+
+    @authorized()
+    def post(self):
+        self.set_header('Content-Type', 'application/json')
+        rspd = {'status': 201, 'msg': 'OK'}
+
+        try:
+            tf = {'true': 1, 'false': 0}
+            email = self.get_argument("email", '')
+            name = self.get_argument("username", '')
+            pw = ''.join(random.sample('zAyBxCwDvEuFtGsHrIqJpKoLnMmNlOkPjQiRhSgTfUeVdWcXbYaZ1928374650', 16))
+            status = tf[self.get_argument("status", 'true')]
+        except:
+            rspd['status'] = 500
+            rspd['msg'] = '错误： 注意必填项'
+            self.write(json.dumps(rspd))
+            return
+
+        try:
+            userid = User.create_user(name, email, pw, status)
+            if userid:
+                sendEmail("新用户注册通知 - " + SITE_TITLE, "您的密码是：" + pw + "<br />请及时登录并修改密码！", email)
+
+                rspd['status'] = 200
+                rspd['msg'] = '创建用户成功，已邮件通知该用户！'
+                rspd['userid'] = userid
+                rspd['method'] = "/admin/edit_user"
+                clear_cache_by_pathlist(['/', 'user:%s' % str(userid)])
+            else:
+                rspd['status'] = 500
+                rspd['msg'] = '错误： 通知邮件发送失败，请稍后重试'
+        except OperationalError:
+            rspd['status'] = 500
+            rspd['msg'] = '错误： 该 Email 地址已被占用，请尝试重新提交'
+        except:
+            rspd['status'] = 500
+            rspd['msg'] = '错误： 未知错误，请尝试重新提交'
+
+        self.write(json.dumps(rspd))
+        return
+
+
+class ListUser(BaseHandler):
+    @authorized()
+    def get(self):
+        page = self.get_argument("page", 1)
+        limit = getAttr('ADMIN_USER_NUM')
+        users = User.get_paged(page, limit)
+        total = math.ceil(Article.count_all() / float(limit))
+        if page == 1:
+            self.echo('admin_user_list.html', {
+                'title': "用户列表",
+                'objs': users,
+                'total': total,
+            }, layout='_layout_admin.html')
+        else:
+            result = {
+                'list': users,
+                'total': total,
+            }
+            self.set_header("Content-Type", "application/json")
+            self.write(json.dumps(result))
+            return
+
+
+class EditUser(BaseHandler):
     @authorized()
     def get(self, id=''):
         obj = None
         if id:
             obj = User.get_user(id)
-            if obj:
-                act = self.get_argument("act", '')
-                if act == 'del':
-                    User.del_user_by_id(id)
-                    clear_cache_by_pathlist(['post:%d' % obj.postid])
-                    self.set_header("Content-Type", "application/json")
-                    self.write(json.dumps("OK"))
-                    return
-                else:
-                    self.echo('admin_comment.html', {
-                        'title': "评论管理",
-                        'obj': obj,
-                    }, layout='_layout_admin.html')
-                    return
-
-        # 评论列表
-        self.echo('admin_comment.html', {
-            'title': "评论管理",
-            'obj': obj,
-            'total': User.count_all(),
-            'comments': User.get_recent_comments(getAttr('ADMIN_COMMENT_NUM')),
+        self.echo('admin_user_edit.html', {
+            'title': "编辑用户",
+            'method': "/admin/edit_user/" + id,
+            'obj': obj
         }, layout='_layout_admin.html')
 
     @authorized()
     def post(self, id=''):
-        act = self.get_argument("act", '')
-        if act == 'findid':
-            eid = self.get_argument("id", '')
-            self.redirect('%s/admin/comment/%s' % (BASE_URL, eid))
-            return
+        self.set_header('Content-Type', 'application/json')
+        rspd = {'status': 201, 'msg': 'ok'}
 
-        tf = {'true': 1, 'false': 0}
-        post_dic = {
-            'author': self.get_argument("author"),
-            'email': self.get_argument("email", ''),
-            'content': safe_encode(self.get_argument("content").replace('\r', '\n')),
-            'url': self.get_argument("url", ''),
-            'visible': self.get_argument("visible", 'false'),
-            'id': id
-        }
-        post_dic['visible'] = tf[post_dic['visible'].lower()]
+        try:
+            tf = {'true': 1, 'false': 0}
+            status = tf[self.get_argument("status", 'false')]
+            User.update_user_audit(id, status)
+            rspd['status'] = 200
+            rspd['msg'] = '用户编辑成功'
+        except:
+            rspd['status'] = 500
+            rspd['msg'] = '错误：注意必填项'
 
-        User.update_user_edit(post_dic)
-        clear_cache_by_pathlist(['post:%s' % id])
-        self.redirect('%s/admin/comment/%s' % (BASE_URL, id))
+        self.write(json.dumps(rspd))
         return
+
+
+class DelUser(BaseHandler):
+    @authorized()
+    def get(self, id=''):
+        try:
+            if id:
+                user = User.get_user(id)
+                articles = Article.get_article_by_author(user.name)
+                for article in articles:
+                    Article.update_post_edit_author(article.id, "admin")
+                User.delete_user(id)
+                cache_key_list = ['/', 'user:%s' % id]
+                clear_cache_by_pathlist(cache_key_list)
+                self.set_header("Content-Type", "application/json")
+                self.write(json.dumps("OK"))
+                return
+        except:
+            raise tornado.web.HTTPError(500)
+
+
+class RePassword(BaseHandler):
+    @authorized()
+    def get(self):
+        name = self.get_argument("name")
+        email = self.get_argument("email")
+        if name and email and User.check_name_email(name, email):
+            pw = "".join(random.sample('zAyBxCwDvEuFtGsHrIqJpKoLnMmNlOkPjQiRhSgTfUeVdWcXbYaZ1928374650', 16))
+            User.update_user(name, email, pw)
+            sendEmail(u"密码重置通知 - " + SITE_TITLE, u"您的新密码是：" + pw + u"<br /><br />请及时登录并修改密码！", str(email))
+
+            self.set_header("Content-Type", "application/json")
+            self.write(json.dumps("OK"))
+            return
+        else:
+            self.set_header("Content-Type", "application/json")
+            self.write(json.dumps("重置密码失败！"))
+            return
 
 
 class BlogSetting(BaseHandler):
@@ -1061,7 +1147,7 @@ def Init():
 class Install(BaseHandler):
     def get(self):
         Init()
-        self.echo('admin_install.html')
+        self.render('admin_install.html')
         # try:
         #     self.write('如果出现错误请尝试刷新本页。')
         #     has_user = User.check_has_user()
@@ -1119,7 +1205,11 @@ urls = [
     (r"/admin/del_post/(\d+)", DelPost),
     (r"/admin/comment/(\d*)", CommentController),
     # 用户管理
-    (r"/admin/users", UserController),
+    (r"/admin/add_user", AddUser),
+    (r"/admin/edit_user/(\d*)", EditUser),
+    (r"/admin/list_user", ListUser),
+    (r"/admin/del_user/(\d+)", DelUser),
+    (r"/admin/repass_user", RePassword),
     # 文件上传及管理
     (r"/admin/fileupload", FileUpload),
     (r"/admin/filelist", FileManager),

@@ -23,15 +23,12 @@ from extensions.sessions import Session, RedisSession
 #     kv = redis.Redis(host=REDIS_HOST, port=int(REDIS_PORT), db=0)
 # else:
 import sae.kvdb
-import tenjin
-
 kv = sae.kvdb.KVClient()
 
 ##############
 # MC 临时缓存 #
 ##############
 import pylibmc
-
 mc = pylibmc.Client()
 
 
@@ -131,7 +128,6 @@ def clear_cache_by_pathlist(pathlist=[]):
 
 def clear_all_cache():
     try:
-        mc = pylibmc.Client()
         mc.flush_all()
     except:
         pass
@@ -168,7 +164,7 @@ RQT_RE = re.compile('<span id="requesttime">\d*</span>', re.I)
 PV_RE = re.compile('<span class="categories greyhref">PageView.*?</span>', re.I)
 
 
-def pagecache(key="", time=86400, key_suffix_calc_func=None):
+def pagecache(key="", time=PAGE_CACHE_TIME, key_suffix_calc_func=None):
     def _decorate(method):
         def _wrapper(*args, **kwargs):
             req = args[0]
@@ -185,7 +181,7 @@ def pagecache(key="", time=86400, key_suffix_calc_func=None):
                 key_with_suffix = req.request.path
 
             html = mc.get(key_with_suffix)
-            # request_time = int(req.request.request_time() * 1000)
+            request_time = int(req.request.request_time() * 1000)
             if html:
                 if key == 'post':
                     if key_suffix:
@@ -201,7 +197,7 @@ def pagecache(key="", time=86400, key_suffix_calc_func=None):
                         req.write(PV_RE.sub('<span class="categories greyhref">PageView(%d)</span>' % count, html))
                         return _wrapper
                 req.write(html)
-                # req.write(RQT_RE.sub('<span id="requesttime">%d</span>'%request_time, html))
+                req.write(RQT_RE.sub('<span id="requesttime">%d</span>'% request_time, html))
             else:
                 result = method(*args, **kwargs)
                 mc.set(key_with_suffix, result, int(time))
@@ -211,6 +207,8 @@ def pagecache(key="", time=86400, key_suffix_calc_func=None):
     return _decorate
 
 ###
+import tenjin
+from tenjin.helpers import *   # or escape, to_str
 engine = tenjin.Engine(path=[os.path.join('templates', theme) for theme in [THEME, 'admin']] + ['templates'],
                        cache=tenjin.MemoryCacheStorage(), preprocess=True)
 
@@ -329,39 +327,6 @@ def client_cache(seconds, privacy=None):
     return wrap
 
 
-# 发送邮件
-def sendEmail(subject, html, to=None):
-    url = "https://sendcloud.sohu.com/webapi/mail.send.xml"
-    if to is None:
-        to = MAIL_TO
-    params = {
-        "api_user": getAttr('MAIL_FROM'),
-        "api_key": getAttr('MAIL_KEY'),
-        "to": to,
-        "from": getAttr('MAIL_FROM'),
-        "formname": getAttr('SITE_TITLE'),
-        "subject": subject,
-        "html": html
-    }
-    r = requests.post(url, params)
-    print r.text
-
-
-# 邮件 html 压缩
-def gzip_compress(content):
-    out = cStringIO.StringIO()
-    gzipfile = gzip.GzipFile(fileobj=out, mode='w', compresslevel=9)
-    gzipfile.write(content)
-    gzipfile.close()
-    out.seek(0)
-    byte = out.read(1)
-    byteArr = []
-    while byte:
-        byteArr.append(byte)
-        byte = out.read(1)
-    return bytearray(byteArr).decode('iso-8859-1')
-
-
 # 以下是在SAE上的计数器实现
 import random
 
@@ -428,13 +393,46 @@ def increment(keyname, num_shards=NUM_SHARDS, value=1):
     return count
 
 
+# 发送邮件
+def sendEmail(subject, html, to=None):
+    url = "https://sendcloud.sohu.com/webapi/mail.send.xml"
+    if to is None:
+        to = MAIL_TO
+    params = {
+        "api_user": getAttr('MAIL_FROM'),
+        "api_key": getAttr('MAIL_KEY'),
+        "to": to,
+        "from": getAttr('MAIL_FROM'),
+        "formname": getAttr('SITE_TITLE'),
+        "subject": subject,
+        "html": html
+    }
+    r = requests.post(url, params)
+    print r.text
+
+
+# 邮件 html 压缩
+def gzip_compress(content):
+    out = cStringIO.StringIO()
+    gzipfile = gzip.GzipFile(fileobj=out, mode='w', compresslevel=9)
+    gzipfile.write(content)
+    gzipfile.close()
+    out.seek(0)
+    byte = out.read(1)
+    byteArr = []
+    while byte:
+        byteArr.append(byte)
+        byte = out.read(1)
+    return bytearray(byteArr).decode('iso-8859-1')
+
+
 # 清空 KVDB 缓存
 def clearAllKVDB():
     total = get_count('Totalblog', NUM_SHARDS, 0)
     for loop in range(0, total + 1):
         keyname = 'pv_%d' % (loop)
-        kv.delete_category(keyname)
-    kv.delete_category('Totalblog')
+        kv.delete(keyname)
+    kv.delete('Totalblog')
 
 
 # 设置属性

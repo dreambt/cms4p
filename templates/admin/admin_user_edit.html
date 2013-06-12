@@ -1,0 +1,58 @@
+<form id="myForm" class="form-horizontal">
+    <div class="control-group">
+        <label class="control-label">用户名</label>
+        <div class="controls">
+            <input type="hidden" name="method" value="#{method}"/>
+            <?py if obj and obj.id: ?>
+            <input type="hidden" name="userid" value="#{obj.id}"/>
+            <input type="text" class="span7" value="${obj.name}" tabindex="1" disabled="disabled"/>
+            <?py else: ?>
+            <input type="text" name="username" class="span7" required maxlength="20" value="${obj.name}" tabindex="1" placeholder="用户名"/>
+            <?py #endif ?>
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label">邮箱</label>
+        <div class="controls">
+            <?py if obj and obj.id: ?>
+            <input type="email" class="span7" value="${obj.email}" tabindex="2" disabled="disabled"/>
+            <?py else: ?>
+            <input type="email" name="email" class="span7" required maxlength="40" value="${obj.email}" tabindex="2" placeholder="邮箱地址"/>
+            <?py #endif ?>
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label">有效</label>
+        <div class="controls">
+            <div class="switch switch-small"><?py ck = ['','checked'] ?><input id="status" name="status" type="checkbox" value="true" tabindex="3" #{ck[obj.status]}/></div>
+        </div>
+    </div>
+    <div class="form-actions">
+        <button type="submit" id="submit" class="btn btn-primary">保 存</button>
+        <button type="reset" id="helper" class="btn">重 置</button>
+        <button type="button" class="btn btn-inverse" onclick="window.location.href='/admin/list_user';">返 回</button>
+    </div>
+</form>
+<hr/>
+<script type="text/javascript">
+    $(function () {
+        $("#user_page").addClass("active");
+        $('#myForm').submit(function () {
+            $('#submit').attr('disabled', 'disabled');
+            $.ajax({
+                type: 'POST',
+                url: $('#method').val(),
+                data: $('#myForm').serialize(),
+                success: function (data) {
+                    SiQiTip.show("success", "保存用户成功！");
+                    $('#submit').removeAttr('disabled');
+                },
+                error: function(){
+                    SiQiTip.show("block", "服务器貌似出现问题，请稍后重试！");
+                    $('#submit').removeAttr('disabled');
+                }
+            });
+            return false;
+        });
+    });
+</script>

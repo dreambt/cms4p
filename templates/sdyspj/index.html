@@ -34,35 +34,30 @@
     <div class="span4">
         <div class="well">
             <h4>新闻资讯</h4>
-            <p>To add a component, just drag it from the list on the right onto the canvas.</p>
             <ul>
-                <li>Item 1</li>
-                <li>Item 2</li>
-                <li>Item 3</li>
+                <?py for news in news1: ?>
+                <li>#{news.title}</li>
+                <?py #endfor ?>
             </ul>
         </div>
     </div>
     <div class="span4">
         <div class="well">
             <h4>行业资讯</h4>
-            <p>You can edit the text sections of a component by double-clicking. Try
-                editing this text!</p>
             <ul>
-                <li>Item 1</li>
-                <li>Item 2</li>
-                <li>Item 3</li>
+                <?py for news in news2: ?>
+                <li>#{news.title}</li>
+                <?py #endfor ?>
             </ul>
         </div>
     </div>
     <div class="span4">
         <div class="well">
             <h4>产品展示</h4>
-            <p>Each component has different options. The "Inspector" panel on the right
-                lets you change them.</p>
             <ul>
-                <li>Item 1</li>
-                <li>Item 2</li>
-                <li>Item 3</li>
+                <?py for news in prods: ?>
+                <li>#{news.title}</li>
+                <?py #endfor ?>
             </ul>
         </div>
     </div>

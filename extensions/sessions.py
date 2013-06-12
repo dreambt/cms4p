@@ -88,7 +88,7 @@ class RedisSessionStore(object):
             self.redis.expire(self.prefixed(sid), expiry)
 
     def delete_session(self, sid):
-        self.redis.delete_category(self.prefixed(sid))
+        self.redis.delete(self.prefixed(sid))
 
 
 class RedisSession(object):

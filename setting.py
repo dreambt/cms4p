@@ -59,11 +59,11 @@ HOT_TAGS_NUM = 30  # 右侧热门标签显示数
 MAX_ARCHIVES_NUM = 50  # 右侧热门标签显示数
 
 # 后台界面设置
-ADMIN_CATEGORY_NUM = 20
-ADMIN_POST_NUM = 20
-ADMIN_COMMENT_NUM = 20
-ADMIN_USER_NUM = 20
-ADMIN_LINK_NUM = 20
+ADMIN_CATEGORY_NUM = 15
+ADMIN_POST_NUM = 15
+ADMIN_COMMENT_NUM = 15
+ADMIN_USER_NUM = 15
+ADMIN_LINK_NUM = 15
 
 MAX_IDLE_TIME = 10  # 数据库最大空闲时间 SAE文档说是30 其实更小，设为5，没问题就不要改了
 
@@ -138,10 +138,15 @@ else:
     BASE_URL = 'http://%s' % MAJOR_DOMAIN
     STATIC_URL = 'http://cms4p.sinaapp.com'
     import sae.const
-
     MYSQL_DB = sae.const.MYSQL_DB
     MYSQL_USER = sae.const.MYSQL_USER
     MYSQL_PASS = sae.const.MYSQL_PASS
     MYSQL_HOST_M = sae.const.MYSQL_HOST
     MYSQL_HOST_S = sae.const.MYSQL_HOST_S
     MYSQL_PORT = sae.const.MYSQL_PORT
+
+#########
+# 云存储 #
+#########
+#使用SAE Storage 服务（保存上传的附件），需在SAE管理面板创建
+DEFAULT_BUCKET = 'attachment'

@@ -80,6 +80,35 @@
                 }
             });
         }
+
+        if ($this.attr('data-reset')) {
+            bootbox.confirm("确认重置吗?", function (result) {
+                if (result) {
+                    $.ajax({
+                        url: url,
+                        type: method,
+                        dataType: 'json',
+                        statusCode: {
+                            200: function (data) {
+                                processData(data, $this)
+                            },
+                            500: function () {
+                                $this.trigger('bootstrap-ajax:error', [$this, 500])
+                            },
+                            404: function () {
+                                $this.trigger('bootstrap-ajax:error', [$this, 404])
+                            }
+                        },
+                        success: function(){
+                            SiQiTip.show("success", "重置操作成功！");
+                        }
+                    })
+                }
+                else {
+                    SiQiTip.show("block", "取消重置操作！");
+                }
+            });
+        }
     }
 
     Ajax.prototype.submit = function (e) {
