@@ -21,16 +21,16 @@ NOTICE_MAIL = u"dreambt@126.com"
 MOVE_SECRET = 'what?'  # 迁移密码
 
 ###配置邮件发送信息，提醒邮件用的，必须正确填写，建议用 Gmail
-MAIL_FROM = 'dreambt@gmail.com'
-MAIL_SMTP = 'smtp.gmail.com'
-MAIL_PORT = 587
-MAIL_USER = ''
-MAIL_KEY = '{hisense2002j}'
+#MAIL_FROM = 'dreambt@gmail.com'
+#MAIL_SMTP = 'smtp.gmail.com'
+#MAIL_PORT = 587
+#MAIL_USER = ''
+#MAIL_KEY = '{hisense2002j}'
 
 MAIL_FROM = 'postmaster@sdyspj.sendcloud.org'
 MAIL_SMTP = 'smtpcloud.sohu.com'
 MAIL_PORT = 25
-MAIL_KEY = 'GtNTClqI'
+MAIL_KEY = 'DSvK6ViH'
 
 # 放在网页底部的统计代码
 ANALYTICS_CODE = """"""
