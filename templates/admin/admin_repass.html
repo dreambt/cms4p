@@ -45,6 +45,7 @@
                 success: function (data) {
                     if(data == "OK") {
                         SiQiTip.show("success", "重置密码成功！请注意查收邮件！");
+                        window.location.href = "/admin/login";
                     }
                     else {
                         SiQiTip.show("error", data);
