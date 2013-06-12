@@ -11,24 +11,25 @@
     <!--[if gte IE 9]><!--><script type="text/javascript" src="#{{ STATIC_URL }}/static/js/vender/jquery-2.0.2.min.js"></script><!--<![endif]-->
 </head>
 <body style="padding-bottom:0;background-color:#f5f5f5;">
+<div class="bb-alert alert" style="display:none;">
+    <span>默认提示信息</span>
+</div>
 <div class="container">
-        <form id="myForm" action="" method="post" class="form-signin">
-            <h2 class="form-signin-heading">后台登录</h2>
-            <input type="text" name="name" size="25" class="input-block-level required" required placeholder="Email address">
-            <input type="password" name="password" size="25" class="input-block-level required" required placeholder="Password">
-
-            <div id="imgid" style="display:block;margin:1px 0 0 160px;position:absolute;z-index:999;"></div>
-            <input type="text" id="captcha" name='captcha' size="6" class="input-block-level required" required
-                   placeholder="Captcha"
-                   autocomplete="off">
-            <label class="checkbox">
-                <input type="checkbox" value="remember-me"> 记住我
-            </label>
-            <button class="btn btn-large btn-primary" type="submit">登录</button>
-            <button class="btn btn-large" onclick="window.location.href='/admin/repass_user';">找回密码</button>
-        </form>
-    </div>
+    <form id="myForm" action="" method="post" class="form-signin">
+        <h2 class="form-signin-heading">后台登录</h2>
+        <input type="text" name="name" size="25" class="input-block-level required" required placeholder="Username or Email">
+        <input type="password" name="password" size="25" class="input-block-level required" required placeholder="Password">
+        <div id="imgid" style="display:block;margin:1px 0 0 160px;position:absolute;z-index:999;"></div>
+        <input type="text" id="captcha" name='captcha' size="6" class="input-block-level required" required placeholder="Captcha" autocomplete="off">
+        <label class="checkbox">
+            <input type="checkbox" value="remember-me"> 记住我
+        </label>
+        <button class="btn btn-large btn-primary" type="submit">登录</button>
+        <button class="btn btn-large" onclick="window.location.href='/admin/repass_user';">找回密码</button>
+    </form>
+</div>
 <script type="text/javascript" src="#{{ STATIC_URL }}/static/js/vender/bootstrap.min.js"></script>
+<script type="text/javascript" src="#{{ STATIC_URL }}/static/js/custom.js"></script>
 <script>
     $(function () {
         //验证码点击时显示
@@ -39,6 +40,23 @@
         }).blur(function () {
                     $('#imgid').contents().remove();
                 });
+        $('#myForm').submit(function () {
+            $('#submit').attr('disabled', 'disabled');
+            $.ajax({
+                type: 'POST',
+                data: $('#myForm').serialize(),
+                success: function (data) {
+                    if(data == "OK") {
+                        window.location.href = "/admin/";
+                    }
+                    else {
+                        SiQiTip.show("error", data);
+                    }
+                    $('#submit').removeAttr('disabled');
+                }
+            });
+            return false;
+        });
     });
 </script>
 </body>

@@ -66,44 +66,36 @@ class Login(BaseHandler):
         self.echo('admin_login.html')
 
     def post(self):
+        self.set_header("Content-Type", "application/json")
+
         try:
             name = self.get_argument("name")
             password = self.get_argument("password")
             captcha = self.get_argument("captcha")
         except:
-            self.redirect('%s/admin/login' % BASE_URL)
+            self.write(json.dumps("用户名、密码、验证码均为必填项！"))
             return
 
         if self.get_secure_cookie("captcha") != captcha:
-            self.redirect('%s/admin/' % BASE_URL)
+            self.write(json.dumps("验证码填写错误或用户不存在！"))
             return
 
-        if name and password:
-            has_user = User.check_has_user()
-            if has_user:
-                password = md5(password.encode('utf-8')).hexdigest()
-                user = User.check_user(name, password)
-                if user:
-                    self.set_secure_cookie('username', name, expires_days=365)
-                    self.set_secure_cookie('userpw', password, expires_days=365)
-                    self.redirect('%s/admin/' % BASE_URL)
-                    return
-                else:
-                    self.redirect('%s/admin/login' % BASE_URL)
-                    return
+        has_user = User.get_user_by_name(name)
+        if has_user:
+            password += has_user.salt
+            password = md5(password.encode('utf-8')).hexdigest()
+            user = User.check_user(name, password)
+            if user:
+                self.set_secure_cookie('username', name, expires_days=365)
+                self.set_secure_cookie('userpw', password, expires_days=365)
+                self.write(json.dumps("OK"))
+                return
             else:
-                # add new user
-                newuser = User.create_user(name, password)
-                if newuser:
-                    self.set_secure_cookie('username', name, expires_days=365)
-                    self.set_secure_cookie('userpw', md5(password.encode('utf-8')).hexdigest(), expires_days=365)
-                    self.redirect('%s/admin/' % BASE_URL)
-                    return
-                else:
-                    self.redirect('%s/admin/login' % BASE_URL)
-                    return
+                self.write(json.dumps("权限验证失败或帐户不可用！"))
+                return
         else:
-            self.redirect('%s/admin/login' % BASE_URL)
+            self.write(json.dumps("验证码填写错误或用户不存在！"))
+            return
 
 
 class Logout(BaseHandler):
@@ -772,7 +764,7 @@ class RePassword(BaseHandler):
         try:
             name = self.get_argument("name")
             email = self.get_argument("email")
-            captcha = self.get_argument("captcha", None)
+            captcha = self.get_argument("captcha", "")
         except:
             self.write(json.dumps("用户名、邮箱、验证码均为必填项！"))
             return
@@ -1237,7 +1229,7 @@ urls = [
     (r"/admin/setting2", BlogSetting2),
     (r"/admin/setting3", BlogSetting3),
     (r"/admin/setting4", BlogSetting4),
-    (r"/admin/setting5", BlogSetting5),  # 后台设置
+    (r"/admin/setting5", BlogSetting5), # 后台设置
     (r"/admin/profile", EditProfile),
     (r"/admin/kvdb", KVDBAdmin),
     (r"/admin/flushdata", FlushData),
