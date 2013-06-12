@@ -29,7 +29,7 @@
             <?py    if i.status == 1: ?><span class="label label-success">启用</span>
             <?py    else: ?><span class="label">禁用</span>
             <?py    #endif ?></td>
-            <td><a href="/admin/repass_user?name=#{i.name}&email=#{i.email}" class="ajax" data-reset="1">找回密码</a></td>
+            <td><a href="/admin/repass_user?name=#{i.name}&email=#{i.email}" class="ajax" data-method="post" data-reset="1">找回密码</a></td>
             <td><a href="/admin/edit_user/#{i.id}">编辑</a> <a href="/admin/del_user/#{i.id}" class="ajax" data-remove-closest="tr">删除</a></td>
         </tr>
         <?py #endfor ?>
@@ -88,7 +88,7 @@
     <%if(list[i].status == 1){%><span class="label label-success">启用</span>
     <%}else{%><span class="label">禁用</span>
     <%}%></td>
-    <td><a href="/admin/repass_user?name=<%=list[i].name%>&email=<%=list[i].email%>" class="ajax">找回密码</a></td>
+    <td><a href="/admin/repass_user?name=<%=list[i].name%>&email=<%=list[i].email%>" class="ajax" data-method="post" data-reset="1">找回密码</a></td>
     <td><a href="/admin/edit_user/<%=list[i].id%>">编辑</a> <a href="/admin/del_user/<%=list[i].id%>" class="ajax" data-remove-closest="tr">删除</a></td>
 </tr>
 <%}%>

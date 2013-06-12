@@ -772,14 +772,21 @@ class RePassword(BaseHandler):
         try:
             name = self.get_argument("name")
             email = self.get_argument("email")
-            captcha = self.get_argument("captcha")
+            captcha = self.get_argument("captcha", None)
         except:
             self.write(json.dumps("用户名、邮箱、验证码均为必填项！"))
             return
 
-        if self.get_secure_cookie("captcha") != captcha:
-            self.write(json.dumps("验证码填写错误！"))
-            return
+        if captcha:
+            if self.get_secure_cookie("captcha") != captcha:
+                self.write(json.dumps("验证码填写错误！"))
+                return
+        else:
+            user_name_cookie = self.get_secure_cookie('username')
+            user_pw_cookie = self.get_secure_cookie('userpw')
+            if not (user_name_cookie and user_pw_cookie and User.check_user(user_name_cookie, user_pw_cookie)):
+                self.write(json.dumps("重置密码失败！"))
+                return
 
         if name and email and User.check_name_email(name, email):
             pw = "".join(random.sample('zAyBxCwDvEuFtGsHrIqJpKoLnMmNlOkPjQiRhSgTfUeVdWcXbYaZ1928374650', 16))
