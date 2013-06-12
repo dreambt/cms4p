@@ -12,7 +12,6 @@
 import os
 import random
 import StringIO
-import ImageFilter
 
 from PIL import Image
 from PIL import ImageFont
@@ -79,8 +78,6 @@ def Recaptcha(text):
     # set border
     #draw.line([(0, 0), (99, 0), (99, 29), (0, 29), (0, 0)], fill=(180, 180, 180))
     del draw
-
-    img = img.filter(ImageFilter.EDGE_ENHANCE_MORE)  # 滤镜，边界加强（阈值更大）
 
     # push data
     strIO = StringIO.StringIO()
