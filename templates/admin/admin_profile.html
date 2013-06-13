@@ -50,9 +50,14 @@
                     newPassword: newPassword,
                     newPassword2: newPassword2
                 },
-                success: function () {
-                    SiQiTip.show("success", "保存成功！");
-                    location.href = "/admin/login";
+                success: function (data) {
+                    if(data=="OK"){
+                        SiQiTip.show("success", "修改密码成功！");
+                        setTimeout("location.href = '/admin/login'", 1500)
+                    }
+                    else{
+                        SiQiTip.show("error", "修改密码失败！");
+                    }
                 }
             });
             return false;

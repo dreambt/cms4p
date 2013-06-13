@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
-import gzip
+import logging
 import re
 import os.path
 import traceback
 from urllib import unquote, quote
 from datetime import datetime, timedelta
-import cStringIO
 import requests
 import tornado.web
 
@@ -260,13 +259,8 @@ class BaseHandler(tornado.web.RequestHandler):
     def isAuthor(self):
         user_name_cookie = self.get_secure_cookie('username', '')
         user_pw_cookie = self.get_secure_cookie('userpw', '')
-        if user_name_cookie and user_pw_cookie:
-            from model import User
-
-            user = User.check_user(user_name_cookie, user_pw_cookie)
-        else:
-            user = False
-        return user
+        from model import User
+        return User.check_user_password(user_name_cookie, user_pw_cookie)
 
     # http://www.keakon.net/2012/12/03/Tornado%E4%BD%BF%E7%94%A8%E7%BB%8F%E9%AA%8C
     def write_error(self, status_code, **kwargs):
@@ -296,12 +290,9 @@ def authorized(url='/admin/login'):
             request = self.request
             user_name_cookie = self.get_secure_cookie('username')
             user_pw_cookie = self.get_secure_cookie('userpw')
-            if user_name_cookie and user_pw_cookie:
-                from model import User
+            from model import User
+            user = User.check_user_password(user_name_cookie, user_pw_cookie)
 
-                user = User.check_user(user_name_cookie, user_pw_cookie)
-            else:
-                user = False
             if request.method == 'GET':
                 if not user:
                     self.redirect(url)
@@ -398,38 +389,49 @@ def increment(keyname, num_shards=NUM_SHARDS, value=1):
 
 # 发送邮件
 def sendEmail(subject, html, to=None):
-    url = "https://sendcloud.sohu.com/webapi/mail.send.xml"
+    subject = subject.encode('utf-8')
+    html = html.encode('utf-8')
+    url = "https://sendcloud.sohu.com/webapi/mail.send.xml".encode('utf-8')
     if to is None:
         to = MAIL_TO
     params = {
         "api_user": getAttr('MAIL_FROM'),
-        "api_key": getAttr('MAIL_KEY'),
-        "to": to,
+        "api_key": getAttr("MAIL_KEY"),
         "from": getAttr('MAIL_FROM'),
         "formname": getAttr('SITE_TITLE'),
         "subject": subject,
-        "html": gzip_compress(html)
+        "html": html,
+        "to": to,
     }
     r = requests.post(url, params)
-    print getAttr('MAIL_FROM')
-    print getAttr('MAIL_KEY')
-    print r.reason
+    if r.text.find("error") > 0:
+        logging.warn("发送邮件失败: " + r.text.encode('utf-8') + "\nTitle(" + subject + ") To(" + to + ") Html(" + html + ")")
     print r.text
+    return r.text
 
 
-# 邮件 html 压缩
-def gzip_compress(content):
-    out = cStringIO.StringIO()
-    gzipfile = gzip.GzipFile(fileobj=out, mode='w', compresslevel=9)
-    gzipfile.write(content.encode('utf-8'))
-    gzipfile.close()
-    out.seek(0)
-    byte = out.read(1)
-    byteArr = []
-    while byte:
-        byteArr.append(byte)
-        byte = out.read(1)
-    return bytearray(byteArr).decode('iso-8859-1')
+def sendTemplateEmail(subject, sub, to=None):
+    subject = subject.encode('utf-8')
+    url = "https://sendcloud.sohu.com/webapi/mail.send_template.xml".encode('utf-8')
+    if to is None:
+        to = MAIL_TO
+    params = {
+        "api_user": getAttr('MAIL_FROM'),
+        "api_key": getAttr("MAIL_KEY"),
+        "from": getAttr('MAIL_FROM'),
+        "formname": getAttr('SITE_TITLE').encode('utf-8'),
+        "template_invoke_name": "cms4j_repass",
+        "subject": subject,
+        "substitution_vars": {
+            "to": [to],
+            "sub": sub
+        }
+    }
+    r = requests.post(url, params)
+    if r.text.find("error") > 0:
+        logging.warn("发送邮件失败: " + r.text.encode('utf-8') + "\nParams(" + str(params) + ")")
+    print r.text
+    return r.text
 
 
 # 清空 KVDB 缓存

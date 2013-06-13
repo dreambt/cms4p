@@ -727,6 +727,10 @@ class User():
         sdb._ensure_connected()
         return sdb.get('SELECT * FROM `sp_user` WHERE `name` = \'%s\' LIMIT 1' % name)
 
+    def get_user_by_email(self, email):
+        sdb._ensure_connected()
+        return sdb.get('SELECT * FROM `sp_user` WHERE `email` = \'%s\' LIMIT 1' % email)
+
     def check_name_email(self, name='', email=''):
         sql = "SELECT * FROM `sp_user` WHERE `name` = %s and `email` = %s LIMIT 1"
         sdb._ensure_connected()
@@ -736,13 +740,17 @@ class User():
         else:
             return False
 
-    def check_user(self, name='', pw=''):
+    def check_user_password(self, name='', pw=''):
         if name and pw:
             user = self.get_user_by_name(name)
-            if user and user.name == name and user.password == pw:
-                return True
-            else:
-                return False
+            return user and user.name == name and user.password == pw
+        else:
+            return False
+
+    def check_email_password(self, email='', pw=''):
+        if email and pw:
+            user = self.get_user_by_email(email)
+            return user and user.email == email and user.password == pw
         else:
             return False
 

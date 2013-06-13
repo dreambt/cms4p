@@ -81,11 +81,13 @@ class Login(BaseHandler):
             return
 
         has_user = User.get_user_by_name(name)
+        if not has_user:
+            has_user = User.get_user_by_email(name)
+            name = has_user.name
         if has_user:
             password += has_user.salt
             password = md5(password.encode('utf-8')).hexdigest()
-            user = User.check_user(name, password)
-            if user:
+            if password == has_user.password:
                 self.set_secure_cookie('username', name, expires_days=365)
                 self.set_secure_cookie('userpw', password, expires_days=365)
                 self.write(json.dumps("OK"))
@@ -776,14 +778,21 @@ class RePassword(BaseHandler):
         else:
             user_name_cookie = self.get_secure_cookie('username')
             user_pw_cookie = self.get_secure_cookie('userpw')
-            if not (user_name_cookie and user_pw_cookie and User.check_user(user_name_cookie, user_pw_cookie)):
+            if not User.check_user_password(user_name_cookie, user_pw_cookie):
                 self.write(json.dumps("重置密码失败！"))
                 return
 
         if name and email and User.check_name_email(name, email):
             pw = "".join(random.sample('zAyBxCwDvEuFtGsHrIqJpKoLnMmNlOkPjQiRhSgTfUeVdWcXbYaZ1928374650', 16))
             User.update_user(name, email, pw)
-            sendEmail(u"密码重置通知 - " + SITE_TITLE, u"您的新密码是：" + pw + u"<br /><br />请及时登录并修改密码！", str(email))
+            sub = {
+                "%website%": [getAttr("SITE_TITLE").encode('utf-8')],
+                "%url%": [getAttr("BASE_URL")],
+                "%name%": [name],
+                "%password%": [pw]
+            }
+            #sendTemplateEmail(u"密码重置通知 - " + getAttr('SITE_TITLE'), sub, str(email))
+            sendEmail(u"密码重置通知 - " + getAttr('SITE_TITLE'), u"您的新密码是：" + pw + u"<br /><br />请及时登录并修改密码！", str(email))
 
             self.write(json.dumps("OK"))
             return
@@ -1010,28 +1019,26 @@ class EditProfile(BaseHandler):
 
     @authorized()
     def post(self):
+        self.set_header("Content-Type", "application/json")
         oldPassword = self.get_argument("oldPassword", '')
         newPassword = self.get_argument("newPassword", '')
         newPassword2 = self.get_argument("newPassword2", '')
         if oldPassword and newPassword and newPassword2:
             if newPassword == newPassword2:
                 username = self.get_secure_cookie('username')
-                oldPassword = md5(oldPassword.encode('utf-8')).hexdigest()
-                user = User.check_user(username, oldPassword)
-                if user:
-                    User.update_user(username, newPassword)
-                    self.set_secure_cookie('userpw', '123', expires_days=1)
-                    self.set_header("Content-Type", "application/json")
-                    self.write(escape.json.dumps(1))
+                old_user = User.get_user_by_name(username)
+                oldPassword = md5(oldPassword.encode('utf-8')+old_user.salt.encode('utf-8')).hexdigest()
+                if oldPassword == old_user.password:
+                    User.update_user(username, None, newPassword)
+                    user = User.get_user(old_user.id)
+                    self.set_secure_cookie('userpw', user.password, expires_days=1)
+                    self.write(escape.json.dumps("OK"))
                     return
                 else:
+                    self.write(escape.json.dumps("更新用户失败！"))
                     pass
-            else:
-                pass
-        else:
-            pass
-        self.set_header("Content-Type", "application/json")
-        self.write(escape.json.dumps(0))
+        self.write(escape.json.dumps("请认真填写必填项！"))
+        return
 
 
 # TODO KVDB 管理
@@ -1229,7 +1236,7 @@ urls = [
     (r"/admin/setting2", BlogSetting2),
     (r"/admin/setting3", BlogSetting3),
     (r"/admin/setting4", BlogSetting4),
-    (r"/admin/setting5", BlogSetting5), # 后台设置
+    (r"/admin/setting5", BlogSetting5),  # 后台设置
     (r"/admin/profile", EditProfile),
     (r"/admin/kvdb", KVDBAdmin),
     (r"/admin/flushdata", FlushData),

@@ -126,7 +126,6 @@ COOKIE_SECRET = '7nVA0WeZSJSzTCUF8UZB/C3OfLrl7k26iHxfnVa9x0I='
 ###############
 if debug:
     BASE_URL = 'http://localhost:8080'
-    STATIC_URL = 'http://localhost:8080'
     STATIC_URL = BASE_URL
     MYSQL_DB = 'app_cms4p'
     MYSQL_USER = 'root'
