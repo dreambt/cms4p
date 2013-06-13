@@ -1,8 +1,13 @@
 <div class="row">
     <div class="span12">
-    <form id="myForm" action="" class="well form-inline" method="post">
-        <select name="category" class="span2" id="category"></select>
-        <input type="text" name="name" class="span3" id="input11" required maxlength="100" placeholder="文章名称"/>
+    <form id="myForm" action="" class="well form-inline">
+        <select name="category" class="span2" id="category">
+            <option value="">所有分类</option>
+        <?py for i in cats: ?>
+            <option value="#{i.name}">#{i.name}</option>
+        <?py #endfor ?>
+        </select>
+        <input type="text" name="title" class="span3" id="input11" maxlength="100" placeholder="文章名称"/>
         <button type="submit" class="btn btn-primary">查 询</button>
         <button type="button" class="btn btn-success pull-right" onclick="window.location.href='/admin/add_post'">新 建</button>
     </form>

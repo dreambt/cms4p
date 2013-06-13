@@ -39,7 +39,7 @@ ADSENSE_CODE2 = """"""
 
 # 文章相关
 EACH_PAGE_POST_NUM = 7  # 每页显示文章数
-SHORTEN_CONTENT_WORDS = 255  # 文章列表截取的字符数
+SHORTEN_CONTENT_WORDS = 512  # 文章列表截取的字符数
 DESCRIPTION_CUT_WORDS = 100  # meta description 显示的字符数
 RELATIVE_POST_NUM = 5  # 显示相关文章数
 

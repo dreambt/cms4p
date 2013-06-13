@@ -320,7 +320,7 @@ class AddPost(BaseHandler):
                 'category': self.get_argument("cat", '-'),
                 'title': self.get_argument("tit"),
                 'content': self.get_argument("con"),
-                'tags': ','.join(self.get_arguments("tag[]")),
+                'tags': ','.join(self.get_arguments("tag")),
                 'closecomment': tf[self.get_argument("clo", 'false')],
                 'password': self.get_argument("password", ''),
                 'add_time': timestamp,
@@ -367,12 +367,16 @@ class ListPost(BaseHandler):
     @authorized()
     def get(self):
         page = self.get_argument("page", 1)
-        article = Article.get_paged(page, getAttr('ADMIN_POST_NUM'))
-        total = math.ceil(Article.count_all() / float(getAttr('ADMIN_POST_NUM')))
+        category = self.get_argument("category", "")
+        title = self.get_argument("title", "")
+        article = Article.get_paged(page, getAttr('ADMIN_POST_NUM'), category, title)
+        total = math.ceil(Article.count_all(category, title) / float(getAttr('ADMIN_POST_NUM')))
         if page == 1:
+            cats = Category.get_all()
             self.echo('admin_post_list.html', {
                 'title': "文章列表",
                 'objs': article,
+                'cats': cats,
                 'total': total,
             }, layout='_layout_admin.html')
         else:
@@ -401,12 +405,6 @@ class EditPost(BaseHandler):
 
     @authorized()
     def post(self, id=''):
-        act = self.get_argument("act", '')
-        if act == 'findid':
-            eid = self.get_argument("id", '')
-            self.redirect('%s/admin/edit_post/%s' % (BASE_URL, eid))
-            return
-
         self.set_header('Content-Type', 'application/json')
         rspd = {'status': 201, 'msg': 'ok'}
         oldobj = Article.get_article(id)
@@ -418,7 +416,7 @@ class EditPost(BaseHandler):
                 'category': self.get_argument("cat", '-'),
                 'title': self.get_argument("tit"),
                 'content': self.get_argument("con"),
-                'tags': ",".join(self.get_arguments("tag[]")),
+                'tags': ",".join(self.get_arguments("tag")),
                 'closecomment': tf[self.get_argument("clo", 'false')],
                 'password': self.get_argument("password", ''),
                 'edit_time': timestamp,

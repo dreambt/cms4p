@@ -151,16 +151,21 @@ def comment_format_admin(objs):
 
 def user_format(objs):
     for obj in objs:
-        obj.gravatar = 'http://www.gravatar.com/avatar/%s' % md5(obj.name).hexdigest()  # TODO 改为 email
+        obj.gravatar = 'http://www.gravatar.com/avatar/%s' % md5(obj.email).hexdigest()
     return objs
 
 ###以下是各个数据表的操作
 
 
 class Article():
-    def count_all(self):
+    def count_all(self, cat=None, title=None):
         sdb._ensure_connected()
-        return sdb.query('SELECT COUNT(*) AS num FROM `sp_posts`')[0]['num']
+        sql = "SELECT COUNT(*) AS num FROM `sp_posts` WHERE 1=1"
+        if cat:
+            sql += " and category = \'%s\'" % cat
+        if title:
+            sql += " and title like \'%s\'" % title
+        return sdb.query(sql)[0]['num']
 
     def create_article(self, params):
         query = "INSERT INTO `sp_posts` (`category`,`title`,`content`,`closecomment`,`tags`,`password`,`add_time`,`edit_time`,`archive`) values(%s,%s,%s,%s,%s,%s,%s,%s,%s)"
@@ -205,11 +210,16 @@ class Article():
         return post_list_format(sdb.query("SELECT * FROM `sp_posts` ORDER BY `id` DESC"))
 
     # 分页
-    def get_paged(self, page=1, limit=None):
+    def get_paged(self, page=1, limit=None, cat=None, title=None):
         if limit is None:
             limit = getAttr('EACH_PAGE_POST_NUM')
         limit = int(limit)
-        sql = "SELECT * FROM `sp_posts` ORDER BY `id` DESC LIMIT %s,%s" % ((int(page) - 1) * limit, limit)
+        sql = "SELECT * FROM `sp_posts` where 1=1"
+        if cat:
+            sql += " and category = \'%s\'" % cat
+        if title:
+            sql += " and title like \'%s\'" % title
+        sql += " ORDER BY `id` DESC LIMIT %s,%s" % ((int(page) - 1) * limit, limit)
         sdb._ensure_connected()
         return sdb.query(sql)
 

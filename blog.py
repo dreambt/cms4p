@@ -41,12 +41,6 @@ class HomePage(BaseHandler):
             'cats': Category.get_all_cat_name(),
             'tags': Tag.get_hot_tag_name(),
             'archives': Archive.get_all_archive_name(),
-            'page': 1,
-            'allpage': all_page,
-            'listtype': 'index',
-            'comments': Comment.get_recent_comments(),
-            'links': Link.get_all_links(),
-            'Totalblog': get_count('Totalblog', NUM_SHARDS, 0),
         }, layout='_layout.html')
         self.write(output)
         return output
@@ -87,7 +81,6 @@ class IndexPage(BaseHandler):
             'endid': endid,
             'comments': Comment.get_recent_comments(),
             'links': Link.get_all_links(),
-            'Totalblog': get_count('Totalblog', NUM_SHARDS, 0),
         }, layout='_layout.html')
         self.write(output)
         return output
@@ -155,7 +148,7 @@ class PostDetail(BaseHandler):
             'comments': Comment.get_recent_comments(),
             'links': Link.get_all_links(),
             'hits': get_count(keyname),
-            'Totalblog': get_count('Totalblog', NUM_SHARDS, 0),
+            'recent_article': Article.get_last_post(8),
             'listtype': '',
         }, layout='_layout.html')
         self.write(output)
@@ -332,6 +325,7 @@ class CategoryDetail(BaseHandler):
             'listtype': 'cat',
             'name': name,
             'namemd5': md5(name.encode('utf-8')).hexdigest(),
+            'recent_article': Article.get_last_post(8),
             'comments': Comment.get_recent_comments(),
             'links': Link.get_all_links(),
         }, layout='_layout.html')
@@ -361,7 +355,7 @@ class ArchiveDetail(BaseHandler):
         if all_post % each_page_post_num:
             all_page += 1
 
-        output = self.render('index.html', {
+        output = self.render('default.html', {
             'title': "%s - %s" % (archiveobj.name, getAttr('SITE_TITLE')),
             'keywords': archiveobj.name,
             'description': getAttr('SITE_DECR'),
@@ -374,9 +368,9 @@ class ArchiveDetail(BaseHandler):
             'listtype': 'archive',
             'name': name,
             'namemd5': md5(name.encode('utf-8')).hexdigest(),
+            'recent_article': Article.get_last_post(8),
             'comments': Comment.get_recent_comments(),
             'links': Link.get_all_links(),
-            'Totalblog': get_count('Totalblog', NUM_SHARDS, 0),
         }, layout='_layout.html')
         self.write(output)
         return output
@@ -413,9 +407,9 @@ class TagDetail(BaseHandler):
             'listtype': 'tag',
             'name': name,
             'namemd5': md5(name.encode('utf-8')).hexdigest(),
+            'recent_article': Article.get_last_post(8),
             'comments': Comment.get_recent_comments(),
             'links': Link.get_all_links(),
-            'Totalblog': get_count('Totalblog', NUM_SHARDS, 0),
         }, layout='_layout.html')
         self.write(output)
         return output
@@ -428,12 +422,15 @@ class ArticleList(BaseHandler):
         if list_type == 'cat':
             objs = Category.get_paged_posts_by_name(name, page)
             catobj = Category.get_by_name(name)
+            show_type = catobj.showtype
         elif list_type == 'tag':
             objs = Tag.get_tag_page_posts(name, page)
             catobj = Tag.get_tag_by_name(name)
+            show_type = "list"
         elif list_type == 'archive':
             objs = Archive.get_archive_page_posts(name, page)
             catobj = Archive.get_archive_by_name(name)
+            show_type = "list"
 
         if catobj:
             pass
@@ -441,7 +438,6 @@ class ArticleList(BaseHandler):
             self.redirect(BASE_URL)
             return
 
-        show_type = catobj.showtype
         each_page_post_num = int(getAttr('EACH_PAGE_POST_NUM'))
         all_post = catobj.id_num
         all_page = all_post / each_page_post_num
@@ -449,7 +445,7 @@ class ArticleList(BaseHandler):
             all_page += 1
 
         output = self.render(show_type + '.html', {
-            'title': "%s - %s | Part %s" % ( catobj.name, getAttr('SITE_TITLE'), page),
+            'title': "%s - %s | Part %s" % (catobj.name, getAttr('SITE_TITLE'), page),
             'keywords': catobj.name,
             'description': getAttr('SITE_DECR'),
             'objs': objs,
@@ -463,7 +459,6 @@ class ArticleList(BaseHandler):
             'namemd5': md5(name.encode('utf-8')).hexdigest(),
             'comments': Comment.get_recent_comments(),
             'links': Link.get_all_links(),
-            'Totalblog': get_count('Totalblog', NUM_SHARDS, 0),
         }, layout='_layout.html')
         self.write(output)
         return output

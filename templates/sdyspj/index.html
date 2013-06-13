@@ -36,7 +36,7 @@
             <h4>新闻资讯</h4>
             <ul>
                 <?py for news in news1: ?>
-                <li>#{news.title}</li>
+                <li><a href="/topic/#{news.id}/#{news.title}">#{news.title}</a></li>
                 <?py #endfor ?>
             </ul>
         </div>
@@ -46,7 +46,7 @@
             <h4>行业资讯</h4>
             <ul>
                 <?py for news in news2: ?>
-                <li>#{news.title}</li>
+                <li><a href="/topic/#{news.id}/#{news.title}">#{news.title}</a></li>
                 <?py #endfor ?>
             </ul>
         </div>
@@ -56,7 +56,7 @@
             <h4>产品展示</h4>
             <ul>
                 <?py for news in prods: ?>
-                <li>#{news.title}</li>
+                <li><a href="/topic/#{news.id}/#{news.title}">#{news.title}</a></li>
                 <?py #endfor ?>
             </ul>
         </div>

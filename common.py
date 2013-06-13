@@ -182,7 +182,7 @@ def pagecache(key="", time=PAGE_CACHE_TIME, key_suffix_calc_func=None):
                 key_with_suffix = req.request.path
 
             html = mc.get(key_with_suffix)
-            request_time = int(req.request.request_time() * 1000)
+            #request_time = int(req.request.request_time() * 1000)
             if html:
                 if key == 'post':
                     if key_suffix:
@@ -198,7 +198,7 @@ def pagecache(key="", time=PAGE_CACHE_TIME, key_suffix_calc_func=None):
                         req.write(PV_RE.sub('<span class="categories greyhref">PageView(%d)</span>' % count, html))
                         return _wrapper
                 req.write(html)
-                req.write(RQT_RE.sub('<span id="requesttime">%d</span>' % request_time, html))
+                #req.write(RQT_RE.sub('<span id="requesttime">%d</span>' % request_time, html))
             else:
                 result = method(*args, **kwargs)
                 mc.set(key_with_suffix, result, int(time))
@@ -272,13 +272,13 @@ class BaseHandler(tornado.web.RequestHandler):
             message += "<h4>Content:</h4>"
             message += "<br />".join(self.request.arguments)
             if status_code == 404:
-                sendEmail(u"404 页面找不到", message)
+                sendEmail(u"404 页面找不到", message.decode('utf-8'))
                 self.render('404.html')
             elif status_code == 500:
-                sendEmail(u"500 页面找不到", message)
+                sendEmail(u"500 页面找不到", message.decode('utf-8'))
                 self.render('500.html')
             else:
-                sendEmail(u"*** 未知异常", message)
+                sendEmail(u"*** 未知异常", message.decode('utf-8'))
                 tornado.web.RequestHandler.write_error(self, status_code, **kwargs)
         else:
             tornado.web.RequestHandler.write_error(self, status_code, **kwargs)
@@ -398,7 +398,7 @@ def sendEmail(subject, html, to=None):
         "api_user": getAttr('MAIL_FROM'),
         "api_key": getAttr("MAIL_KEY"),
         "from": getAttr('MAIL_FROM'),
-        "formname": getAttr('SITE_TITLE'),
+        "formname": getAttr('SITE_TITLE').encode('utf-8'),
         "subject": subject,
         "html": html,
         "to": to,
@@ -406,7 +406,6 @@ def sendEmail(subject, html, to=None):
     r = requests.post(url, params)
     if r.text.find("error") > 0:
         logging.warn("发送邮件失败: " + r.text.encode('utf-8') + "\nTitle(" + subject + ") To(" + to + ") Html(" + html + ")")
-    print r.text
     return r.text
 
 
@@ -430,7 +429,6 @@ def sendTemplateEmail(subject, sub, to=None):
     r = requests.post(url, params)
     if r.text.find("error") > 0:
         logging.warn("发送邮件失败: " + r.text.encode('utf-8') + "\nParams(" + str(params) + ")")
-    print r.text
     return r.text
 
 
