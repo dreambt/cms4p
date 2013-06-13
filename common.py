@@ -23,12 +23,14 @@ from extensions.sessions import Session, RedisSession
 #     kv = redis.Redis(host=REDIS_HOST, port=int(REDIS_PORT), db=0)
 # else:
 import sae.kvdb
+
 kv = sae.kvdb.KVClient()
 
 ##############
 # MC 临时缓存 #
 ##############
 import pylibmc
+
 mc = pylibmc.Client()
 
 
@@ -197,7 +199,7 @@ def pagecache(key="", time=PAGE_CACHE_TIME, key_suffix_calc_func=None):
                         req.write(PV_RE.sub('<span class="categories greyhref">PageView(%d)</span>' % count, html))
                         return _wrapper
                 req.write(html)
-                req.write(RQT_RE.sub('<span id="requesttime">%d</span>'% request_time, html))
+                req.write(RQT_RE.sub('<span id="requesttime">%d</span>' % request_time, html))
             else:
                 result = method(*args, **kwargs)
                 mc.set(key_with_suffix, result, int(time))
@@ -209,6 +211,7 @@ def pagecache(key="", time=PAGE_CACHE_TIME, key_suffix_calc_func=None):
 ###
 import tenjin
 from tenjin.helpers import *   # or escape, to_str
+
 engine = tenjin.Engine(path=[os.path.join('templates', theme) for theme in [THEME, 'admin']] + ['templates'],
                        cache=tenjin.MemoryCacheStorage(), preprocess=True)
 
@@ -405,9 +408,12 @@ def sendEmail(subject, html, to=None):
         "from": getAttr('MAIL_FROM'),
         "formname": getAttr('SITE_TITLE'),
         "subject": subject,
-        "html": html
+        "html": gzip_compress(html)
     }
     r = requests.post(url, params)
+    print getAttr('MAIL_FROM')
+    print getAttr('MAIL_KEY')
+    print r.reason
     print r.text
 
 
@@ -415,7 +421,7 @@ def sendEmail(subject, html, to=None):
 def gzip_compress(content):
     out = cStringIO.StringIO()
     gzipfile = gzip.GzipFile(fileobj=out, mode='w', compresslevel=9)
-    gzipfile.write(content)
+    gzipfile.write(content.encode('utf-8'))
     gzipfile.close()
     out.seek(0)
     byte = out.read(1)

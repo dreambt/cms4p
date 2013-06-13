@@ -28,9 +28,9 @@ MOVE_SECRET = 'what?'  # 迁移密码
 #MAIL_KEY = '{hisense2002j}'
 
 MAIL_FROM = 'postmaster@sdyspj.sendcloud.org'
+MAIL_KEY = 'DSvK6ViH'
 MAIL_SMTP = 'smtpcloud.sohu.com'
 MAIL_PORT = 25
-MAIL_KEY = 'DSvK6ViH'
 
 # 放在网页底部的统计代码
 ANALYTICS_CODE = """"""
