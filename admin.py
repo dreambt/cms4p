@@ -663,7 +663,7 @@ class AddUser(BaseHandler):
         try:
             userid = User.create_user(name, email, pw, status)
             if userid:
-                sendEmail("新用户注册通知 - " + SITE_TITLE, "您的密码是：" + pw + "<br />请及时登录并修改密码！", email)
+                sendEmail(u"新用户注册通知 - " + SITE_TITLE, u"您的密码是：" + pw + u"<br />请及时登录并修改密码！", email)
 
                 rspd['status'] = 200
                 rspd['msg'] = '创建用户成功，已邮件通知该用户！'

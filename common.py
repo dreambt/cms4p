@@ -272,13 +272,13 @@ class BaseHandler(tornado.web.RequestHandler):
             message += "<h4>Content:</h4>"
             message += "<br />".join(self.request.arguments)
             if status_code == 404:
-                sendEmail("404 页面找不到", message)
+                sendEmail(u"404 页面找不到", message)
                 self.render('404.html')
             elif status_code == 500:
-                sendEmail("500 页面找不到", message)
+                sendEmail(u"500 页面找不到", message)
                 self.render('500.html')
             else:
-                sendEmail("*** 未知异常", message)
+                sendEmail(u"*** 未知异常", message)
                 tornado.web.RequestHandler.write_error(self, status_code, **kwargs)
         else:
             tornado.web.RequestHandler.write_error(self, status_code, **kwargs)
