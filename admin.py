@@ -688,7 +688,7 @@ class ListUser(BaseHandler):
         page = self.get_argument("page", 1)
         limit = getAttr('ADMIN_USER_NUM')
         users = User.get_paged(page, limit)
-        total = math.ceil(Article.count_all() / float(limit))
+        total = math.ceil(User.count_all() / float(limit))
         if page == 1:
             self.echo('admin_user_list.html', {
                 'title': "用户列表",
