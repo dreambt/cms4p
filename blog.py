@@ -466,7 +466,7 @@ class ArticleList(BaseHandler):
 
 class Robots(BaseHandler):
     def get(self):
-        self.echo('robots.txt', {'cats': Category.get_category()})
+        self.echo('robots.txt', {'cats': Category.get_all()})
 
 
 class Feed(BaseHandler):

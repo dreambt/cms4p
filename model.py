@@ -478,7 +478,6 @@ class Category():
             print 'not name'
 
     def get_sitemap_by_id(self, id=''):
-
         obj = self.get_category(id)
         if not obj:
             return ''
