@@ -86,11 +86,11 @@ def post_detail_formate(obj):
         obj.keywords = obj.tags
         obj.description = HTML_REG.sub('', obj.content[:DESCRIPTION_CUT_WORDS])
         #get prev and next obj
-        obj.prev_obj = sdb.get('SELECT `id`,`title` FROM `sp_posts` WHERE `id` > %s LIMIT 1' % str(obj.id))
+        obj.prev_obj = sdb.get('SELECT `id`,`title` FROM `sp_posts` WHERE `id` > %s' % str(obj.id))
         if obj.prev_obj:
             obj.prev_obj.slug = slugfy(obj.prev_obj.title)
         obj.next_obj = sdb.get(
-            'SELECT `id`,`title` FROM `sp_posts` WHERE `id` < %s ORDER BY `id` DESC LIMIT 1' % str(obj.id))
+            'SELECT `id`,`title` FROM `sp_posts` WHERE `id` < %s ORDER BY `id` DESC' % str(obj.id))
         if obj.next_obj:
             obj.next_obj.slug = slugfy(obj.next_obj.title)
             #get relative obj base tags
@@ -203,7 +203,7 @@ class Article():
 
     def get_article(self, userid):
         sdb._ensure_connected()
-        return sdb.get('SELECT * FROM `sp_posts` WHERE `id` = %s LIMIT 1' % str(userid))
+        return sdb.get('SELECT * FROM `sp_posts` WHERE `id` = %s' % str(userid))
 
     def get_all(self):
         sdb._ensure_connected()
@@ -236,7 +236,7 @@ class Article():
 
     def get_last_post_add_time(self):
         sdb._ensure_connected()
-        obj = sdb.get('SELECT `add_time` FROM `sp_posts` ORDER BY `id` DESC LIMIT 1')
+        obj = sdb.get('SELECT `add_time` FROM `sp_posts` ORDER BY `id` DESC')
         if obj:
             return datetime.fromtimestamp(obj.add_time)
         else:
@@ -251,12 +251,12 @@ class Article():
 
     def get_article_detail(self, userid):
         sdb._ensure_connected()
-        return post_detail_formate(sdb.get('SELECT * FROM `sp_posts` WHERE `id` = %s LIMIT 1' % str(userid)))
+        return post_detail_formate(sdb.get('SELECT * FROM `sp_posts` WHERE `id` = %s' % str(userid)))
 
     def get_article_simple(self, userid):
         sdb._ensure_connected()
         return sdb.get(
-            'SELECT `id`,`category`,`title`,`comment_num`,`closecomment`,`password` FROM `sp_posts` WHERE `id` = %s LIMIT 1' % str(
+            'SELECT `id`,`category`,`title`,`comment_num`,`closecomment`,`password` FROM `sp_posts` WHERE `id` = %s' % str(
                 userid))
 
     def get_post_for_sitemap(self, ids=[]):
@@ -300,7 +300,7 @@ class Comment():
 
     def get_comment(self, id):
         sdb._ensure_connected()
-        return sdb.get('SELECT * FROM `sp_comments` WHERE `id` = %s LIMIT 1' % str(id))
+        return sdb.get('SELECT * FROM `sp_comments` WHERE `id` = %s' % str(id))
 
     # 分页
     def get_paged(self, page=1, limit=None):
@@ -318,7 +318,6 @@ class Comment():
         return comment_format(sdb.query('SELECT * FROM `sp_comments` ORDER BY `id` DESC LIMIT %s' % limit))
 
     def get_post_page_comments_by_id(self, postid=0, min_comment_id=0, limit=EACH_PAGE_COMMENT_NUM):
-
         if min_comment_id == 0:
             sdb._ensure_connected()
             return comment_format(sdb.query(
@@ -355,7 +354,7 @@ class Link():
 
     def get_link(self, id):
         sdb._ensure_connected()
-        return sdb.get('SELECT * FROM `sp_links` WHERE `id` = %s LIMIT 1' % str(id))
+        return sdb.get('SELECT * FROM `sp_links` WHERE `id` = %s' % str(id))
 
     def get_all_links(self, limit=LINK_NUM):
         sdb._ensure_connected()
@@ -396,7 +395,7 @@ class Category():
 
     def get_category(self, id=''):
         sdb._ensure_connected()
-        return sdb.get('SELECT * FROM `sp_category` WHERE `id` = %s LIMIT 1' % str(id))
+        return sdb.get('SELECT * FROM `sp_category` WHERE `id` = %s' % str(id))
 
     def get_all(self):
         sdb._ensure_connected()
@@ -433,7 +432,7 @@ class Category():
 
     def get_by_name(self, name=''):
         sdb._ensure_connected()
-        return sdb.get('SELECT * FROM `sp_category` WHERE `name` = \'%s\' LIMIT 1' % name)
+        return sdb.get('SELECT * FROM `sp_category` WHERE `name` = \'%s\'' % name)
 
     def get_all_post_num(self, name=''):
         obj = self.get_by_name(name)
@@ -445,7 +444,7 @@ class Category():
     def add_postid_to_cat(self, name='', postid=''):
         mdb._ensure_connected()
         # 因为 UPDATE 时无论有没有影响行数，都返回0，所以这里要多读一次（从主数据库读）
-        obj = mdb.get('SELECT * FROM `sp_category` WHERE `name` = \'%s\' LIMIT 1' % name)
+        obj = mdb.get('SELECT * FROM `sp_category` WHERE `name` = \'%s\'' % name)
 
         if obj:
             query = "UPDATE `sp_category` SET `id_num` = `id_num` + 1, `content` =  concat(%s, `content`) WHERE `id` = %s LIMIT 1"
@@ -457,7 +456,7 @@ class Category():
     def remove_postid_from_cat(self, name='', postid=''):
         mdb._ensure_connected()
         if name:
-            obj = mdb.get('SELECT * FROM `sp_category` WHERE `name` = \'%s\' LIMIT 1' % name)
+            obj = mdb.get('SELECT * FROM `sp_category` WHERE `name` = \'%s\'' % name)
             if obj:
                 idlist = obj.content.split(',')
                 if postid in idlist:
@@ -526,7 +525,7 @@ class Tag():
 
     def get_tag_by_name(self, name=''):
         sdb._ensure_connected()
-        return sdb.get('SELECT * FROM `sp_tags` WHERE `name` = \'%s\' LIMIT 1' % name)
+        return sdb.get('SELECT * FROM `sp_tags` WHERE `name` = \'%s\'' % name)
 
     def get_all_post_num(self, name=''):
         obj = self.get_tag_by_name(name)
@@ -551,7 +550,7 @@ class Tag():
     def add_postid_to_tags(self, tags=[], postid=''):
         mdb._ensure_connected()
         for tag in tags:
-            obj = mdb.get('SELECT * FROM `sp_tags` WHERE `name` = \'%s\' LIMIT 1' % tag)
+            obj = mdb.get('SELECT * FROM `sp_tags` WHERE `name` = \'%s\'' % tag)
 
             if obj:
                 query = "UPDATE `sp_tags` SET `id_num` = `id_num` + 1, `content` =  concat(%s, `content`) WHERE `id` = %s LIMIT 1"
@@ -563,7 +562,7 @@ class Tag():
     def remove_postid_from_tags(self, tags=[], postid=''):
         mdb._ensure_connected()
         for tag in tags:
-            obj = mdb.get('SELECT * FROM `sp_tags` WHERE `name` = \'%s\' LIMIT 1' % tag)
+            obj = mdb.get('SELECT * FROM `sp_tags` WHERE `name` = \'%s\'' % tag)
 
             if obj:
                 idlist = obj.content.split(',')
@@ -588,7 +587,7 @@ Tag = Tag()
 class Archive():
     def get_latest_archive_name(self):
         sdb._ensure_connected()
-        objs = sdb.query('SELECT `name` FROM `sp_archive` ORDER BY `name` DESC LIMIT 1')
+        objs = sdb.get('SELECT `name` FROM `sp_archive` ORDER BY `name` DESC')
         print objs[0].name
         return objs[0].name
 
@@ -606,7 +605,7 @@ class Archive():
 
     def get_archive_by_name(self, name=''):
         sdb._ensure_connected()
-        return sdb.get('SELECT * FROM `sp_archive` WHERE `name` = \'%s\' LIMIT 1' % name)
+        return sdb.get('SELECT * FROM `sp_archive` WHERE `name` = \'%s\'' % name)
 
     def get_all_post_num(self, name=''):
         obj = self.get_archive_by_name(name)
@@ -631,7 +630,7 @@ class Archive():
     def add_postid_to_archive(self, name='', postid=''):
         mdb._ensure_connected()
         #因为 UPDATE 时无论有没有影响行数，都返回0，所以这里要多读一次（从主数据库读）
-        obj = mdb.get('SELECT * FROM `sp_archive` WHERE `name` = \'%s\' LIMIT 1' % name)
+        obj = mdb.get('SELECT * FROM `sp_archive` WHERE `name` = \'%s\'' % name)
 
         if obj:
             query = "UPDATE `sp_archive` SET `id_num` = `id_num` + 1, `content` =  concat(%s, `content`) WHERE `id` = %s LIMIT 1"
@@ -642,7 +641,7 @@ class Archive():
 
     def remove_postid_from_archive(self, name='', postid=''):
         mdb._ensure_connected()
-        obj = mdb.get('SELECT * FROM `sp_archive` WHERE `name` = \'%s\' LIMIT 1' % name)
+        obj = mdb.get('SELECT * FROM `sp_archive` WHERE `name` = \'%s\'' % name)
         if obj:
             idlist = obj.content.split(',')
             if postid in idlist:
@@ -661,7 +660,7 @@ class Archive():
 
     def get_archive(self, id=''):
         sdb._ensure_connected()
-        return sdb.get('SELECT * FROM `sp_archive` WHERE `id` = %s LIMIT 1' % str(id))
+        return sdb.get('SELECT * FROM `sp_archive` WHERE `id` = %s' % str(id))
 
 
 Archive = Archive()
@@ -714,7 +713,7 @@ class User():
 
     def get_user(self, id):
         sdb._ensure_connected()
-        return sdb.get('SELECT * FROM `sp_user` WHERE `id` = %s LIMIT 1' % id)
+        return sdb.get('SELECT * FROM `sp_user` WHERE `id` = %s' % id)
 
     def get_all(self):
         sdb._ensure_connected()
@@ -731,18 +730,18 @@ class User():
 
     def check_has_user(self):
         sdb._ensure_connected()
-        return sdb.get('SELECT `id` FROM `sp_user` LIMIT 1')
+        return sdb.get('SELECT `id` FROM `sp_user`')
 
     def get_user_by_name(self, name):
         sdb._ensure_connected()
-        return sdb.get('SELECT * FROM `sp_user` WHERE `name` = \'%s\' LIMIT 1' % name)
+        return sdb.get('SELECT * FROM `sp_user` WHERE `name` = \'%s\'' % name)
 
     def get_user_by_email(self, email):
         sdb._ensure_connected()
-        return sdb.get('SELECT * FROM `sp_user` WHERE `email` = \'%s\' LIMIT 1' % email)
+        return sdb.get('SELECT * FROM `sp_user` WHERE `email` = \'%s\'' % email)
 
     def check_name_email(self, name='', email=''):
-        sql = "SELECT * FROM `sp_user` WHERE `name` = %s and `email` = %s LIMIT 1"
+        sql = "SELECT * FROM `sp_user` WHERE `name` = %s and `email` = %s"
         sdb._ensure_connected()
         user = sdb.get(sql, name, email)
         if user:
@@ -876,6 +875,5 @@ CREATE TABLE IF NOT EXISTS `sp_user` (
 """
         mdb._ensure_connected()
         mdb.execute(sql)
-
 
 MyData = MyData()
