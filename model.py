@@ -86,11 +86,11 @@ def post_detail_formate(obj):
         obj.keywords = obj.tags
         obj.description = HTML_REG.sub('', obj.content[:DESCRIPTION_CUT_WORDS])
         #get prev and next obj
-        obj.prev_obj = sdb.get('SELECT `id`,`title` FROM `sp_posts` WHERE `id` > %s' % str(obj.id))
+        obj.prev_obj = sdb.get('SELECT `id`,`title` FROM `sp_posts` WHERE `id` > %s LIMIT 1' % str(obj.id))
         if obj.prev_obj:
             obj.prev_obj.slug = slugfy(obj.prev_obj.title)
         obj.next_obj = sdb.get(
-            'SELECT `id`,`title` FROM `sp_posts` WHERE `id` < %s ORDER BY `id` DESC' % str(obj.id))
+            'SELECT `id`,`title` FROM `sp_posts` WHERE `id` < %s ORDER BY `id` DESC LIMIT 1' % str(obj.id))
         if obj.next_obj:
             obj.next_obj.slug = slugfy(obj.next_obj.title)
             #get relative obj base tags
@@ -251,7 +251,7 @@ class Article():
 
     def get_article_detail(self, userid):
         sdb._ensure_connected()
-        return post_detail_formate(sdb.get('SELECT * FROM `sp_posts` WHERE `id` = %s' % str(userid)))
+        return post_detail_formate(sdb.get('SELECT * FROM `sp_posts` WHERE `id` = %s LIMIT 1' % str(userid)))
 
     def get_article_simple(self, userid):
         sdb._ensure_connected()
