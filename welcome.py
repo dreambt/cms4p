@@ -4,9 +4,9 @@ import re
 import time
 from tornado import database
 
-from common import BaseHandler, pagecache, getAttr
+from core.common import BaseHandler, pagecache, getAttr
 
-from model import Category
+from model.model import Category
 from setting import *
 
 ##数据库配置信息

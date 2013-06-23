@@ -11,12 +11,18 @@ from tornado import escape
 import tornado
 from tornado.database import OperationalError
 
-from common import BaseHandler, authorized, safe_encode, clear_cache_by_pathlist, quoted_string, clear_all_cache, genArchive, setAttr, clearAllKVDB, set_count, increment, getAttr, sendEmail
-from helpers import generate_random
+from core.common import BaseHandler, authorized, safe_encode, clear_cache_by_pathlist, quoted_string, clear_all_cache, genArchive, setAttr, clearAllKVDB, set_count, increment, getAttr, sendEmail
+from core.utils.random_utils import random_int
+from model.archive import Archive
+from model.article import Article
+from model.base import MyData
+from model.category import Category
+from model.comment import Comment
+from model.link import Link
+from model.tag import Tag
+from model.user import User
 from setting import *
 from extensions.imagelib import Recaptcha, Thumbnail
-from model import Article, Comment, Link, Category, Tag, User, MyData, Archive
-
 
 try:
     import json
@@ -1185,7 +1191,7 @@ class Install(BaseHandler):
 
 class GetCaptcha(BaseHandler):
     def get(self):
-        text = generate_random(4)
+        text = random_int(4)
         self.set_secure_cookie("captcha", text)
 
         strIO = Recaptcha(text)

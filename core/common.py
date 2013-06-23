@@ -211,8 +211,13 @@ def pagecache(key="", time=PAGE_CACHE_TIME, key_suffix_calc_func=None):
 import tenjin
 from tenjin.helpers import *   # or escape, to_str
 
-engine = tenjin.Engine(path=[os.path.join('templates', theme) for theme in [THEME, 'admin']] + ['templates'],
-                       cache=tenjin.MemoryCacheStorage(), preprocess=True)
+engine = tenjin.Engine(path=[os.path.join('../templates', theme) for theme in [THEME, 'admin']] + ['templates'],
+                       cache=tenjin.MemoryCacheStorage(), 
+                       preprocess=True,
+                       pp=[
+                           tenjin.TrimPreprocessor(),
+                       ],
+)
 
 
 class BaseHandler(tornado.web.RequestHandler):
@@ -259,8 +264,15 @@ class BaseHandler(tornado.web.RequestHandler):
     def isAuthor(self):
         user_name_cookie = self.get_secure_cookie('username', '')
         user_pw_cookie = self.get_secure_cookie('userpw', '')
-        from model import User
+        from model.model import User
         return User.check_user_password(user_name_cookie, user_pw_cookie)
+
+    def get_current_user(self):
+        """
+        获取登录用户名
+        :return: 用户名
+        """
+        return self.get_secure_cookie("username")
 
     # http://www.keakon.net/2012/12/03/Tornado%E4%BD%BF%E7%94%A8%E7%BB%8F%E9%AA%8C
     def write_error(self, status_code, **kwargs):
@@ -290,7 +302,7 @@ def authorized(url='/admin/login'):
             request = self.request
             user_name_cookie = self.get_secure_cookie('username')
             user_pw_cookie = self.get_secure_cookie('userpw')
-            from model import User
+            from model.model import User
             user = User.check_user_password(user_name_cookie, user_pw_cookie)
 
             if request.method == 'GET':

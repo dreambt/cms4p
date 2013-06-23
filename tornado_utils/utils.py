@@ -89,14 +89,6 @@ def mkdir(newdir):
             os.mkdir(newdir)
 
 
-from random import choice
-from string import letters
-
-
-def random_string(length):
-    return ''.join(choice(letters) for i in xrange(length))
-
-
 def all_hash_tags(tags, title):
     """return true if all tags in the title were constructed with a '#' instead
     of a '@' sign"""

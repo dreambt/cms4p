@@ -5,13 +5,16 @@ import json
 from hashlib import md5
 from time import time
 from urlparse import unquote
-from admin import DEFAULT_BUCKET
+from model.archive import Archive
+from model.article import Article
+from model.category import Category
+from model.comment import Comment
+from model.link import Link
+from model.tag import Tag
 
 from setting import *
 
-from common import BaseHandler, unquoted_unicode, safe_encode, pagecache, clear_cache_by_pathlist, client_cache, get_count, increment, getAttr
-
-from model import Article, Comment, Link, Category, Tag, Archive
+from core.common import BaseHandler, unquoted_unicode, safe_encode, pagecache, clear_cache_by_pathlist, client_cache, get_count, increment, getAttr
 
 
 class HomePage(BaseHandler):

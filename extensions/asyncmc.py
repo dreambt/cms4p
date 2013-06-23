@@ -1,3 +1,11 @@
+#!/usr/bin/env python
+#coding=utf-8
+"""
+    asyncmc.py
+    ~~~~~~~~~~~~~
+    Async Memcache client for Tornado
+    https://github.com/jeffhodsdon/asyncmc
+"""
 import socket
 import random
 import functools
@@ -12,9 +20,9 @@ import tornado.iostream
 
 class Client(object):
 
-    _FLAG_PICKLE  = 1<<0
-    _FLAG_INTEGER = 1<<1
-    _FLAG_LONG    = 1<<2
+    _FLAG_PICKLE = 1 << 0
+    _FLAG_INTEGER = 1 << 1
+    _FLAG_LONG = 1 << 2
 
     def __init__(self, servers, **kwargs):
         self.conn_pool = ConnectionPool(servers, **kwargs)
@@ -31,11 +39,11 @@ class Client(object):
     def get(self, key, callback):
         server = self._server(key)
         server.send_cmd("get %s" % (key,),
-            functools.partial(self._get_callback_write, server=server, callback=callback))
+                        functools.partial(self._get_callback_write, server=server, callback=callback))
 
     def _get_callback_write(self, server, callback):
         server.stream.read_until("\r\n",
-            functools.partial(self._get_callback_read, server=server, callback=callback))
+                                 functools.partial(self._get_callback_read, server=server, callback=callback))
 
     def _get_callback_read(self, result, server, callback):
         self._debug("_get_callback_read `%s`" % (result,))
@@ -94,11 +102,11 @@ class Client(object):
             value = pickle.dumps(value, 2)
 
         server.send_cmd("set %s %d %d %d\r\n%s" % (key, flags, timeout, len(value), value),
-            functools.partial(self._set_callback_write, server=server, callback=callback))
+                        functools.partial(self._set_callback_write, server=server, callback=callback))
 
     def _set_callback_write(self, server, callback):
         server.stream.read_until("\r\n",
-            functools.partial(self._set_callback_read, server=server, callback=callback))
+                                 functools.partial(self._set_callback_read, server=server, callback=callback))
 
     def _set_callback_read(self, result, server, callback):
         callback(result)
@@ -184,11 +192,12 @@ class Host(object):
 
         self.sock = s
         self.stream = tornado.iostream.IOStream(s)
-        self.stream.debug=True
+        self.stream.debug = True
 
     def send_cmd(self, cmd, callback):
         self._ensure_connection()
         self.stream.write(cmd + "\r\n", callback)
+
 
 if __name__ == "__main__":
 
@@ -197,13 +206,14 @@ if __name__ == "__main__":
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     )
 
-    c =  Client(["127.0.0.1:11211", "127.0.0.1:11212"])
+    c = Client(["127.0.0.1:11211", "127.0.0.1:11212"])
+
     def _set_cb(res):
         print "Set callback", res
 
         def _get_cb(res):
             print "Get callback", res
-            c.get("bar", lambda r: logging.info("get bar cb "+str(r)))
+            c.get("bar", lambda r: logging.info("get bar cb " + str(r)))
 
         c.get("foo", _get_cb)
 

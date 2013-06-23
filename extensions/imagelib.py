@@ -25,8 +25,8 @@ def Recaptcha(text):
     img_width = 100
     img_height = 30
     font_size = 25
-    font_style = random.choice(
-        ['AGENTRED.TTF', 'CRUSOGP.TTF', 'FontfabricFree.otf', 'FacesAndCaps.ttf', 'KINKEE.TTF', 'VITAMINOUTLINE.TTF'])
+    font_style = os.path.join('font', random.choice(
+        ['AGENTRED.TTF', 'CRUSOGP.TTF', 'FacesAndCaps.ttf', 'KINKEE.TTF', 'VITAMINOUTLINE.TTF']))
     font = ImageFont.truetype(os.path.join(os.path.dirname(__file__), font_style), font_size)
     #background = (random.randrange(230, 255), random.randrange(230, 255), random.randrange(230, 255))
     colors = [

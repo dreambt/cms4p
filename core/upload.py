@@ -4,7 +4,7 @@ import os
 import glob
 import re
 import time
-from common import BaseHandler, authorized
+from core.common import BaseHandler, authorized
 
 __author__ = 'baitao.ji'
 
