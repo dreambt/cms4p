@@ -2,32 +2,9 @@
 import json
 import re
 import time
-from tornado import database
 
 from core.common import BaseHandler, pagecache, getAttr
-
-from model.model import Category
-from setting import *
-
-##数据库配置信息
-if debug:
-    #已经在setting里设置了
-    pass
-else:
-    import sae.const
-
-    MYSQL_DB = sae.const.MYSQL_DB
-    MYSQL_USER = sae.const.MYSQL_USER
-    MYSQL_PASS = sae.const.MYSQL_PASS
-    MYSQL_HOST_M = sae.const.MYSQL_HOST
-    MYSQL_HOST_S = sae.const.MYSQL_HOST_S
-    MYSQL_PORT = sae.const.MYSQL_PORT
-
-
-mdb = database.Connection("%s:%s" % (MYSQL_HOST_M, str(MYSQL_PORT)), MYSQL_DB, MYSQL_USER, MYSQL_PASS,
-                          max_idle_time=10)
-sdb = database.Connection("%s:%s" % (MYSQL_HOST_S, str(MYSQL_PORT)), MYSQL_DB, MYSQL_USER, MYSQL_PASS,
-                          max_idle_time=10)
+from model.base import mdb
 
 
 class HomePage(BaseHandler):
@@ -68,12 +45,14 @@ class Subscribe(BaseHandler):
 
 class Robots(BaseHandler):
     def get(self):
+        from model.category import Category
         self.echo('robots.txt', {'cats': Category.get_category()})
 
 
 class Sitemap(BaseHandler):
     def get(self, id=''):
         self.set_header('Content-Type', 'text/xml')
+        from model.category import Category
         self.echo('sitemap.html', {'sitemapstr': Category.get_sitemap_by_id(id), 'id': id})
 
 
