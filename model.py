@@ -236,7 +236,7 @@ class Article():
 
     def get_last_post_add_time(self):
         sdb._ensure_connected()
-        obj = sdb.get('SELECT `add_time` FROM `sp_posts` LIMIT 1 ORDER BY `id` DESC')
+        obj = sdb.get('SELECT `add_time` FROM `sp_posts` ORDER BY `id` DESC LIMIT 1')
         if obj:
             return datetime.fromtimestamp(obj.add_time)
         else:
