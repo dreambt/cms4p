@@ -6,12 +6,12 @@ import re
 import time
 import math
 
-from sae.storage import Bucket
 from tornado import escape
 import tornado
 from tornado.database import OperationalError
 
 from core.common import BaseHandler, authorized, safe_encode, clear_cache_by_pathlist, quoted_string, clear_all_cache, genArchive, setAttr, clearAllKVDB, set_count, increment, getAttr, sendEmail
+from core.storage import put_storage, get_storage_list
 from core.utils.random_utils import random_int
 from model.archive import Archive
 from model.article import Article
@@ -32,26 +32,6 @@ except:
 if not debug:
     import sae.mail
     from sae.taskqueue import add_task
-
-bucket = Bucket(DEFAULT_BUCKET)
-
-
-def put_saestorage(file_name='', data='', expires='365', con_type=None, encoding=None, domain_name=DEFAULT_BUCKET):
-    bucket.put_object(file_name, data)
-    return bucket.generate_url(file_name)
-    #s = sae.storage.Client()
-    #ob = sae.storage.Object(data=data, cache_control='access plus %s day' % expires, content_type=con_type,
-    #                        content_encoding=encoding)
-    #return s.put(domain_name, str(datetime.now().strftime("%Y%m") + "/" + file_name), ob)
-    #return s.put(domain_name, file_name, ob)
-
-
-def get_saestorage(domain_name=DEFAULT_BUCKET):
-    #s = sae.storage.Client()
-    #filelist = s.list(domain_name)
-    filelist = bucket.list()
-    #total_count = len(filelist)
-    return filelist
 
 
 class HomePage(BaseHandler):
@@ -148,8 +128,8 @@ class FileUpload(BaseHandler):
                 if file_type in ['jpg', 'jpeg', 'png', 'gif', 'bmp']:
                     new_file_name = "%s-thumb.%s" % (file_name, file_type)
                     img_data = Thumbnail(StringIO.StringIO(myfile['body'])).thumb((100, 100))
-                    put_saestorage(file_name=new_file_name, data=img_data, expires='365',
-                                   con_type=mime_type, encoding=encoding)
+                    put_storage(file_name=new_file_name, data=img_data, expires='365',
+                                con_type=mime_type, encoding=encoding)
                     #im = Image.open(StringIO.StringIO(myfile['body']))
                     # im.show()
                     #width, height = im.size
@@ -171,8 +151,8 @@ class FileUpload(BaseHandler):
 
             try:
                 new_file_name = "%s.%s" % (file_name, file_type)
-                attachment_url = put_saestorage(file_name=new_file_name, data=myfile['body'], expires='365',
-                                                con_type=mime_type, encoding=encoding)
+                attachment_url = put_storage(file_name=new_file_name, data=myfile['body'], expires='365',
+                                             con_type=mime_type, encoding=encoding)
             except:
                 attachment_url = ''
 
@@ -194,7 +174,7 @@ class FileUpload(BaseHandler):
 class FileManager(BaseHandler):
     @authorized()
     def get(self):
-        file_list = get_saestorage()
+        file_list = get_storage_list()
 
         upload = {
             "moveup_dir_path": "",
@@ -1031,7 +1011,7 @@ class EditProfile(BaseHandler):
             if newPassword == newPassword2:
                 username = self.get_secure_cookie('username')
                 old_user = User.get_user_by_name(username)
-                oldPassword = md5(oldPassword.encode('utf-8')+old_user.salt.encode('utf-8')).hexdigest()
+                oldPassword = md5(oldPassword.encode('utf-8') + old_user.salt.encode('utf-8')).hexdigest()
                 if oldPassword == old_user.password:
                     User.update_user(username, None, newPassword)
                     user = User.get_user(old_user.id)
@@ -1240,7 +1220,7 @@ urls = [
     (r"/admin/setting2", BlogSetting2),
     (r"/admin/setting3", BlogSetting3),
     (r"/admin/setting4", BlogSetting4),
-    (r"/admin/setting5", BlogSetting5),  # 后台设置
+    (r"/admin/setting5", BlogSetting5), # 后台设置
     (r"/admin/profile", EditProfile),
     (r"/admin/kvdb", KVDBAdmin),
     (r"/admin/flushdata", FlushData),

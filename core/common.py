@@ -211,7 +211,7 @@ def pagecache(key="", time=PAGE_CACHE_TIME, key_suffix_calc_func=None):
 import tenjin
 from tenjin.helpers import *   # or escape, to_str
 
-engine = tenjin.Engine(path=[os.path.join('../templates', theme) for theme in [THEME, 'admin']] + ['templates'],
+engine = tenjin.Engine(path=[os.path.join('templates', theme) for theme in [THEME, 'admin']] + ['templates'],
                        cache=tenjin.MemoryCacheStorage(), 
                        preprocess=True,
                        pp=[
