@@ -1,4 +1,3 @@
-<<<<<<< .merge_file_ddlnWW
 *.py[cod]
 
 # C extensions
@@ -37,9 +36,8 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
-=======
+
 # PyCharm
 # http://www.jetbrains.com/pycharm/webhelp/project.html
 .idea
 .iml
->>>>>>> .merge_file_DLLkMN

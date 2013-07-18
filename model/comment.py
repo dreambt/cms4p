@@ -51,7 +51,7 @@ class Comment():
         cobj = self.get_comment(id)
         postid = cobj.postid
         from model.article import Article
-        pobj = Article.get_article(postid)
+        pobj = Article.get(postid)
 
         mdb._ensure_connected()
         mdb.execute("DELETE FROM `sp_comments` WHERE `id` = %s LIMIT 1", id)

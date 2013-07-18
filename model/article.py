@@ -40,11 +40,11 @@ def post_detail_formate(obj):
         obj.keywords = obj.tags
         obj.description = HTML_REG.sub('', obj.content[:DESCRIPTION_CUT_WORDS])
         #get prev and next obj
-        obj.prev_obj = sdb.get('SELECT `id`,`title` FROM `sp_posts` WHERE `id` > %s LIMIT 1' % str(obj.id))
+        obj.prev_obj = sdb.get('SELECT `id`,`title` FROM `cms_posts` WHERE `id` > %s LIMIT 1' % str(obj.id))
         if obj.prev_obj:
             obj.prev_obj.slug = slugfy(obj.prev_obj.title)
         obj.next_obj = sdb.get(
-            'SELECT `id`,`title` FROM `sp_posts` WHERE `id` < %s ORDER BY `id` DESC LIMIT 1' % str(obj.id))
+            'SELECT `id`,`title` FROM `cms_posts` WHERE `id` < %s ORDER BY `id` DESC LIMIT 1' % str(obj.id))
         if obj.next_obj:
             obj.next_obj.slug = slugfy(obj.next_obj.title)
             #get relative obj base tags
@@ -67,7 +67,7 @@ def post_detail_formate(obj):
                     break
                     #
             if idlist:
-                obj.relative = sdb.query('SELECT `id`,`title` FROM `sp_posts` WHERE `id` in(%s) LIMIT %s' % (
+                obj.relative = sdb.query('SELECT `id`,`title` FROM `cms_posts` WHERE `id` in(%s) LIMIT %s' % (
                     ','.join(idlist), str(len(idlist))))
                 if obj.relative:
                     for robj in obj.relative:
@@ -87,22 +87,24 @@ def post_detail_formate(obj):
 class Article():
     def count_all(self, cat=None, title=None):
         sdb._ensure_connected()
-        sql = "SELECT COUNT(*) AS num FROM `sp_posts` WHERE 1=1"
+        sql = "SELECT COUNT(*) AS num FROM `cms_posts` WHERE 1=1"
         if cat:
             sql += " and category = \'%s\'" % cat
         if title:
             sql += " and title like \'%s\'" % title
         return sdb.query(sql)[0]['num']
 
-    def create_article(self, params):
-        query = "INSERT INTO `sp_posts` (`category`,`title`,`content`,`closecomment`,`tags`,`password`,`add_time`,`edit_time`,`archive`) values(%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+    def create(self, params):
+        query = "INSERT INTO `cms_posts` (`category`,`title`,`content`,`closecomment`,`tags`,`password`," \
+                "`add_time`,`edit_time`,`archive`) values(%s,%s,%s,%s,%s,%s,%s,%s,%s)"
         mdb._ensure_connected()
         return mdb.execute(query, params['category'], params['title'], params['content'], params['closecomment'],
                            params['tags'], params['password'], params['add_time'], params['edit_time'],
                            params['archive'])
 
-    def update_post_edit(self, params):
-        query = "UPDATE `sp_posts` SET `category` = %s, `title` = %s, `content` = %s, `closecomment` = %s, `tags` = %s, `password` = %s, `edit_time` = %s WHERE `id` = %s LIMIT 1"
+    def update(self, params):
+        query = "UPDATE `cms_posts` SET `category` = %s, `title` = %s, `content` = %s, `closecomment` = %s, " \
+                "`tags` = %s, `password` = %s, `edit_time` = %s WHERE `id` = %s LIMIT 1"
         mdb._ensure_connected()
         mdb.execute(query, params['category'], params['title'], params['content'], params['closecomment'],
                     params['tags'], params['password'], params['edit_time'], params['id'])
@@ -110,38 +112,38 @@ class Article():
         return params['id']
 
     def update_post_edit_author(self, userid, author):
-        sql = "UPDATE `sp_posts` SET `author` = %s WHERE `id` = %s LIMIT 1" % (author, userid)
+        sql = "UPDATE `cms_posts` SET `author` = %s WHERE `id` = %s LIMIT 1" % (author, userid)
         mdb._ensure_connected()
         mdb.execute(sql)
 
     def update_comment_num(self, num=1, userid=''):
-        query = "UPDATE `sp_posts` SET `comment_num` = %s WHERE `id` = %s LIMIT 1"
+        query = "UPDATE `cms_posts` SET `comment_num` = %s WHERE `id` = %s LIMIT 1"
         mdb._ensure_connected()
         return mdb.execute(query, num, userid)
 
-    def delete_post(self, userid=''):
+    def delete(self, userid=''):
         if userid:
             obj = self.get_article_simple(userid)
             if obj:
                 limit = obj.comment_num
                 mdb._ensure_connected()
-                mdb.execute("DELETE FROM `sp_posts` WHERE `id` = %s LIMIT 1", userid)
-                mdb.execute("DELETE FROM `sp_comments` WHERE `postid` = %s LIMIT %s", userid, limit)
+                mdb.execute("DELETE FROM `cms_posts` WHERE `id` = %s LIMIT 1", userid)
+                mdb.execute("DELETE FROM `cms_comments` WHERE `postid` = %s LIMIT %s", userid, limit)
 
-    def get_article(self, userid):
+    def get(self, article_id):
         sdb._ensure_connected()
-        return sdb.get('SELECT * FROM `sp_posts` WHERE `id` = %s' % str(userid))
+        return sdb.get('SELECT * FROM `cms_posts` WHERE `id` = %s' % str(article_id))
 
     def get_all(self):
         sdb._ensure_connected()
-        return post_list_format(sdb.query("SELECT * FROM `sp_posts` ORDER BY `id` DESC"))
+        return post_list_format(sdb.query("SELECT * FROM `cms_posts` ORDER BY `id` DESC"))
 
     # 分页
     def get_paged(self, page=1, limit=None, cat=None, title=None):
         if limit is None:
             limit = getAttr('EACH_PAGE_POST_NUM')
         limit = int(limit)
-        sql = "SELECT * FROM `sp_posts` where 1=1"
+        sql = "SELECT * FROM `cms_posts` where 1=1"
         if cat:
             sql += " and category = \'%s\'" % cat
         if title:
@@ -153,18 +155,18 @@ class Article():
     '''获取指定用户发表的所有文章'''
 
     def get_article_by_author(self, author):
-        sql = "SELECT * FROM `sp_posts` where `author` = '%s'" % author
+        sql = "SELECT * FROM `cms_posts` where `author` = '%s'" % author
         sdb._ensure_connected()
         return sdb.query(sql)
 
     def get_max_id(self):
         sdb._ensure_connected()
-        maxobj = sdb.query("select max(id) as maxid from `sp_posts`")
+        maxobj = sdb.query("select max(id) as maxid from `cms_posts`")
         return str(maxobj[0]['maxid'])
 
     def get_last_post_add_time(self):
         sdb._ensure_connected()
-        obj = sdb.get('SELECT `add_time` FROM `sp_posts` ORDER BY `id` DESC LIMIT 1')
+        obj = sdb.get('SELECT `add_time` FROM `cms_posts` ORDER BY `id` DESC LIMIT 1')
         if obj:
             return datetime.fromtimestamp(obj.add_time)
         else:
@@ -175,21 +177,21 @@ class Article():
             limit = getAttr('EACH_PAGE_POST_NUM')
         sdb._ensure_connected()
         return post_list_format(
-            sdb.query("SELECT * FROM `sp_posts` ORDER BY `id` DESC LIMIT %s" % limit))
+            sdb.query("SELECT * FROM `cms_posts` ORDER BY `id` DESC LIMIT %s" % limit))
 
     def get_article_detail(self, userid):
         sdb._ensure_connected()
-        return post_detail_formate(sdb.get('SELECT * FROM `sp_posts` WHERE `id` = %s LIMIT 1' % str(userid)))
+        return post_detail_formate(sdb.get('SELECT * FROM `cms_posts` WHERE `id` = %s LIMIT 1' % str(userid)))
 
     def get_article_simple(self, userid):
         sdb._ensure_connected()
         return sdb.get(
-            'SELECT `id`,`category`,`title`,`comment_num`,`closecomment`,`password` FROM `sp_posts` WHERE `id` = %s' % str(
+            'SELECT `id`,`category`,`title`,`comment_num`,`closecomment`,`password` FROM `cms_posts` WHERE `id` = %s' % str(
                 userid))
 
     def get_post_for_sitemap(self, ids=[]):
         sdb._ensure_connected()
-        return sdb.query("SELECT `id`,`edit_time` FROM `sp_posts` WHERE `id` in(%s) ORDER BY `id` DESC LIMIT %s" % (
+        return sdb.query("SELECT `id`,`edit_time` FROM `cms_posts` WHERE `id` in(%s) ORDER BY `id` DESC LIMIT %s" % (
             ','.join(ids), str(len(ids))))
 
 
