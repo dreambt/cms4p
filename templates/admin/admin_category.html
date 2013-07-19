@@ -12,8 +12,8 @@
           <option value="video">视频瀑布</option>
         </select>
         <input type="number" name="sort" value="#{obj.displayorder}" min="0" max="255" class="span1" id="input03" tabindex="3" placeholder="排序"/>
-        <input type='hidden' value='edit' name='act'/>
-        <input type='hidden' value='#{obj.id}' name='id'/>
+        <input type="hidden" value="edit" name="act"/>
+        <input type="hidden" value="#{obj.id}" name="id"/>
         <?py else: ?>
         <span class="label label-info">新建</span>
         <input type="text" name="name" value="" class="span3" id="input11" required maxlength="100" tabindex="1" placeholder="分类名称"/>
@@ -25,7 +25,7 @@
           <option value="video">视频瀑布</option>
         </select>
         <input type="number" name="sort" value="" class="span1" min="0" max="255" id="input13" tabindex="2" placeholder="排序"/>
-        <input type='hidden' value='add' name='act'/>
+        <input type="hidden" value="add" name="act"/>
         <?py #endif ?>
         <button type="submit" class="btn btn-primary">保 存</button>
         <button type="reset" class="btn">重 置</button>

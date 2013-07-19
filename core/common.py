@@ -6,6 +6,7 @@ import traceback
 from urllib import unquote, quote
 from datetime import datetime, timedelta
 import requests
+from tornado.httputil import HTTPHeaders
 import tornado.web
 
 from setting import *
@@ -16,21 +17,26 @@ from extensions.sessions import Session, RedisSession
 ##############
 # KV 永久缓存 #
 ##############
-# if debug:
-#     REDIS_HOST = "localhost"
-#     REDIS_PORT = 6379
-#     kv = redis.Redis(host=REDIS_HOST, port=int(REDIS_PORT), db=0)
-# else:
-import sae.kvdb
+if debug:
+    import sae.kvdb
 
-kv = sae.kvdb.KVClient()
+    kv = sae.kvdb.KVClient()
+else:
+    import redis
+
+    kv = redis.Redis(host=REDIS_HOST, port=int(REDIS_PORT), db=0)
+
 
 ##############
 # MC 临时缓存 #
 ##############
 import pylibmc
 
-mc = pylibmc.Client()
+if debug:
+    mc = pylibmc.Client()
+else:
+    mc = pylibmc.Client(["127.0.0.1:11211"], binary=True)
+    mc.behaviors = {"tcp_nodelay": True, "ketama": True}
 
 
 def slugfy(text, separator='-'):
@@ -134,8 +140,12 @@ def clear_all_cache():
         pass
 
 
-def format_date(dt):
+def format_datetime(dt):
     return dt.strftime('%Y年%m月%d日 %H:%M:%S')
+
+
+def format_date(dt):
+    return dt.strftime('%Y年%m月%d日')
 
 
 def memcached(key, cache_time=0, key_suffix_calc_func=None):
@@ -211,7 +221,9 @@ def pagecache(key="", time=PAGE_CACHE_TIME, key_suffix_calc_func=None):
 import tenjin
 from tenjin.helpers import *   # or escape, to_str
 
-engine = tenjin.Engine(path=[os.path.join('templates', theme) for theme in [THEME, 'admin']] + ['templates'],
+sub_path = [os.path.join('templates', theme) for theme in
+            ['blog', 'admin']]
+engine = tenjin.Engine(path=sub_path + ['templates'],
                        cache=tenjin.MemoryCacheStorage(), 
                        preprocess=True,
                        pp=[
@@ -264,7 +276,8 @@ class BaseHandler(tornado.web.RequestHandler):
     def isAuthor(self):
         user_name_cookie = self.get_secure_cookie('username', '')
         user_pw_cookie = self.get_secure_cookie('userpw', '')
-        from model.model import User
+        from model.user import User
+
         return User.check_user_password(user_name_cookie, user_pw_cookie)
 
     def get_current_user(self):
@@ -274,21 +287,42 @@ class BaseHandler(tornado.web.RequestHandler):
         """
         return self.get_secure_cookie("username")
 
+    def send_error(self, status_code=500, **kwargs):
+        self.write(self.render("500.html", {
+            'title': "%s - %s" % (getAttr('SITE_TITLE'), getAttr('SITE_SUB_TITLE')),
+        }, layout='_layout.html'))
+        if not self._finished:
+            self.finish()
+
     # http://www.keakon.net/2012/12/03/Tornado%E4%BD%BF%E7%94%A8%E7%BB%8F%E9%AA%8C
     def write_error(self, status_code, **kwargs):
-        if not debug:
-            message = "<h4>Error Code:" + str(kwargs['exc_info'][1]) + "</h4><br />"
-            message += "<h4>Exception Stack:</h4>"
-            message += "<br />".join(traceback.format_exception(*kwargs["exc_info"]))
-            # TODO 完善使之具有丰富的调试上下文，方便调试
+        exc_info = kwargs.pop('exc_info')
+        kwargs['exception'] = exc_info[1]
+
+        if debug:
+            message = "<h4>Error Code: " + str(status_code) + "</h4>"
+            message += "<h4>Error Type: " + str(exc_info[0]) + "</h4>"
+            message += "<h4>Error Detail: " + str(exc_info[1]) + "</h4>"
+
+            message += "<h4>Header:</h4>"
+            message += "<br />".join(
+                '%s: "%s"' % (elem[0], elem[1]) for elem in HTTPHeaders.get_all(self.request.headers))
             message += "<h4>Content:</h4>"
-            message += "<br />".join(self.request.arguments)
+            message += "<br />".join(
+                ['%s: "%s"' % (key, ', '.join(value)) for key, value in self.request.arguments.items()])
+
+            if "exc_info" in kwargs:
+                message += "<h4>Traceback:</h4>"
+                message += "<br />".join(traceback.format_exception(*kwargs["exc_info"]))
+
+            message = message.replace("<", "").replace(">", "")
+
             if status_code == 404:
                 sendEmail(u"404 页面找不到", message.decode('utf-8'))
                 self.render('404.html')
             elif status_code == 500:
                 sendEmail(u"500 页面找不到", message.decode('utf-8'))
-                self.render('500.html')
+                # self.render('500.html')
             else:
                 sendEmail(u"*** 未知异常", message.decode('utf-8'))
                 tornado.web.RequestHandler.write_error(self, status_code, **kwargs)
@@ -300,10 +334,11 @@ def authorized(url='/admin/login'):
     def wrap(handler):
         def authorized_handler(self, *args, **kw):
             request = self.request
-            user_name_cookie = self.get_secure_cookie('username')
-            user_pw_cookie = self.get_secure_cookie('userpw')
-            from model.model import User
-            user = User.check_user_password(user_name_cookie, user_pw_cookie)
+            user_email_cookie = self.get_secure_cookie('email')
+            user_pw_cookie = self.get_secure_cookie('password')
+            from model.user import User
+
+            user = User.check_email_password(user_email_cookie, user_pw_cookie)
 
             if request.method == 'GET':
                 if not user:

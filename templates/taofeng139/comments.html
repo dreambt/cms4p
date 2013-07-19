@@ -1,0 +1,20 @@
+<?py for cobj in cobjs: ?>
+<a name="r#{cobj.id}"></a>
+<li id="comment-#{cobj.id}">
+    <div class="media">
+        <a class="pull-left" href="#"><img class="media-object" style="width:48px;height:48px;" src="#{cobj.gravatar}?s=48&d=monsterid"></a>
+        <div class="media-body"><h4 class="media-heading">
+            <?py if cobj.url: ?>
+            <a href="#respond" onclick="reply('#{cobj.id}','#{cobj.author}')" target="_blank" rel="nofollow">#{cobj.author}</a>
+            <?py else: ?>
+            #{cobj.author}
+            <?py #endif ?> 于 <a href="#{{ BASE_URL }}/t/#{cobj.postid}#r#{cobj.id}">#{cobj.add_time}</a> <a href="#respond" onclick="reply('#{cobj.id}','#{cobj.author}')">回复</a>
+        </h4>
+            <?py if cobj.visible: ?>
+            <p>#{cobj.content.replace('\n','<br/>')}</p>
+            <?py else: ?>
+            <em>需要等待审核以后才能显示.</em>
+            <?py #endif ?></div>
+    </div>
+</li>
+<?py #endfor ?>

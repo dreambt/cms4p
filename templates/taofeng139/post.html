@@ -1,0 +1,156 @@
+<div class="row">
+    <div class="span9">
+        <section id="article">
+          <div class="page-header">
+            <h1>#{obj.title}</h1>
+          </div>
+          <p class="lead">#{obj.content}#{getAttr('ADSENSE_CODE1')}</p>
+        </section>
+        <footer>
+            <p class="meta grey">
+                <span>发表人：<strong>#{{ ADMIN_NAME }}</strong></span> | <span>发表时间：#{obj.add_time_fn}</span> |
+                <span class="categories greyhref">
+                    分类: <a href="#{{ BASE_URL }}/category/#{obj.category}/" rel="category tag">#{obj.category}</a>
+                </span>
+                <?py if obj.tags: ?>
+                <span class="categories greyhref">
+                  | Tags: #{obj.taglist}
+                </span>
+                <?py #endif ?>
+                | <span class="categories greyhref">评论(#{obj.comment_num})</span>
+                | <span class="categories greyhref">浏览(#{hits})</span>
+            </p>
+        </footer>
+        <section>
+            <legend>分享内容</legend>
+            <div style="display:block;margin-bottom:20px;">
+                <!-- JiaThis Button BEGIN -->
+                <div id="jiathis_style_32x32">
+                    <a class="jiathis_button_tsina"></a>
+                    <a class="jiathis_button_ishare"></a>
+                    <a class="jiathis_button_renren"></a>
+                    <a class="jiathis_button_baidu"></a>
+                    <a href="http://www.jiathis.com/share"
+                       class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+                </div>
+                <script type="text/javascript">
+                    var jiathis_config = {
+                        summary: "",
+                        hideMore: false
+                    }
+                </script>
+                <script type="text/javascript" src="http://v2.jiathis.com/code_mini/jia.js" charset="utf-8"></script>
+                <!-- JiaThis Button END -->
+                <div class="c"></div>
+            </div>
+        </section>
+
+        <section>
+            <ul class="pager">
+                <li class="previous">
+                    <?py if obj.prev_obj: ?>
+                    <a class="prev" href="#{{ BASE_URL }}/topic/#{obj.prev_obj.id}/#{obj.prev_obj.slug}"
+                       rel="prev">&larr; #{obj.prev_obj.title}</a>
+                    <?py #endif ?>
+                </li>
+                <li class="next">
+                    <?py if obj.next_obj: ?>
+                    <a class="next" href="#{{ BASE_URL }}/topic/#{obj.next_obj.id}/#{obj.next_obj.slug}" rel="next">#{obj.next_obj.title} &rarr;</a>
+                    <?py #endif ?>
+                </li>
+            </ul>
+        </section>
+
+        <?py if obj.relative: ?>
+        <section>
+            <legend>相关内容</legend>
+            <ul class="nav nav-pills nav-stacked">
+                <?py     for robj in obj.relative: ?>
+                <li><a href="#{{ BASE_URL }}/topic/#{robj.id}/#{robj.slug}" rel="bookmark">#{robj.title}</a></li>
+                <?py     #endfor ?>
+            </ul>
+        </section>
+        <?py #endif ?>
+
+        <a name="comments"></a>
+        <?py if obj.comment_num > 0: ?>
+        <section>
+            <legend>评论列表 (共 #{obj.comment_num} 条)</legend>
+            <div id="comments">
+                <ul class="singlecomments" id="commentlist">
+                    <?py include("comments.html") ?>
+                </ul>
+                <?py if obj.comment_num > EACH_PAGE_COMMENT_NUM: ?>
+                <p class="topline grey">
+                    本主题还有 <strong id="hasnum">#{obj.comment_num - EACH_PAGE_COMMENT_NUM}</strong> 条评论未显示，<span class="label label-info" onclick="goon();return false;">点击这里查看更多</span>
+                </p>
+                <?py #endif ?>
+            </div>
+        </section>
+
+        <?py else: ?>
+
+        <section id="commentsec" style="display:none;">
+            <legend>评论列表</legend>
+            <div id="comments">
+                <h2 class="comments">只有一条评论 "#{obj.title}"</h2>
+                <ul class="singlecomments" id="commentlist">
+                </ul>
+            </div>
+        </section>
+
+        <?py #endif ?>
+
+        <!-- new comment -->
+        <section>
+            <div id="respond" class="topline">
+                <?py if obj.closecomment: ?>
+
+                <p>该篇文章已关闭评论</p>
+                <script>
+                    function reply(toid, name) {
+                        return false;
+                    }
+                </script>
+
+                <?py else: ?>
+
+                <?py include("newcomment.html") ?>
+
+                <?py #endif ?>
+            </div>
+        </section>
+        <!-- new comment end -->
+
+        <?py if obj.comment_num > EACH_PAGE_COMMENT_NUM: ?>
+        <!-- readmore comments -->
+        <script>
+            function goon() {
+                var fromid = $("#commentlist li:last").attr('id').split("-")[1];
+                var showednum = $("#commentlist li").length;
+                $.ajax({
+                    type: 'POST',
+                    url: '#{request.path}',
+                    dataType: "json",
+                    data: {'act': 'readmorecomment', 'fromid': fromid, 'showednum': showednum, 'allnum': '#{obj.comment_num}' },
+                    success: function (data) {
+                        if (data.status == 200) {
+                            $('#commentlist').append(data.commentstr);
+                            $('#hasnum').text(data.lavenum);
+                            if (data.lavenum == 0) {
+                                $('#idgoon').html('没有了！在下面补上一条吧！！');
+                            }
+                        }
+                    }
+
+                });
+                return false;
+            }
+        </script>
+        <!-- readmore comments end -->
+        <?py #endif ?>
+    </div>
+    <div class="span3">
+        <?py include("sider.html") ?>
+    </div>
+</div>

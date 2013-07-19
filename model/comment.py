@@ -31,38 +31,37 @@ def comment_format_admin(objs):
 class Comment():
     def count_all(self):
         sdb._ensure_connected()
-        return sdb.query('SELECT COUNT(*) AS num FROM `sp_comments`')[0]['num']
+        return sdb.query('SELECT COUNT(*) AS num FROM `cms_comments`')[0]['num']
 
-    def create_comment(self, params):
-        query = "INSERT INTO `sp_comments` (`postid`,`author`,`email`,`url`,`visible`,`add_time`,`content`) values(%s,%s,%s,%s,%s,%s,%s)"
+    def create(self, params):
+        query = "INSERT INTO `cms_comments` (`post_id`, `user_name`, `email`, `website`, `content`, `status`) " \
+                "values(%s,%s,%s,%s,%s,%s)"
         mdb._ensure_connected()
-        return mdb.execute(query, params['postid'], params['author'], params['email'], params['url'], params['visible'],
-                           params['add_time'], params['content'])
+        return mdb.execute(query, params['post_id'], params['user_name'], params['email'], params['website'],
+                           params['content'], params['status'])
 
-    def update_comment(self, params):
-        query = "UPDATE `sp_comments` SET `author` = %s, `email` = %s, `url` = %s, `visible` = %s, `content` = %s WHERE `id` = %s LIMIT 1"
+    def update(self, params):
+        query = "UPDATE `cms_comments` SET `content` = %s WHERE `comment_id` = %s LIMIT 1"
         mdb._ensure_connected()
-        mdb.execute(query, params['author'], params['email'], params['url'], params['visible'], params['content'],
-                    params['id'])
-        ### update 返回不了 lastrowid，直接返回 id
-        return params['id']
+        mdb.execute(query, params['content'], params['comment_id'])
+        return params['comment_id']
 
-    def delete_comment(self, id):
-        cobj = self.get_comment(id)
-        postid = cobj.postid
+    def delete(self, comment_id):
+        cobj = self.get(comment_id)
+        post_id = cobj.post_id
         from model.article import Article
-        pobj = Article.get(postid)
+
+        pobj = Article.get(post_id)
 
         mdb._ensure_connected()
-        mdb.execute("DELETE FROM `sp_comments` WHERE `id` = %s LIMIT 1", id)
+        mdb.execute("DELETE FROM `cms_comments` WHERE `comment_id` = %s LIMIT 1", comment_id)
         if pobj:
-            from model.article import Article
-            Article.update_comment_num(pobj.comment_num - 1, postid)
+            Article.update_comment_num(pobj.comment_num - 1, post_id)
         return
 
-    def get_comment(self, id):
+    def get(self, comment_id):
         sdb._ensure_connected()
-        return sdb.get('SELECT * FROM `sp_comments` WHERE `id` = %s' % str(id))
+        return sdb.get('SELECT * FROM `cms_comments` WHERE `comment_id` = %s' % str(comment_id))
 
     # 分页
     def get_paged(self, page=1, limit=None):
@@ -70,26 +69,27 @@ class Comment():
             limit = getAttr('ADMIN_COMMENT_NUM')
         limit = int(limit)
         sdb._ensure_connected()
-        sql = "SELECT * FROM `sp_comments` ORDER BY `id` DESC LIMIT %s,%s" % ((int(page) - 1) * limit, limit)
+        sql = "SELECT * FROM `cms_comments` ORDER BY `id` DESC LIMIT %s,%s" % ((int(page) - 1) * limit, limit)
         return comment_format_admin(sdb.query(sql))
 
     def get_recent_comments(self, limit=None):
         if limit is None:
             limit = getAttr('RECENT_COMMENT_NUM')
         sdb._ensure_connected()
-        return comment_format(sdb.query('SELECT * FROM `sp_comments` ORDER BY `id` DESC LIMIT %s' % limit))
+        return comment_format(sdb.query('SELECT * FROM `cms_comments` ORDER BY `comment_id` DESC LIMIT %s' % limit))
 
-    def get_post_page_comments_by_id(self, postid=0, min_comment_id=0, limit=EACH_PAGE_COMMENT_NUM):
+    def get_post_page_comments_by_id(self, post_id=0, min_comment_id=0, limit=EACH_PAGE_COMMENT_NUM):
         if min_comment_id == 0:
             sdb._ensure_connected()
             return comment_format(sdb.query(
-                'SELECT * FROM `sp_comments` WHERE `postid`= %s ORDER BY `id` DESC LIMIT %s' % (
-                    str(postid), str(limit))))
+                'SELECT * FROM `cms_comments` WHERE `postid`= %s ORDER BY `comment_id` DESC LIMIT %s' % (
+                    str(post_id), str(limit))))
         else:
+            sql = "SELECT * FROM `cms_comments` WHERE `postid`= %s AND `comment_id` < %s " \
+                  "ORDER BY `comment_id` DESC LIMIT %s"
             sdb._ensure_connected()
             return comment_format(sdb.query(
-                'SELECT * FROM `sp_comments` WHERE `postid`= %s AND `id` < %s ORDER BY `id` DESC LIMIT %s' % (
-                    str(postid), str(min_comment_id), str(limit))))
-
+                sql % (
+                    str(post_id), str(min_comment_id), str(limit))))
 
 Comment = Comment()

@@ -21,9 +21,9 @@ class HomePage(BaseHandler):
     @pagecache()
     def get(self):
         try:
-            news1 = Category.get_paged_posts_by_name('新闻资讯')
-            news2 = Category.get_paged_posts_by_name('行业资讯')
-            prods = Category.get_paged_posts_by_name('产品展示')
+            news1 = Category.get(1)
+            news2 = Category.get(2)
+            prods = Category.get(3)
         except:
             self.redirect('/install')
             return
@@ -41,8 +41,8 @@ class HomePage(BaseHandler):
             'news1': news1,
             'news2': news2,
             'prods': prods,
-            'cats': Category.get_all_cat_name(),
-            'tags': Tag.get_hot_tag_name(),
+            'cats': Category.get_all_category_name(),
+            'tags': Tag.get_hot_tag(),
             'archives': Archive.get_all_archive_name(),
         }, layout='_layout.html')
         self.write(output)
@@ -74,8 +74,8 @@ class IndexPage(BaseHandler):
             'keywords': getAttr('KEYWORDS'),
             'description': getAttr('SITE_DECR'),
             'objs': objs,
-            'cats': Category.get_all_cat_name(),
-            'tags': Tag.get_hot_tag_name(),
+            'cats': Category.get_all_category_name(),
+            'tags': Tag.get_hot_tag(),
             'archives': Archive.get_all_archive_name(),
             'page': int(page),
             'allpage': all_page,
@@ -83,7 +83,7 @@ class IndexPage(BaseHandler):
             'fromid': fromid,
             'endid': endid,
             'comments': Comment.get_recent_comments(),
-            'links': Link.get_all_links(),
+            'links': Link.get_all(),
         }, layout='_layout.html')
         self.write(output)
         return output
@@ -143,13 +143,13 @@ class PostDetail(BaseHandler):
             'obj': obj,
             'cobjs': obj.coms,
             'postdetail': 'postdetail',
-            'cats': Category.get_all_cat_name(),
-            'tags': Tag.get_hot_tag_name(),
+            'cats': Category.get_all_category_name(),
+            'tags': Tag.get_hot_tag(),
             'archives': Archive.get_all_archive_name(),
             'page': 1,
             'allpage': 10,
             'comments': Comment.get_recent_comments(),
-            'links': Link.get_all_links(),
+            'links': Link.get_all(),
             'hits': get_count(keyname),
             'recent_article': Article.get_last_post(8),
             'listtype': '',
@@ -289,7 +289,7 @@ class PostDetail(BaseHandler):
 class CategoryDetailShort(BaseHandler):
     @client_cache(3600, 'public')
     def get(self, id=''):
-        obj = Category.get_category(id)
+        obj = Category.get(id)
         if obj:
             self.redirect('%s/category/%s' % (BASE_URL, obj.name), 301)
             return
@@ -300,8 +300,8 @@ class CategoryDetailShort(BaseHandler):
 class CategoryDetail(BaseHandler):
     @pagecache('cat', PAGE_CACHE_TIME, lambda self, name: name)
     def get(self, name=''):
-        objs = Category.get_paged_posts_by_name(name, 1)
-        catobj = Category.get_by_name(name)
+        #objs = Category.get_posts_by_name(name, 1)
+        catobj = Category.get_by_category_name(name)
 
         if catobj:
             pass
@@ -320,8 +320,8 @@ class CategoryDetail(BaseHandler):
             'keywords': catobj.name,
             'description': getAttr('SITE_DECR'),
             'objs': objs,
-            'cats': Category.get_all_cat_name(),
-            'tags': Tag.get_hot_tag_name(),
+            'cats': Category.get_all_category_name(),
+            'tags': Tag.get_hot_tag(),
             'archives': Archive.get_all_archive_name(),
             'page': 1,
             'allpage': all_page,
@@ -330,7 +330,7 @@ class CategoryDetail(BaseHandler):
             'namemd5': md5(name.encode('utf-8')).hexdigest(),
             'recent_article': Article.get_last_post(8),
             'comments': Comment.get_recent_comments(),
-            'links': Link.get_all_links(),
+            'links': Link.get_all(),
         }, layout='_layout.html')
         self.write(output)
         return output
@@ -363,8 +363,8 @@ class ArchiveDetail(BaseHandler):
             'keywords': archiveobj.name,
             'description': getAttr('SITE_DECR'),
             'objs': objs,
-            'cats': Category.get_all_cat_name(),
-            'tags': Tag.get_hot_tag_name(),
+            'cats': Category.get_all_category_name(),
+            'tags': Tag.get_hot_tag(),
             'archives': Archive.get_all_archive_name(),
             'page': 1,
             'allpage': all_page,
@@ -373,7 +373,7 @@ class ArchiveDetail(BaseHandler):
             'namemd5': md5(name.encode('utf-8')).hexdigest(),
             'recent_article': Article.get_last_post(8),
             'comments': Comment.get_recent_comments(),
-            'links': Link.get_all_links(),
+            'links': Link.get_all(),
         }, layout='_layout.html')
         self.write(output)
         return output
@@ -382,7 +382,7 @@ class ArchiveDetail(BaseHandler):
 class TagDetail(BaseHandler):
     @pagecache()
     def get(self, name=''):
-        objs = Tag.get_tag_page_posts(name, 1)
+        objs = Tag.get_page_posts_by_tag_name(name, 1)
 
         catobj = Tag.get_tag_by_name(name)
         if catobj:
@@ -402,8 +402,8 @@ class TagDetail(BaseHandler):
             'keywords': catobj.name,
             'description': getAttr('SITE_DECR'),
             'objs': objs,
-            'cats': Category.get_all_cat_name(),
-            'tags': Tag.get_hot_tag_name(),
+            'cats': Category.get_all_category_name(),
+            'tags': Tag.get_hot_tag(),
             'archives': Archive.get_all_archive_name(),
             'page': 1,
             'allpage': all_page,
@@ -412,7 +412,7 @@ class TagDetail(BaseHandler):
             'namemd5': md5(name.encode('utf-8')).hexdigest(),
             'recent_article': Article.get_last_post(8),
             'comments': Comment.get_recent_comments(),
-            'links': Link.get_all_links(),
+            'links': Link.get_all(),
         }, layout='_layout.html')
         self.write(output)
         return output
@@ -423,11 +423,11 @@ class ArticleList(BaseHandler):
     def get(self, list_type='', direction='next', page='1', name=''):
         catobj = None
         if list_type == 'cat':
-            objs = Category.get_paged_posts_by_name(name, page)
-            catobj = Category.get_by_name(name)
+            #objs = Category.get_posts_by_name(name, page)
+            catobj = Category.get_by_category_name(name)
             show_type = catobj.showtype
         elif list_type == 'tag':
-            objs = Tag.get_tag_page_posts(name, page)
+            objs = Tag.get_page_posts_by_tag_name(name, page)
             catobj = Tag.get_tag_by_name(name)
             show_type = "list"
         elif list_type == 'archive':
@@ -452,8 +452,8 @@ class ArticleList(BaseHandler):
             'keywords': catobj.name,
             'description': getAttr('SITE_DECR'),
             'objs': objs,
-            'cats': Category.get_all_cat_name(),
-            'tags': Tag.get_hot_tag_name(),
+            'cats': Category.get_all_category_name(),
+            'tags': Tag.get_hot_tag(),
             'archives': Archive.get_all_archive_name(),
             'page': int(page),
             'allpage': all_page,
@@ -461,7 +461,7 @@ class ArticleList(BaseHandler):
             'name': name,
             'namemd5': md5(name.encode('utf-8')).hexdigest(),
             'comments': Comment.get_recent_comments(),
-            'links': Link.get_all_links(),
+            'links': Link.get_all(),
         }, layout='_layout.html')
         self.write(output)
         return output

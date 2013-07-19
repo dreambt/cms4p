@@ -42,7 +42,7 @@ class User():
         if user_id:
             timestamp = int(time.time())
             sql = "update `cms_user` set `user_name`= \'%s\'" % user_name
-           if email:
+            if email:
                 sql += ", `email` = \'%s\'" % email
             if pw:
                 salt = random_string(8)

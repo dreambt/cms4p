@@ -1,88 +1,71 @@
 # -*- coding: utf-8 -*-
+from core.common import getAttr
 from model.article import post_list_format
 from model.base import mdb, sdb
-from setting import EACH_PAGE_POST_NUM
 
 _author__ = 'baitao.ji'
 
 
 class Archive():
-    def get_latest_archive_name(self):
-        sdb._ensure_connected()
-        objs = sdb.get('SELECT `name` FROM `cms_archive` ORDER BY `name` DESC')
-        print objs[0].name
-        return objs[0].name
-
-    def get_all_archive_name(self):
-        sdb._ensure_connected()
-        return sdb.query('SELECT `name`,`id_num` FROM `cms_archive` ORDER BY `name` DESC')
-
     def get_all(self):
         sdb._ensure_connected()
-        return sdb.query('SELECT * FROM `cms_archive` ORDER BY `name` DESC')
+        return sdb.query('SELECT * FROM `cms_archive` ORDER BY `archive_name` DESC')
 
-    def get_all_archive_id(self):
+    def get(self, archive_id=''):
         sdb._ensure_connected()
-        return sdb.query('SELECT `id` FROM `cms_archive` ORDER BY `id` DESC')
+        return sdb.get('SELECT * FROM `cms_archive` WHERE `archive_id` = %s' % str(archive_id))
 
-    def get_archive_by_name(self, name=''):
+    def get_by_name(self, archive_name=''):
         sdb._ensure_connected()
-        return sdb.get('SELECT * FROM `cms_archive` WHERE `name` = \'%s\'' % name)
+        return sdb.get('SELECT * FROM `cms_archive` WHERE `archive_name` = \'%s\'' % archive_name)
 
-    def get_all_post_num(self, name=''):
-        obj = self.get_archive_by_name(name)
-        if obj and obj.content:
-            return len(obj.content.split(','))
-        else:
-            return 0
+    def get_post_num_by_archive_id(self, archive_id=''):
+        sql = 'SELECT count(*) FROM `cms_posts` p ' \
+              'inner join `cms_archive_post` ap on p.`post_id` = ap.post_id and ap.archive_id = \'%s\''
+        sdb._ensure_connected()
+        return sdb.get(sql, archive_id)
 
-    def get_archive_page_posts(self, name='', page=1, limit=EACH_PAGE_POST_NUM):
-        obj = self.get_archive_by_name(name)
-        if obj:
-            page = int(page)
-            idlist = obj.content.split(',')
-            getids = idlist[limit * (page - 1):limit * page]
-            sdb._ensure_connected()
-            return post_list_format(sdb.query(
-                "SELECT * FROM `cms_posts` WHERE `id` in(%s) ORDER BY `id` DESC LIMIT %s" % (
-                    ','.join(getids), str(len(getids)))))
-        else:
-            return []
+    def get_post_num_by_archive_name(self, archive_name=''):
+        sql = 'SELECT count(*) FROM `cms_posts` p ' \
+              'inner join `cms_archive_post` ap on p.`post_id` = ap.post_id ' \
+              'inner join `cms_archive` a on ap.`archive_id` = a.archive_id and a.archive_name = \'%s\''
+        sdb._ensure_connected()
+        return sdb.get(sql, archive_name)
 
-    def add_postid_to_archive(self, name='', postid=''):
+    def get_page_posts_by_archive_name(self, archive_name='', page=1, limit=''):
+        if limit is None:
+            limit = getAttr('EACH_PAGE_POST_NUM')
+        sql = "SELECT p.* FROM `cms_posts` p " \
+              "inner join `cms_archive_post` ap on p.`post_id` = ap.post_id " \
+              "inner join `cms_archive` a on ap.`archive_id` = a.archive_id and a.archive_name = \'%s\''" \
+              "ORDER BY `id` DESC LIMIT %s,%s"
+        sdb._ensure_connected()
+        return post_list_format(sdb.query(sql, archive_name, (int(page) - 1) * limit, limit))
+
+    def add_post_to_archive(self, archive_id='', post_id=''):
         mdb._ensure_connected()
-        #因为 UPDATE 时无论有没有影响行数，都返回0，所以这里要多读一次（从主数据库读）
-        obj = mdb.get('SELECT * FROM `cms_archive` WHERE `name` = \'%s\'' % name)
+        mdb.execute("INSERT INTO `cms_archive_post` (`archive_id`, `post_id`) values %s",
+                    ','.join('(%d,%d)' % (archive_id, x) for x in post_id))
+        mdb.execute("UPDATE `cms_archive` SET `post_num` = `post_num`+1 WHERE `archive_id` = %s LIMIT 1", archive_id)
 
-        if obj:
-            query = "UPDATE `cms_archive` SET `id_num` = `id_num` + 1, `content` =  concat(%s, `content`) WHERE `id` = %s LIMIT 1"
-            mdb.execute(query, "%s," % postid, obj.id)
-        else:
-            query = "INSERT INTO `cms_archive` (`name`,`id_num`,`content`) values(%s,1,%s)"
-            mdb.execute(query, name, postid)
-
-    def remove_postid_from_archive(self, name='', postid=''):
+    def add_posts_to_archive(self, archive_id='', post_ids=[]):
         mdb._ensure_connected()
-        obj = mdb.get('SELECT * FROM `cms_archive` WHERE `name` = \'%s\'' % name)
-        if obj:
-            idlist = obj.content.split(',')
-            if postid in idlist:
-                idlist.remove(postid)
-                try:
-                    idlist.remove('')
-                except:
-                    pass
-                if len(idlist) == 0:
-                    mdb.execute("DELETE FROM `cms_archive` WHERE `id` = %s LIMIT 1", obj.id)
-                else:
-                    query = "UPDATE `cms_archive` SET `id_num` = %s, `content` =  %s WHERE `id` = %s LIMIT 1"
-                    mdb.execute(query, len(idlist), ','.join(idlist), obj.id)
-            else:
-                pass
+        mdb.execute("INSERT INTO `cms_archive_post` (`archive_id`, `post_id`) values (%s,%s)", archive_id, post_ids)
+        mdb.execute("UPDATE `cms_archive` SET `post_num` = `post_num`+%s WHERE `archive_id` = %s LIMIT 1",
+                    len(post_ids), archive_id)
 
-    def get_archive(self, id=''):
-        sdb._ensure_connected()
-        return sdb.get('SELECT * FROM `cms_archive` WHERE `id` = %s' % str(id))
+    def remove_post_from_archive(self, archive_id='', post_id=''):
+        mdb._ensure_connected()
+        mdb.execute("DELETE FROM `cms_archive_post` WHERE `archive_id` = %s and `post_id` = %s LIMIT 1", archive_id,
+                    post_id)
+        mdb.execute("UPDATE `cms_archive` SET `post_num` = `post_num`-1 WHERE `archive_id` = %s LIMIT 1", archive_id)
+
+    def remove_posts_from_archive(self, archive_id='', post_ids=[]):
+        mdb._ensure_connected()
+        mdb.execute("DELETE FROM `cms_archive_post` WHERE `archive_id` = %s and `post_id` in (%s) LIMIT 1", archive_id,
+                    ','.join(post_ids))
+        mdb.execute("UPDATE `cms_archive` SET `post_num` = `post_num`-%s WHERE `archive_id` = %s LIMIT 1",
+                    len(post_ids), archive_id)
 
 
 Archive = Archive()

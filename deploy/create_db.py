@@ -156,6 +156,7 @@ DROP TABLE IF EXISTS `cms_tags`;
 CREATE TABLE IF NOT EXISTS `cms_tags` (
   `tag_id` int unsigned NOT NULL AUTO_INCREMENT,
   `tag_name` varchar(20) NOT NULL DEFAULT '',
+  `tag_hot` int unsigned NOT NULL DEFAULT 0,
   PRIMARY KEY (`tag_id`),
   KEY `tag_name` (`tag_name`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;

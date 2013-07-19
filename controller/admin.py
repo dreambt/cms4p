@@ -13,9 +13,9 @@ from tornado.database import OperationalError
 from core.common import BaseHandler, authorized, safe_encode, clear_cache_by_pathlist, quoted_string, clear_all_cache, genArchive, setAttr, clearAllKVDB, set_count, increment, getAttr, sendEmail
 from core.storage import put_storage, get_storage_list
 from core.utils.random_utils import random_int
+from deploy.create_db import flush_all_data
 from model.archive import Archive
 from model.article import Article
-from model.base import MyData
 from model.category import Category
 from model.comment import Comment
 from model.link import Link
@@ -30,7 +30,6 @@ except:
     import simplejson as json
 
 if not debug:
-    import sae.mail
     from sae.taskqueue import add_task
 
 
@@ -218,14 +217,14 @@ class CategoryController(BaseHandler):
         obj = None
         if act == 'del':
             if id:
-                Category.delete_category(id)
+                Category.delete(id)
                 clear_cache_by_pathlist(['/'])
             self.set_header("Content-Type", "application/json")
             self.write(json.dumps("OK"))
             return
         elif act == 'edit':
             if id:
-                obj = Category.get_category(id)
+                obj = Category.get(id)
 
         # 分类列表
         page = self.get_argument("page", 1)
@@ -255,16 +254,16 @@ class CategoryController(BaseHandler):
         showtype = self.get_argument("showtype", '')
         sort = self.get_argument("sort", '0')
 
-        if id and (name or sort):
+        if name:
+            params = {'id': id, 'name': name, 'showtype': showtype, 'displayorder': sort}
             if act == 'add':
-                Category.create_category(name)
+                Category.create(params)
 
             if act == 'edit':
-                params = {'id': id, 'name': name, 'showtype': showtype, 'displayorder': sort}
-                Category.update_cat(params)
+                Category.update(params)
 
             if act == 'del':
-                Category.delete_category(id)
+                Category.delete(id)
 
             clear_cache_by_pathlist(['/'])
 
@@ -289,7 +288,7 @@ class AddPost(BaseHandler):
         self.echo('admin_post_edit.html', {
             'title': "添加文章",
             'method': "/admin/add_post",
-            'cats': Category.get_all_cat_name(),
+            'cats': Category.get_all_category_name(),
             'tags': Tag.get_all_tag_name(),
             'obj': obj,
         }, layout='_layout_admin.html')
@@ -319,7 +318,7 @@ class AddPost(BaseHandler):
             self.write(json.dumps(rspd))
             return
 
-        postid = Article.create_article(post_dic)
+        postid = Article.create(post_dic)
         if postid:
             keyname = 'pv_%s' % (str(postid))
             set_count(keyname, 0, 0)
@@ -380,11 +379,11 @@ class EditPost(BaseHandler):
     def get(self, id=''):
         obj = None
         if id:
-            obj = Article.get_article(id)
+            obj = Article.get(id)
         self.echo('admin_post_edit.html', {
             'title': "编辑文章",
             'method': "/admin/edit_post/" + id,
-            'cats': Category.get_all_cat_name(),
+            'cats': Category.get_all_category_name(),
             'tags': Tag.get_all_tag_name(),
             'obj': obj
         }, layout='_layout_admin.html')
@@ -393,7 +392,7 @@ class EditPost(BaseHandler):
     def post(self, id=''):
         self.set_header('Content-Type', 'application/json')
         rspd = {'status': 201, 'msg': 'ok'}
-        oldobj = Article.get_article(id)
+        oldobj = Article.get(id)
 
         try:
             tf = {'true': 0, 'false': 1}
@@ -423,7 +422,7 @@ class EditPost(BaseHandler):
             self.write(json.dumps(rspd))
             return
 
-        postid = Article.update_post_edit(post_dic)
+        postid = Article.update(post_dic)
         if postid:
             cache_key_list = ['/', 'post:%s' % id, 'cat:%s' % quoted_string(oldobj.category)]
             if oldobj.category != post_dic['category']:
@@ -464,11 +463,11 @@ class DelPost(BaseHandler):
     def get(self, id=''):
         try:
             if id:
-                oldobj = Article.get_article(id)
+                oldobj = Article.get(id)
                 Category.remove_postid_from_cat(oldobj.category, str(id))
                 Archive.remove_postid_from_archive(oldobj.archive, str(id))
                 Tag.remove_postid_from_tags(set(oldobj.tags.split(',')), str(id))
-                Article.delete_post(id)
+                Article.delete(id)
                 increment('Totalblog', NUM_SHARDS, -1)
                 cache_key_list = ['/', 'post:%s' % id, 'cat:%s' % quoted_string(oldobj.category)]
                 clear_cache_by_pathlist(cache_key_list)
@@ -560,14 +559,14 @@ class LinkController(BaseHandler):
         obj = None
         if act == 'del':
             if id:
-                Link.delete_link(id)
+                Link.delete(id)
                 clear_cache_by_pathlist(['/'])
             self.set_header("Content-Type", "application/json")
             self.write(json.dumps("OK"))
             return
         elif act == 'edit':
             if id:
-                obj = Link.get_link(id)
+                obj = Link.get(id)
                 clear_cache_by_pathlist(['/'])
 
         # 友情链接列表
@@ -602,10 +601,10 @@ class LinkController(BaseHandler):
         if name and url:
             params = {'id': id, 'name': name, 'url': url, 'displayorder': sort}
             if act == 'add':
-                Link.create_link(params)
+                Link.create(params)
 
             if act == 'edit':
-                Link.update_link(params)
+                Link.update(params)
 
             clear_cache_by_pathlist(['/'])
 
@@ -645,7 +644,7 @@ class AddUser(BaseHandler):
             return
 
         try:
-            userid = User.create_user(name, email, pw, status)
+            userid = User.create(name, email, pw, status)
             if userid:
                 sendEmail(u"新用户注册通知 - " + SITE_TITLE, u"您的密码是：" + pw + u"<br />请及时登录并修改密码！", email)
 
@@ -696,7 +695,7 @@ class EditUser(BaseHandler):
     def get(self, id=''):
         obj = None
         if id:
-            obj = User.get_user(id)
+            obj = User.get(id)
         self.echo('admin_user_edit.html', {
             'title': "编辑用户",
             'method': "/admin/edit_user/" + id,
@@ -727,11 +726,11 @@ class DelUser(BaseHandler):
     def get(self, id=''):
         try:
             if id:
-                user = User.get_user(id)
+                user = User.get(id)
                 articles = Article.get_article_by_author(user.name)
                 for article in articles:
                     Article.update_post_edit_author(article.id, "admin")
-                User.delete_user(id)
+                User.delete(id)
                 cache_key_list = ['/', 'user:%s' % id]
                 clear_cache_by_pathlist(cache_key_list)
                 self.set_header("Content-Type", "application/json")
@@ -768,7 +767,7 @@ class RePassword(BaseHandler):
 
         if name and email and User.check_name_email(name, email):
             pw = "".join(random.sample('zAyBxCwDvEuFtGsHrIqJpKoLnMmNlOkPjQiRhSgTfUeVdWcXbYaZ1928374650', 16))
-            User.update_user(name, email, pw)
+            User.update(name, email, pw)
             sub = {
                 "%website%": [getAttr("SITE_TITLE").encode('utf-8')],
                 "%url%": [getAttr("BASE_URL")],
@@ -1013,8 +1012,8 @@ class EditProfile(BaseHandler):
                 old_user = User.get_user_by_name(username)
                 oldPassword = md5(oldPassword.encode('utf-8') + old_user.salt.encode('utf-8')).hexdigest()
                 if oldPassword == old_user.password:
-                    User.update_user(username, None, newPassword)
-                    user = User.get_user(old_user.id)
+                    User.update(username, None, newPassword)
+                    user = User.get(old_user.id)
                     self.set_secure_cookie('userpw', user.password, expires_days=1)
                     self.write(escape.json.dumps("OK"))
                     return
@@ -1044,7 +1043,7 @@ class FlushData(BaseHandler):
     def post(self):
         act = self.get_argument("act", '')
         if act == 'flush':
-            MyData.flush_all_data()
+            flush_all_data()
             clear_all_cache()
             clearAllKVDB()
             self.set_header("Content-Type", "application/json")

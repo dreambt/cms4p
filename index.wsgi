@@ -14,8 +14,10 @@ saeurls = blogurls + adminurls
 
 settings = {
     'debug': True,
+    #"static_path": os.path.join(os.path.dirname(__file__), "static"),
     'cookie_secret': '7nVA0WeZSJSzTCUF8UZB/C3OfLrl7k26iHxfnVa9x0I=',
     'login_url': "/login",
+    #"xsrf_cookies": True,
     #'gzip': True,
 }
 

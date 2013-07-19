@@ -46,14 +46,14 @@ class Subscribe(BaseHandler):
 class Robots(BaseHandler):
     def get(self):
         from model.category import Category
-        self.echo('robots.txt', {'cats': Category.get_category()})
+        self.echo('robots.txt', {'cats': Category.get()})
 
 
 class Sitemap(BaseHandler):
     def get(self, id=''):
         self.set_header('Content-Type', 'text/xml')
         from model.category import Category
-        self.echo('sitemap.html', {'sitemapstr': Category.get_sitemap_by_id(id), 'id': id})
+        self.echo('sitemap.html', {'sitemapstr': Category.get_sitemap_by_category_id(id), 'id': id})
 
 
 ########
