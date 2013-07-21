@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-from model.article import post_list_format
-from model.base import mdb, sdb
+from model.articles import post_list_format
+from model import mdb, sdb
 from setting import EACH_PAGE_POST_NUM, HOT_TAGS_NUM
 
 _author__ = 'baitao.ji'
 
 
-class Tag():
+class Tags():
     def get_all_tag_name(self, limit=HOT_TAGS_NUM):
         #for add/edit post
         sdb._ensure_connected()
@@ -36,4 +36,4 @@ class Tag():
             "SELECT * FROM `cms_posts` WHERE `tags` like \'%s\' ORDER BY `views` DESC LIMIT %s,%s" % (
                 tag_name, (int(page) - 1) * limit, limit)))
 
-Tag = Tag()
+Tags = Tags()

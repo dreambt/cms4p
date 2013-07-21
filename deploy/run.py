@@ -8,10 +8,14 @@ import tornado.ioloop
 import tornado.web
 import os
 
-from controller.admin import urls as adminurls
 from controller.blog import urls as blogurls
+from controller.post import urls as posturls
+from controller.category import urls as categoryurls
+from controller.user import urls as userurls
+from controller.link import urls as linkurls
+from controller.admin import urls as adminurls
 
-urls = adminurls + blogurls
+saeurls = blogurls + posturls + categoryurls + userurls + linkurls + adminurls
 
 settings = {
     'debug': False,

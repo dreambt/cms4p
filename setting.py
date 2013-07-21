@@ -27,6 +27,7 @@ LANGUAGE = 'zh-CN'
 ADMIN_NAME = u"baitao.ji"
 NOTICE_MAIL = u"dreambt@126.com"
 MOVE_SECRET = 'what?'  # 迁移密码
+THEME = 'taofeng139'
 
 
 ##############
@@ -73,11 +74,11 @@ HOT_TAGS_NUM = 30  # 右侧热门标签显示数
 MAX_ARCHIVES_NUM = 50  # 右侧热门标签显示数
 
 # 后台界面设置
-ADMIN_CATEGORY_NUM = 15
-ADMIN_POST_NUM = 15
-ADMIN_COMMENT_NUM = 15
-ADMIN_USER_NUM = 15
-ADMIN_LINK_NUM = 15
+ADMIN_CATEGORY_NUM = 12
+ADMIN_POST_NUM = 12
+ADMIN_COMMENT_NUM = 12
+ADMIN_USER_NUM = 12
+ADMIN_LINK_NUM = 12
 
 NUM_SHARDS = 0  # 分片计数器的个数,人少的话用0就可以了，如果由0扩展到比如3，可能程序需要稍微修改一下
 if NUM_SHARDS > 0:
@@ -107,7 +108,8 @@ COOKIE_SECRET = '7nVA0WeZSJSzTCUF8UZB/C3OfLrl7k26iHxfnVa9x0I='
 # 静态资源文件 CDN 加速 #
 ######################
 if debug:
-    BASE_URL = 'http://localhost:8080'
+    MAJOR_DOMAIN = '%s.sinaapp.com' % APP_NAME
+    BASE_URL = 'http://localhost:8081'
     STATIC_URL = BASE_URL
     JQUERY = "http://lib.sinaapp.com/js/jquery/2.0.2/jquery-2.0.2.min.js"
     JQUERY_IE = "http://lib.sinaapp.com/js/jquery/1.10.1/jquery-1.10.1.min.js"
@@ -137,7 +139,7 @@ DEFAULT_BUCKET = 'attachment'
 # MySQL 数据库 #
 ###############
 if debug:
-    MYSQL_DB = 'app_cloudprint'
+    MYSQL_DB = 'app_cms4p'
     MYSQL_USER = 'root'
     MYSQL_PASS = 'hisense2002j'
     MYSQL_HOST_M = '127.0.0.1'
@@ -145,7 +147,7 @@ if debug:
     MYSQL_PORT = '3306'
     MAX_IDLE_TIME = 10
 else:
-    MYSQL_DB = 'app_cloudprint'
+    MYSQL_DB = 'app_taofeng139'
     MYSQL_USER = 'root'
     MYSQL_PASS = 'hisense2012JBT'
     MYSQL_HOST_M = 'localhost'
@@ -153,7 +155,7 @@ else:
     MYSQL_PORT = '3306'
     MAX_IDLE_TIME = 30
 
-# MAJOR_DOMAIN = '%s.sinaapp.com' % APP_NAME
+
 # BASE_URL = 'http://%s' % MAJOR_DOMAIN
 # STATIC_URL = 'http://cms4p.sinaapp.com'
 # import sae.const

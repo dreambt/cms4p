@@ -4,7 +4,7 @@ import re
 import time
 
 from core.common import BaseHandler, pagecache, getAttr
-from model.base import mdb
+from model import mdb
 
 
 class HomePage(BaseHandler):
@@ -45,15 +45,15 @@ class Subscribe(BaseHandler):
 
 class Robots(BaseHandler):
     def get(self):
-        from model.category import Category
-        self.echo('robots.txt', {'cats': Category.get()})
+        from model.categories import Categories
+        self.echo('robots.txt', {'cats': Categories.get()})
 
 
 class Sitemap(BaseHandler):
     def get(self, id=''):
         self.set_header('Content-Type', 'text/xml')
-        from model.category import Category
-        self.echo('sitemap.html', {'sitemapstr': Category.get_sitemap_by_category_id(id), 'id': id})
+        from model.categories import Categories
+        self.echo('sitemap.html', {'sitemapstr': Categories.get_sitemap_by_category_id(id), 'id': id})
 
 
 ########

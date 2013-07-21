@@ -302,7 +302,7 @@ window.Modernizr = function (a, b, c) {
 }(this, this.document), Modernizr.load = function () {
     yepnope.apply(window, [].slice.call(arguments, 0))
 };
-/* custom.js */
+/* admin.js */
 function getNav() {
     var mobileNav = $('nav[role=navigation] fieldset[role=site-search]').after('<fieldset role="mobile-nav"></fieldset>').next().append('<select></select>');
     mobileNav.children('select').append('<option value="">Navigate&hellip;</option>');

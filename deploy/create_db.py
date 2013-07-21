@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from model.base import mdb
+from model import mdb
 
 _author__ = 'baitao.ji'
 
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS `cms_user` (
   `status` tinyint(1) NOT NULL DEFAULT '0',
   `deleted` TINYINT(1) NOT NULL DEFAULT 0,
   `last_modified_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `created_date` TIMESTAMP NOT NULL DEFAULT 0,
+  `created_date` TIMESTAMP NOT NULL DEFAULT '2013-07-21 17:00:41',
   PRIMARY KEY (`user_id`),
   KEY `user_name` (`user_name`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS `cms_role` (
   `role_name` varchar(20) NOT NULL DEFAULT '',
   `deleted` TINYINT(1) NOT NULL DEFAULT 0,
   `last_modified_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `created_date` TIMESTAMP NOT NULL DEFAULT 0,
+  `created_date` TIMESTAMP NOT NULL DEFAULT '2013-07-21 17:00:41',
   PRIMARY KEY (`role_id`),
   KEY `role_name` (`role_name`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS `cms_function` (
   `url` varchar(80) NOT NULL DEFAULT '',
   `deleted` TINYINT(1) NOT NULL DEFAULT 0,
   `last_modified_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `created_date` TIMESTAMP NOT NULL DEFAULT 0,
+  `created_date` TIMESTAMP NOT NULL DEFAULT '2013-07-21 17:00:41',
   PRIMARY KEY (`function_id`),
   KEY `function_name` (`function_name`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
@@ -71,16 +71,21 @@ CREATE TABLE IF NOT EXISTS `cms_category` (
   `category_name` varchar(20) NOT NULL DEFAULT '',
   `display_order` tinyint(3) NOT NULL DEFAULT 0,
   `show_type` varchar(10) NOT NULL DEFAULT 'default',
-  `url` varchar(80) NOT NULL DEFAULT '',
   `description` varchar(500) NOT NULL,
   `allow_comment` TINYINT(1) NOT NULL DEFAULT 1,
   `allow_publish` TINYINT(1) NOT NULL DEFAULT 1,
-  `show_nav` TINYINT(1) NOT NULL DEFAULT 1,
   `deleted` TINYINT(1) NOT NULL DEFAULT 0,
   `last_modified_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `created_date` TIMESTAMP NOT NULL DEFAULT 0,
+  `created_date` TIMESTAMP NOT NULL DEFAULT '2013-07-21 17:00:41',
   PRIMARY KEY (`category_id`),
   KEY `category_name` (`category_name`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+DROP TABLE IF EXISTS `cms_show_type`;
+CREATE TABLE IF NOT EXISTS `cms_show_type` (
+  `type_key` varchar(20) NOT NULL DEFAULT '',
+  `type_name` varchar(20) NOT NULL DEFAULT '',
+  KEY `type_key` (`type_key`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 DROP TABLE IF EXISTS `cms_posts`;
@@ -104,7 +109,7 @@ CREATE TABLE IF NOT EXISTS `cms_posts` (
   `status` TINYINT(1) NOT NULL DEFAULT 1,
   `deleted` TINYINT(1) NOT NULL DEFAULT 0,
   `last_modified_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `created_date` TIMESTAMP NOT NULL DEFAULT 0,
+  `created_date` TIMESTAMP NOT NULL DEFAULT '2013-07-21 17:00:41',
   PRIMARY KEY (`post_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
@@ -135,7 +140,7 @@ CREATE TABLE IF NOT EXISTS `cms_comments` (
   `status` TINYINT(1) NOT NULL DEFAULT 1,
   `deleted` TINYINT(1) NOT NULL DEFAULT 0,
   `last_modified_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `created_date` TIMESTAMP NOT NULL DEFAULT 0,
+  `created_date` TIMESTAMP NOT NULL DEFAULT '2013-07-21 17:00:41',
   PRIMARY KEY (`comment_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
@@ -148,7 +153,7 @@ CREATE TABLE IF NOT EXISTS `cms_links` (
   `status` TINYINT(1) NOT NULL DEFAULT 1,
   `deleted` TINYINT(1) NOT NULL DEFAULT 0,
   `last_modified_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `created_date` TIMESTAMP NOT NULL DEFAULT 0,
+  `created_date` TIMESTAMP NOT NULL DEFAULT '2013-07-21 17:00:41',
   PRIMARY KEY (`link_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
@@ -160,6 +165,16 @@ CREATE TABLE IF NOT EXISTS `cms_tags` (
   PRIMARY KEY (`tag_id`),
   KEY `tag_name` (`tag_name`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+
+INSERT INTO cms_category (category_id, father_category_id, category_name, display_order, show_type, url, description, allow_comment, allow_publish, deleted, last_modified_date, created_date) VALUES (0, 0, '顶级菜单', 0, 'url', '', '', false, true, false, '2013-07-21 16:20:56', '2013-07-21 16:13:12');
+
+insert into cms_show_types values ('default', '默认显示');
+insert into cms_show_types values ('list', '简单列表');
+insert into cms_show_types values ('digest', '摘要列表');
+insert into cms_show_types values ('pic', '图片瀑布');
+insert into cms_show_types values ('video', '视频瀑布');
+insert into cms_show_types values ('url', 'URL 网址');
 """
     mdb._ensure_connected()
     mdb.execute(sql)

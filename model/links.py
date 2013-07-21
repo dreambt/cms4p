@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 from core.common import getAttr
-from model.base import sdb, mdb
+from model import sdb, mdb
 from setting import LINK_NUM
 
 _author__ = 'baitao.ji'
 
 
-class Link():
+class Links():
     def count_all(self):
         sdb._ensure_connected()
         return sdb.query('SELECT COUNT(*) AS num FROM `cms_links`')[0]['num']
@@ -17,7 +17,8 @@ class Link():
         return mdb.execute(query, params['link_name'], params['url'], params['display_order'])
 
     def update(self, params):
-        query = "UPDATE `cms_links` SET `link_name` = %s, `url` = %s, `display_order` = %s WHERE `link_id` = %s LIMIT 1"
+        query = "UPDATE `cms_links` SET `link_name` = \'%s\', `url` = \'%s\', `display_order` = %s " \
+                "WHERE `link_id` = %s LIMIT 1"
         mdb._ensure_connected()
         mdb.execute(query, params['link_name'], params['url'], params['display_order'], params['link_id'])
 
@@ -43,4 +44,4 @@ class Link():
         return sdb.query(sql)
 
 
-Link = Link()
+Links = Links()

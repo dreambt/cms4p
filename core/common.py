@@ -221,8 +221,7 @@ def pagecache(key="", time=PAGE_CACHE_TIME, key_suffix_calc_func=None):
 import tenjin
 from tenjin.helpers import *   # or escape, to_str
 
-sub_path = [os.path.join('templates', theme) for theme in
-            ['blog', 'admin']]
+sub_path = [os.path.join('templates', theme) for theme in [THEME, 'admin', '']]
 engine = tenjin.Engine(path=sub_path + ['templates'],
                        cache=tenjin.MemoryCacheStorage(), 
                        preprocess=True,
@@ -274,23 +273,24 @@ class BaseHandler(tornado.web.RequestHandler):
             return self._session
 
     def isAuthor(self):
-        user_name_cookie = self.get_secure_cookie('username', '')
-        user_pw_cookie = self.get_secure_cookie('userpw', '')
-        from model.user import User
-
-        return User.check_user_password(user_name_cookie, user_pw_cookie)
+        #user_name_cookie = self.get_secure_cookie('username', '')
+        email_cookie = self.get_secure_cookie('email', '')
+        password_cookie = self.get_secure_cookie('password', '')
+        from model.users import Users
+        return Users.check_user_or_email_password(email_cookie, password_cookie)
 
     def get_current_user(self):
         """
         获取登录用户名
         :return: 用户名
         """
-        return self.get_secure_cookie("username")
+        return self.get_secure_cookie("email")
 
     def send_error(self, status_code=500, **kwargs):
-        self.write(self.render("500.html", {
-            'title': "%s - %s" % (getAttr('SITE_TITLE'), getAttr('SITE_SUB_TITLE')),
-        }, layout='_layout.html'))
+        # self.write(self.render("500.html", {
+        #     'title': "%s - %s" % (getAttr('SITE_TITLE'), getAttr('SITE_SUB_TITLE')),
+        # }, layout='_layout.html'))
+        self.write(self.render("500.html"))
         if not self._finished:
             self.finish()
 
@@ -334,11 +334,12 @@ def authorized(url='/admin/login'):
     def wrap(handler):
         def authorized_handler(self, *args, **kw):
             request = self.request
-            user_email_cookie = self.get_secure_cookie('email')
-            user_pw_cookie = self.get_secure_cookie('password')
-            from model.user import User
+            #username_cookie = self.get_secure_cookie('username')
+            email_cookie = self.get_secure_cookie('email')
+            password_cookie = self.get_secure_cookie('password')
+            from model.users import Users
 
-            user = User.check_email_password(user_email_cookie, user_pw_cookie)
+            user = Users.check_user_or_email_password(email_cookie, password_cookie)
 
             if request.method == 'GET':
                 if not user:

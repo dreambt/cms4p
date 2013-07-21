@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from core.common import getAttr, slugfy, time_from_now, timestamp_to_datetime
-from model.base import sdb, mdb, HTML_REG, tran_content
+from model import sdb, mdb, HTML_REG, tran_content
 from setting import EACH_PAGE_COMMENT_NUM, RELATIVE_POST_NUM, BASE_URL, DESCRIPTION_CUT_WORDS
 
 _author__ = 'baitao.ji'
@@ -52,9 +52,9 @@ def post_detail_formate(obj):
             idlist = []
             getit = False
             for tag in obj.tags.split(','):
-                from model.tag import Tag
+                from model.tags import Tags
 
-                tagobj = Tag.get_tag_by_name(tag)
+                tagobj = Tags.get_tag_by_name(tag)
                 if tagobj and tagobj.content:
                     pids = tagobj.content.split(',')
                     for pid in pids:
@@ -79,13 +79,13 @@ def post_detail_formate(obj):
                 first_limit = EACH_PAGE_COMMENT_NUM
             else:
                 first_limit = obj.comment_num
-            from model.comment import Comment
+            from model.comments import Comments
 
-            obj.coms = Comment.get_post_page_comments_by_id(obj.id, 0, first_limit)
+            obj.coms = Comments.get_post_page_comments_by_id(obj.id, 0, first_limit)
     return obj
 
 
-class Article():
+class Articles():
     def count_all(self, category_id=None, title=None):
         sdb._ensure_connected()
         sql = "SELECT COUNT(*) AS num FROM `cms_posts` WHERE 1=1"
@@ -194,4 +194,4 @@ class Article():
                          "WHERE `post_id` in(%s) ORDER BY `post_id` DESC LIMIT %s" % (','.join(ids), str(len(ids))))
 
 
-Article = Article()
+Articles = Articles()

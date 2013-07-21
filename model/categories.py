@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
+import tornado.web
 from core.common import cnnow, timestamp_to_datetime, getAttr
-from model.article import post_list_format
-from model.base import sdb, mdb
+from model.articles import post_list_format
+from model import sdb, mdb
 from setting import BASE_URL
 
 _author__ = 'baitao.ji'
 
 
-class Category():
+class Categories():
     def count_all(self):
         sdb._ensure_connected()
         return sdb.query('SELECT COUNT(*) AS num FROM `cms_category`')[0]['num']
@@ -15,32 +16,21 @@ class Category():
     def create(self, params):
         mdb._ensure_connected()
         query = "INSERT INTO `cms_category` (`father_category_id`, `category_name`, `display_order`, `show_type`, " \
-                "`url`, `description`, `allow_comment`, `allow_publish`, `show_nav`) values(%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+                "`description`, `allow_comment`, `allow_publish`) values(%s,%s,%s,%s,%s,%s,%s,%s)"
         mdb.execute(query, params['father_category_id'], params['category_name'], params['display_order'],
-                    params['show_type'], params['url'], params['description'], params['allow_comment'],
-                    params['allow_publish'], params['show_nav'])
+                    params['show_type'], params['description'], params['allow_comment'], params['allow_publish'])
 
     def update(self, params):
         mdb._ensure_connected()
         sql = "UPDATE `cms_category` SET "
         if params['father_category_id']:
             sql += "`father_category_id` = %s," % params['father_category_id']
-        if params['category_name']:
-            sql += "`category_name` = %s," % params['category_name']
-        if params['display_order']:
-            sql += "`display_order` = %s," % params['display_order']
-        if params['show_type']:
-            sql += "`show_type` = %s," % params['show_type']
-        if params['url']:
-            sql += "`url` = %s," % params['url']
-        if params['description']:
-            sql += "`description` = %s," % params['description']
-        if params['allow_comment']:
-            sql += "`allow_comment` = %s," % params['allow_comment']
-        if params['allow_publish']:
-            sql += "`allow_publish` = %s," % params['allow_publish']
-        if params['show_nav']:
-            sql += "`show_nav` = %s," % params['show_nav']
+        sql += "`category_name` = \'%s\'," % params['category_name']
+        sql += "`display_order` = %s," % params['display_order']
+        sql += "`show_type` = \'%s\'," % params['show_type']
+        sql += "`description` = \'%s\'," % params['description']
+        sql += "`allow_comment` = %s," % params['allow_comment']
+        sql += "`allow_publish` = %s," % params['allow_publish']
         sql += "category_id = %s WHERE category_id = %s"
         mdb.execute(sql, params['category_id'], params['category_id'])
 
@@ -54,13 +44,24 @@ class Category():
         query = "DELETE FROM `cms_category` WHERE `father_category_id` = %s"
         mdb.execute(query, father_category_id)
 
-    def get(self, category_id=''):
+    def get(self, category_id):
+        if category_id is None:
+            raise tornado.web.HTTPError(404)
         sdb._ensure_connected()
-        return sdb.get('SELECT * FROM `cms_category` WHERE `category_id` = %s' % category_id)
+        post = sdb.get('SELECT * FROM `cms_category` WHERE `category_id` = %s' % category_id)
+        if post is None:
+            raise tornado.web.HTTPError(404)
+        return post
 
     def get_all(self):
         sdb._ensure_connected()
         return sdb.query('SELECT * FROM `cms_category` ORDER BY `father_category_id` ASC, `display_order` DESC')
+
+    def get_all_kv(self):
+        sql = "SELECT `category_id`,`category_name` FROM `cms_category` WHERE `father_category_id` = 0 " \
+              "ORDER BY `father_category_id` ASC, `display_order` DESC"
+        sdb._ensure_connected()
+        return sdb.query(sql)
 
     # 分页
     def get_paged(self, page=1, limit=None):
@@ -109,9 +110,9 @@ class Category():
         urllist.append(
             urlstr % ( "%s/c/%s" % (BASE_URL, str(obj.id)), cnnow().strftime("%Y-%m-%dT%H:%M:%SZ"), 'daily', '0.8'))
 
-        from model.article import Article
+        from model.articles import Articles
 
-        objs = Article.get_post_for_sitemap(obj.content.split(','))
+        objs = Articles.get_post_for_sitemap(obj.content.split(','))
         for p in objs:
             if p:
                 urllist.append(urlstr % (
@@ -123,4 +124,4 @@ class Category():
         return ''.join(urllist)
 
 
-Category = Category()
+Categories = Categories()

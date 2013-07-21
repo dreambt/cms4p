@@ -2,29 +2,51 @@
     <div class="span12">
     <form id="myForm" action="" class="well form-inline" method="post">
         <?py if obj: ?>
-        <span class="label label-info"><strong>编辑</strong></span>
-        <input type="text" name="name" value="#{obj.name}" class="span3" id="input01" required maxlength="100" tabindex="1" placeholder="分类名称"/>
-        <select id="showtype" name="showtype" tabindex="2" class="span2">
-          <option value="default">默认显示</option>
-          <option value="list">简单列表</option>
-          <option value="digest">摘要列表</option>
-          <option value="pic">图片瀑布</option>
-          <option value="video">视频瀑布</option>
+        <select name="father_id" class="span2">
+            <?py for item in category_kv: ?>
+            <?py    if item.category_id == obj.father_category_id: ?>
+            <option value="${item.category_id}" selected="selected">${item.category_name}</option>
+            <?py    else: ?>
+            <option value="${item.category_id}">${item.category_name}</option>
+            <?py    #endif ?>
+            <?py #endfor ?>
         </select>
-        <input type="number" name="sort" value="#{obj.displayorder}" min="0" max="255" class="span1" id="input03" tabindex="3" placeholder="排序"/>
+        <input type="text" name="name" value="${obj.category_name}" class="span2" required maxlength="100" placeholder="分类名称"/>
+        <select id="show_type" name="show_type" class="span2">
+            <?py for item in show_types: ?>
+            <?py    if item.type_key == obj.show_type: ?>
+            <option value="${item.type_key}" selected="selected">${item.type_name}</option>
+            <?py    else: ?>
+            <option value="${item.type_key}">${item.type_name}</option>
+            <?py    #endif ?>
+            <?py #endfor ?>
+        </select>
+        <input type="number" name="sort" value="${obj.display_order}" class="span1" min="0" max="255" placeholder="排序"/>
+        <?py ck = ['','checked'] ?>
+        <input type="checkbox" name="allow_comment" value="true" #{ck[obj.allow_comment]}> 评论
+        <input type="checkbox" name="allow_publish" value="true" #{ck[obj.allow_publish]}/> 发表
+        <input type="text" name="description" value="${obj.description}" class="span2" placeholder="分类描述"/>
         <input type="hidden" value="edit" name="act"/>
-        <input type="hidden" value="#{obj.id}" name="id"/>
+        <input type="hidden" value="#{obj.category_id}" name="id"/>
         <?py else: ?>
-        <span class="label label-info">新建</span>
-        <input type="text" name="name" value="" class="span3" id="input11" required maxlength="100" tabindex="1" placeholder="分类名称"/>
-        <select id="showtype" name="showtype" tabindex="2" class="span2">
+        <select name="father_id" class="span2">
+            <?py for item in category_kv: ?>
+            <option value="${item.category_id}">${item.category_name}</option>
+            <?py #endfor ?>
+        </select>
+        <input type="text" name="name" value="" class="span2" required maxlength="100" placeholder="分类名称"/>
+        <select id="show_type" name="show_type" class="span2">
           <option value="default">默认显示</option>
           <option value="list">简单列表</option>
           <option value="digest">摘要列表</option>
           <option value="pic">图片瀑布</option>
           <option value="video">视频瀑布</option>
+          <option value="url">URL 网址</option>
         </select>
-        <input type="number" name="sort" value="" class="span1" min="0" max="255" id="input13" tabindex="2" placeholder="排序"/>
+        <input type="number" name="sort" value="" class="span1" min="0" max="255" placeholder="排序"/>
+        <input type="checkbox" name="allow_comment" value="true" checked="checked"> 评论
+        <input type="checkbox" name="allow_publish" value="true" checked="checked"/> 发表
+        <input type="text" name="description" value="" class="span2" placeholder="分类描述"/>
         <input type="hidden" value="add" name="act"/>
         <?py #endif ?>
         <button type="submit" class="btn btn-primary">保 存</button>
@@ -34,23 +56,39 @@
     <table class="table table-striped table-hover table-bordered table-condensed">
         <thead>
         <tr>
+            <th style="width:48px">#父级</th>
             <th style="width:48px">#</th>
-            <th style="width:180px">分类名称</th>
+            <th>分类名称</th>
             <th style="width:80px">显示类型</th>
+            <th style="width:48px">文章数</th>
             <th style="width:30px">排序</th>
-            <th>文章数</th>
+            <th style="width:30px">评论</th>
+            <th style="width:30px">发表</th>
+            <th style="width:140px">最后修改时间</th>
             <th style="width:60px">可用操作</th>
         </tr>
         </thead>
         <tbody id="content">
         <?py for i in objs: ?>
-        <tr id="category-#{i.id}">
-            <td>#{i.id}</td>
-            <td><a href="/category/#{i.name}/" title="Link to #{i.name}" target="_blank">#{i.name}</a></td>
-            <td>#{i.showtype}</td>
-            <td>#{i.displayorder}</td>
-            <td>#{i.id_num}</td>
-            <td><a href="/admin/category?id=#{i.id}&act=edit">编辑</a> <a href="/admin/category?id=#{i.id}&act=del" class="ajax" data-remove-closest="tr">删除</a></td>
+        <tr id="category-#{i.category_id}">
+            <td>#{i.father_category_id}</td>
+            <td>#{i.category_id}</td>
+            <td><a href="/category/#{i.category_name}/" title="Link to #{i.category_name}" target="_blank">#{i.category_name}</a></td>
+            <td>#{i.show_type}</td>
+            <td>#{i.display_order}</td>
+            <td>#{i.display_order}</td>
+            <td>
+                <?py if i.allow_comment == 1: ?><span class="label label-success">允许</span>
+                <?py else: ?><span class="label">禁止</span>
+                <?py #endif ?>
+            </td>
+            <td>
+                <?py if i.allow_publish == 1: ?><span class="label label-success">允许</span>
+                <?py else: ?><span class="label">禁止</span>
+                <?py #endif ?>
+            </td>
+            <td>#{i.last_modified_date}</td>
+            <td><a href="/admin/category?id=#{i.category_id}&act=edit">编辑</a> <a href="/admin/category?id=#{i.category_id}&act=del" class="ajax" data-remove-closest="tr">删除</a></td>
         </tr>
         <?py #endfor ?>
         </tbody>
@@ -73,28 +111,72 @@
 </div>
 <script type="text/javascript" src="#{{ STATIC_URL }}/static/js/vender/template.min.js"></script>
 <script type="text/javascript">
+    template.helper('$format', function (content) {
+        return content.replace('T',' ');
+    });
     $(function () {
         $("#category_page").addClass("active");
         $("input,select,textarea").not("[type=submit]").not("[type=reset]").jqBootstrapValidation();
         $('#myForm').submit(function () {
             var name = $("input[name='name']").val();
-            var showtype = $("#showtype").val();
-            var sort = $("input[name='sort']").val().trim();
-            if (sort=="") $("input[name='sort']").val("0");
+            var show_type = $("#show_type").val();
+            var sort = $.trim($("input[name='sort']").val());
+            if (sort=="") {sort = 0;$("input[name='sort']").val("0");}
+            var allow_comment = $("input[name='allow_comment']").is(':checked');
+            var allow_publish = $("input[name='allow_publish']").is(':checked');
             $.ajax({
                 type: 'POST',
                 url: "",
                 dataType: "json",
                 data: $("#myForm").serialize(),
-                success: function () {
-                    SiQiTip.show("success", "保存成功！");
-                    if ($("input[name='act']").val()=="add") {
-                        $("#content").prepend("<tr><td>#</td><td><a href='/category/"+name+"/' title='Link to "+name+"' target='_blank'>"+name+"</a></td><td>"+showtype+"</td><td>"+sort+"</td><td>0</td><td><a href='/admin/category'>刷新</a></td></tr>");
-                        $("input").val("");
+                success: function (data) {
+                    if(data == "OK") {
+                        if ($("input[name='act']").val()=="add") {
+                            var html = "<tr><td>#</td><td>#</td><td><a href='/category/"+name+"/' title='Link to "+name+"' target='_blank'>"+name+"</a></td><td>"+show_type+"</td><td>0</td><td>"+sort+"</td>";
+                            if (allow_comment) {
+                                html += "<td><span class='label label-success'>允许</span></td>";
+                            }
+                            else {
+                                html += "<td><span class='label'>禁止</span></td>";
+                            }
+                            if (allow_publish) {
+                                html += "<td><span class='label label-success'>允许</span></td>";
+                            }
+                            else {
+                                html += "<td><span class='label'>禁止</span></td>";
+                            }
+                            html += "<td><a href='/admin/category'>刷新</a></td></tr>";
+                            $("#content").prepend(html);
+                            $("input").val("");
+                        }
+                        else {
+                            var id = $("input[name='id']").val();
+                            var father_id = $("select[name='father_id']").val();
+                            var html = "<td>" + father_id + "</td><td>"+id+"</td><td><a href='/category/"+name+"/' title='Link to "+name+"' target='_blank'>"+name+"</a></td><td>"+show_type+"</td><td>0</td><td>"+sort+"</td>";
+                            if (allow_comment) {
+                                html += "<td><span class='label label-success'>允许</span></td>";
+                            }
+                            else {
+                                html += "<td><span class='label'>禁止</span></td>";
+                            }
+                            if (allow_publish) {
+                                html += "<td><span class='label label-success'>允许</span></td>";
+                            }
+                            else {
+                                html += "<td><span class='label'>禁止</span></td>";
+                            }
+                            html += "<td>?</td><td><a href='/admin/category?id="+id+"&act=edit'>编辑</a> <a href='/admin/category?id="+id+"&act=del' class='ajax' data-remove-closest='tr'>删除</a></td>";
+                            $("#category-"+id).html(html);
+                        }
+                        // Reset
+                        $("input[name=id]").val("");
+                        $("input[name=act]").val("add");
+                        $("input[name=name]").val("");
+                        $("input[name=sort]").val("");
+                        SiQiTip.show("success", "保存成功！");
                     }
                     else {
-                        var id = $("input[name='id']").val();
-                        $("#category-"+id).html("<td>"+id+"</td><td><a href='/category/"+name+"/' title='Link to "+name+"' target='_blank'>"+name+"</a></td><td>"+showtype+"</td><td>"+sort+"</td><td>?</td><td><a href='/admin/category?id="+id+"&act=edit'>编辑</a> <a href='/admin/category?id="+id+"&act=del' class='ajax' data-remove-closest='tr'>删除</a></td>");
+                        SiQiTip.show("error", data);
                     }
                 },
                 error: function() {
@@ -125,13 +207,25 @@
 </script>
 <script id="categoryTemplate" type="text/html">
 <%for(i = 0; i < list.length; i ++) {%>
-<tr id="category-<%=list[i].id%>">
-    <td><%=list[i].id%></td>
-    <td><a href="/category/<%=list[i].name%>/" title="Link to <%=list[i].name%>" target="_blank"><%=list[i].name%></a></td>
-    <td><%=list[i].showtype%></td>
-    <td><%=list[i].displayorder%></td>
-    <td><%=list[i].id_num%></td>
-    <td><a href="/admin/category?id=<%=list[i].id%>&act=edit">编辑</a> <a href="/admin/category?id=<%=list[i].id%>&act=del" class="ajax" data-remove-closest="tr">删除</a></td>
+<tr id="category-<%=list[i].category_id%>">
+    <td><%=list[i].father_category_id%></td>
+    <td><%=list[i].category_id%></td>
+    <td><a href="/category/<%=list[i].category_name%>/" title="Link to <%=list[i].category_name%>" target="_blank"><%=list[i].category_name%></a></td>
+    <td><%=list[i].show_type%></td>
+    <td><%=list[i].display_order%></td>
+    <td><%=list[i].display_order%></td>
+    <td>
+        <%if(list[i].allow_comment == 1){%><span class="label label-success">允许</span>
+        <%}else{%><span class="label">禁止</span>
+        <%}%>
+    </td>
+    <td>
+        <%if(list[i].allow_publish == 1){%><span class="label label-success">允许</span>
+        <%}else{%><span class="label">禁止</span>
+        <%}%>
+    </td>
+    <td><%=$format(list[i].last_modified_date)%></td>
+    <td><a href="/admin/category?id=<%=list[i].category_id%>&act=edit">编辑</a> <a href="/admin/category?id=<%=list[i].category_id%>&act=del" class="ajax" data-remove-closest="tr">删除</a></td>
 </tr>
 <%}%>
 </script>

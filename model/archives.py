@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 from core.common import getAttr
-from model.article import post_list_format
-from model.base import mdb, sdb
+from model.articles import post_list_format
+from model import mdb, sdb
 
 _author__ = 'baitao.ji'
 
 
-class Archive():
+class Archives():
     def get_all(self):
         sdb._ensure_connected()
         return sdb.query('SELECT * FROM `cms_archive` ORDER BY `archive_name` DESC')
@@ -68,4 +68,4 @@ class Archive():
                     len(post_ids), archive_id)
 
 
-Archive = Archive()
+Archives = Archives()

@@ -34,9 +34,9 @@
         $("#profile_page").addClass("active");
         $("input,select,textarea").not("[type=submit]").not("[type=reset]").jqBootstrapValidation();
         $('#myForm').submit(function () {
-            var oldPassword = $("#oldPassword").val().trim();
-            var newPassword = $("#newPassword").val().trim();
-            var newPassword2 = $("#newPassword2").val().trim();
+            var oldPassword = $.trim($("#oldPassword").val());
+            var newPassword = $.trim($("#newPassword").val());
+            var newPassword2 = $.trim($("#newPassword2").val());
             if(newPassword != newPassword2){
                 SiQiTip.show("error", "新密码和确认密码必须一致");
                 return false;

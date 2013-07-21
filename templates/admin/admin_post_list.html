@@ -4,7 +4,7 @@
         <select name="category" class="span2" id="category">
             <option value="">所有分类</option>
         <?py for i in cats: ?>
-            <option value="#{i.name}">#{i.name}</option>
+            <option value="#{i.category_id}">#{i.category_name}</option>
         <?py #endfor ?>
         </select>
         <input type="text" name="title" class="span3" id="input11" maxlength="100" placeholder="文章名称"/>

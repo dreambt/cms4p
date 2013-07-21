@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from hashlib import md5
 from core.common import getAttr, time_from_now
-from model.base import sdb, mdb, HTML_REG
+from model import sdb, mdb, HTML_REG
 from setting import EACH_PAGE_COMMENT_NUM, RECENT_COMMENT_CUT_WORDS
 
 _author__ = 'baitao.ji'
@@ -28,7 +28,7 @@ def comment_format_admin(objs):
     return objs
 
 
-class Comment():
+class Comments():
     def count_all(self):
         sdb._ensure_connected()
         return sdb.query('SELECT COUNT(*) AS num FROM `cms_comments`')[0]['num']
@@ -49,14 +49,14 @@ class Comment():
     def delete(self, comment_id):
         cobj = self.get(comment_id)
         post_id = cobj.post_id
-        from model.article import Article
+        from model.articles import Articles
 
-        pobj = Article.get(post_id)
+        pobj = Articles.get(post_id)
 
         mdb._ensure_connected()
         mdb.execute("DELETE FROM `cms_comments` WHERE `comment_id` = %s LIMIT 1", comment_id)
         if pobj:
-            Article.update_comment_num(pobj.comment_num - 1, post_id)
+            Articles.update_comment_num(pobj.comment_num - 1, post_id)
         return
 
     def get(self, comment_id):
@@ -92,4 +92,4 @@ class Comment():
                 sql % (
                     str(post_id), str(min_comment_id), str(limit))))
 
-Comment = Comment()
+Comments = Comments()
