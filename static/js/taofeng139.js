@@ -27,23 +27,41 @@ var SiQiTip = (function() {
     that.show = function(type, text) {
         clearTimeout(hideHandler);
 
-        elem.addClass("alert-"+type).find("span").html(text);
-        elem.fadeIn();
+        var title = "成功";
+        switch (type) {
+            case "info":
+                title = "信息";
+                break;
+            case "error":
+                title = "错误";
+                break;
+            case "warning":
+                title = "警告";
+                break;
+        }
+        elem.addClass("message-"+type).find("p").html(text);
+        elem.find("h3").html(title);
+        elem.animate({top:"40"}, 500);
+        //elem.fadeIn();
         hideHandler = setTimeout(function() {
             that.hide();
-            elem.removeClass("alert-"+type).find("span").html();
-        }, 5000);
+            //elem.removeClass("message-"+type).find("p").html("");
+        }, 4000);
     };
 
     that.hide = function() {
-        elem.fadeOut();
+        //elem.fadeOut();
+        elem.animate({top:"-97px"}, 500)
     };
 
     return that;
 }());
 $(function () {
     SiQiTip.init({
-        "selector": ".bb-alert"
+        "selector": ".message"
+    });
+    $('.message').click(function(){
+	    $(this).animate({top: -$(this).outerHeight()}, 500);
     });
     $("#flushcache").click(function () {
             bootbox.confirm("确认清空缓存?", function(result) {

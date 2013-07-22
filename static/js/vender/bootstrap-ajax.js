@@ -76,7 +76,7 @@
                     })
                 }
                 else {
-                    SiQiTip.show("block", "取消删除操作！");
+                    SiQiTip.show("warning", "取消删除操作！");
                 }
             });
         }
@@ -105,7 +105,7 @@
                     })
                 }
                 else {
-                    SiQiTip.show("block", "取消重置操作！");
+                    SiQiTip.show("warning", "取消重置操作！");
                 }
             });
         }
