@@ -69,9 +69,14 @@
             $.ajax({
                 url: '#{request.path}?page='+num,
                 success: function (data) {
-                    var html = template.render('articleTemplate', data);
-                    $("#content").html(html);
-                    SiQiTip.show("success", "加载用户列表成功！");
+                    if(data == "OK") {
+                        var html = template.render('articleTemplate', data);
+                        $("#content").html(html);
+                        SiQiTip.show("success", "加载用户列表成功！");
+                    }
+                    else {
+                        SiQiTip.show("error", data);
+                    }
                 },
                 error: function() {
                     SiQiTip.show("error", "加载用户列表失败！");

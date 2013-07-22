@@ -10,7 +10,7 @@ from core import dthandler
 
 from core.common import BaseHandler, authorized, clear_cache_by_pathlist, getAttr, sendEmail
 from core.utils.random_utils import random_string
-from model.articles import Articles
+from model.posts import Posts
 from model.users import Users
 from setting import *
 

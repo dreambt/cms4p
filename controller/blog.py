@@ -6,7 +6,7 @@ from hashlib import md5
 from time import time
 from urlparse import unquote
 from model.archives import Archives
-from model.articles import Articles
+from model.posts import Posts
 from model.categories import Categories
 from model.comments import Comments
 from model.links import Links
@@ -29,7 +29,7 @@ class HomePage(BaseHandler):
             return
 
         each_page_post_num = int(getAttr('EACH_PAGE_POST_NUM'))
-        all_post = Articles.count_all()
+        all_post = Posts.count_all()
         all_page = all_post / each_page_post_num
         if all_post % each_page_post_num:
             all_page += 1
@@ -55,7 +55,7 @@ class IndexPage(BaseHandler):
         if page == '1':
             self.redirect(BASE_URL)
             return
-        objs = Articles.get_paged(direction, page, base_id)
+        objs = Posts.get_paged(direction, page, base_id)
         if objs:
             if direction == 'prev':
                 objs.reverse()
@@ -65,7 +65,7 @@ class IndexPage(BaseHandler):
             fromid = endid = ''
 
         each_page_post_num = int(getAttr('EACH_PAGE_POST_NUM'))
-        all_post = Articles.count_all()
+        all_post = Posts.count_all()
         all_page = all_post / each_page_post_num
         if all_post % each_page_post_num:
             all_page += 1
@@ -92,7 +92,7 @@ class IndexPage(BaseHandler):
 class PostDetailShort(BaseHandler):
     @client_cache(600, 'public')
     def get(self, id=''):
-        obj = Articles.get_post_simple(id)
+        obj = Posts.get_post_simple(id)
         if obj:
             self.redirect('%s/topic/%d/%s' % (BASE_URL, obj.id, obj.title), 301)
             return
@@ -104,7 +104,7 @@ class PostDetail(BaseHandler):
     @pagecache('post', PAGE_CACHE_TIME, lambda self, id, title: id)
     def get(self, post_id='', title=''):
         tmpl = ''
-        obj = Articles.get_post_detail(post_id)
+        obj = Posts.get_post_detail(post_id)
         if not obj:
             self.redirect(BASE_URL)
             return
@@ -151,7 +151,7 @@ class PostDetail(BaseHandler):
             'comments': Comments.get_recent_comments(),
             'links': Links.get_all(),
             'hits': get_count(keyname),
-            'recent_article': Articles.get_last_post(8),
+            'recent_article': Posts.get_last_post(8),
             'listtype': '',
         }, layout='_layout.html')
         self.write(output)
@@ -173,7 +173,7 @@ class PostDetail(BaseHandler):
                 return
 
             pw = self.get_argument("pw", '')
-            pobj = Articles.get_post_simple(id)
+            pobj = Posts.get_post_simple(id)
             if pw:
                 if pobj.password == pw:
                     clear_cache_by_pathlist(['post:%s' % id])
@@ -232,11 +232,11 @@ class PostDetail(BaseHandler):
             self.write(json.dumps(rspd))
             return
 
-        pobj = Articles.get_post_simple(id)
+        pobj = Posts.get_post_simple(id)
         if pobj and not pobj.closecomment:
             cobjid = Comments.create(post_dic)
             if cobjid:
-                Articles.update_comment_num(pobj.comment_num + 1, id)
+                Posts.update_comment_num(pobj.comment_num + 1, id)
                 self.set_secure_cookie("usercomnum", str(int(usercomnum) + 1), expires_days=1)
                 rspd['status'] = 200
                 rspd['msg'] = '恭喜您，已成功提交评论！'
@@ -328,7 +328,7 @@ class CategoryDetail(BaseHandler):
             'listtype': 'cat',
             'name': name,
             'namemd5': md5(name.encode('utf-8')).hexdigest(),
-            'recent_article': Articles.get_last_post(8),
+            'recent_article': Posts.get_last_post(8),
             'comments': Comments.get_recent_comments(),
             'links': Links.get_all(),
         }, layout='_layout.html')
@@ -371,7 +371,7 @@ class ArchiveDetail(BaseHandler):
             'listtype': 'archive',
             'name': name,
             'namemd5': md5(name.encode('utf-8')).hexdigest(),
-            'recent_article': Articles.get_last_post(8),
+            'recent_article': Posts.get_last_post(8),
             'comments': Comments.get_recent_comments(),
             'links': Links.get_all(),
         }, layout='_layout.html')
@@ -410,7 +410,7 @@ class TagDetail(BaseHandler):
             'listtype': 'tag',
             'name': name,
             'namemd5': md5(name.encode('utf-8')).hexdigest(),
-            'recent_article': Articles.get_last_post(8),
+            'recent_article': Posts.get_last_post(8),
             'comments': Comments.get_recent_comments(),
             'links': Links.get_all(),
         }, layout='_layout.html')
@@ -474,10 +474,10 @@ class Robots(BaseHandler):
 
 class Feed(BaseHandler):
     def get(self):
-        posts = Articles.get_last_post()
+        posts = Posts.get_last_post()
         output = self.render('index.xml', {
             'posts': posts,
-            'site_updated': Articles.get_last_post_add_time(),
+            'site_updated': Posts.get_last_post_add_time(),
         })
         self.set_header('Content-Type', 'application/atom+xml')
         self.write(output)

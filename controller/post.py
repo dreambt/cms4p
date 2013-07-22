@@ -4,7 +4,7 @@ import math
 
 from core.common import BaseHandler, authorized, safe_encode, clear_cache_by_pathlist, quoted_string, genArchive, set_count, increment, getAttr
 from model.archives import Archives
-from model.articles import Articles
+from model.posts import Posts
 from model.categories import Categories
 from model.comments import Comments
 from model.tags import Tags
@@ -20,24 +20,6 @@ if not debug:
 
 
 class AddPost(BaseHandler):
-    @authorized()
-    def get(self):
-        obj = Articles
-        obj.id = ''
-        obj.category = ''
-        obj.title = ''
-        obj.content = ''
-        obj.tags = ''
-        obj.closecomment = 0
-        obj.password = ''
-        self.echo('admin_post_edit.html', {
-            'title': "添加文章",
-            'method': "/admin/add_post",
-            'cats': Categories.get_all_category_name(),
-            'tags': Tags.get_all_tag_name(),
-            'obj': obj,
-        }, layout='_layout_admin.html')
-
     @authorized()
     def post(self):
         self.set_header('Content-Type', 'application/json')
@@ -63,7 +45,7 @@ class AddPost(BaseHandler):
             self.write(json.dumps(rspd))
             return
 
-        postid = Articles.create(post_dic)
+        postid = Posts.create(post_dic)
         if postid:
             keyname = 'pv_%s' % (str(postid))
             set_count(keyname, 0, 0)
@@ -93,51 +75,108 @@ class AddPost(BaseHandler):
             return
 
 
-class ListPost(BaseHandler):
+class PostController(BaseHandler):
     @authorized()
     def get(self):
+        act = self.get_argument("act", '')
+        post_id = self.get_argument("id", '')
+
+        obj = None
+        if act == 'add':
+            obj = Posts
+            obj.id = ''
+            obj.category = ''
+            obj.title = ''
+            obj.content = ''
+            obj.tags = ''
+            obj.closecomment = 0
+            obj.password = ''
+            self.echo('admin_post_edit.html', {
+                'title': "添加文章",
+                'method': "/admin/posts?act=add",
+                'categories': Categories.get_all_kv(),
+                'tags': Tags.get_all_tag_name(),
+                'obj': obj,
+            }, layout='_layout_admin.html')
+            return
+        elif act == 'edit':
+            if post_id:
+                obj = Posts.get(post_id)
+                self.echo('admin_post_edit.html', {
+                    'title': "编辑文章",
+                    'method': "/admin/posts?act=edit",
+                    'categories': Categories.get_all_kv(),
+                    'tags': Tags.get_all_tag_name(),
+                    'obj': obj,
+                }, layout='_layout_admin.html')
+                return
+        elif act == 'del':
+            if post_id:
+                oldobj = Posts.get(id)
+                Archives.remove_post_from_archive(post_id=post_id)
+                Posts.delete(id)
+                cache_key_list = ['/', 'post:%s' % id, 'cat:%s' % quoted_string(oldobj.category)]
+                clear_cache_by_pathlist(cache_key_list)
+                clear_cache_by_pathlist(['post:%s' % id])
+
+                Posts.delete(post_id)
+                clear_cache_by_pathlist(['/'])
+            self.set_header("Content-Type", "application/json")
+            self.write(json.dumps("OK"))
+            return
+
+        # 文章列表
         page = self.get_argument("page", 1)
-        category = self.get_argument("category", "")
-        title = self.get_argument("title", "")
-        article = Articles.get_paged(page, getAttr('ADMIN_POST_NUM'), category, title)
-        total = math.ceil(Articles.count_all(category, title) / float(getAttr('ADMIN_POST_NUM')))
+        posts = Posts.get_paged(page, getAttr('ADMIN_POST_NUM'))
+        categories = Categories.get_all_kv()
+        total = math.ceil(Posts.count_all() / float(getAttr('ADMIN_POST_NUM')))
         if page == 1:
-            cats = Categories.get_all()
             self.echo('admin_post_list.html', {
-                'title': "文章列表",
-                'objs': article,
-                'cats': cats,
+                'title': "文章链接",
+                'objs': posts,
+                'categories': categories,
                 'total': total,
             }, layout='_layout_admin.html')
         else:
             result = {
-                'list': article,
+                'list': posts,
                 'total': total,
             }
             self.set_header("Content-Type", "application/json")
             self.write(json.dumps(result))
             return
 
+    @authorized()
+    def post(self):
+        try:
+            tf = {'true': 1, 'false': 0}
+            act = self.get_argument("act", '').encode('utf-8')
+            user_id = self.get_argument("user_id", '').encode('utf-8')
+            user_name = self.get_argument("user_name", '').encode('utf-8')
+            email = self.get_argument("email", '').encode('utf-8')
+            status = tf[self.get_argument("status", 'false').encode('utf-8')]
+        except:
+            self.write(json.dumps("用户名、邮箱均为必填项！"))
+            return
+
+        params = {'user_id': user_id, 'user_name': user_name, 'email': email, 'password': None, 'status': status}
+        if act == 'add' and user_name is not None and email is not None:
+            password = Posts.create(params)
+        elif act == 'edit' and user_id is not None:
+            Posts.update(params)
+
+        clear_cache_by_pathlist(['/'])
+
+        self.set_header("Content-Type", "application/json")
+        self.write(json.dumps("OK"))
+
 
 class EditPost(BaseHandler):
-    @authorized()
-    def get(self, id=''):
-        obj = None
-        if id:
-            obj = Articles.get(id)
-        self.echo('admin_post_edit.html', {
-            'title': "编辑文章",
-            'method': "/admin/edit_post/" + id,
-            'cats': Categories.get_all_category_name(),
-            'tags': Tags.get_all_tag_name(),
-            'obj': obj
-        }, layout='_layout_admin.html')
-
     @authorized()
     def post(self, id=''):
         self.set_header('Content-Type', 'application/json')
         rspd = {'status': 201, 'msg': 'ok'}
-        oldobj = Articles.get(id)
+        oldobj = Posts.get(id)
 
         try:
             tf = {'true': 0, 'false': 1}
@@ -167,7 +206,7 @@ class EditPost(BaseHandler):
             self.write(json.dumps(rspd))
             return
 
-        postid = Articles.update(post_dic)
+        postid = Posts.update(post_dic)
         if postid:
             cache_key_list = ['/', 'post:%s' % id, 'cat:%s' % quoted_string(oldobj.category)]
             if oldobj.category != post_dic['category']:
@@ -208,11 +247,11 @@ class DelPost(BaseHandler):
     def get(self, id=''):
         try:
             if id:
-                oldobj = Articles.get(id)
+                oldobj = Posts.get(id)
                 Categories.remove_postid_from_cat(oldobj.category, str(id))
                 Archives.remove_postid_from_archive(oldobj.archive, str(id))
                 Tags.remove_postid_from_tags(set(oldobj.tags.split(',')), str(id))
-                Articles.delete(id)
+                Posts.delete(id)
                 increment('Totalblog', NUM_SHARDS, -1)
                 cache_key_list = ['/', 'post:%s' % id, 'cat:%s' % quoted_string(oldobj.category)]
                 clear_cache_by_pathlist(cache_key_list)
@@ -228,41 +267,37 @@ class DelPost(BaseHandler):
 
 class CommentController(BaseHandler):
     @authorized()
-    def get(self, id=''):
-        obj = None
-        total = math.ceil(Comments.count_all() / float(getAttr('ADMIN_COMMENT_NUM')))
-        if id:
-            obj = Comments.get_comment(id)
-            if obj:
-                act = self.get_argument("act", '')
-                if act == 'del':
-                    Comments.delete_comment(id)
-                    clear_cache_by_pathlist(['post:%d' % obj.postid])
-                    self.set_header("Content-Type", "application/json")
-                    self.write(json.dumps("OK"))
-                    return
-                else:
-                    self.echo('admin_comment.html', {
-                        'title': "评论管理",
-                        'obj': obj,
-                        'total': total,
-                    }, layout='_layout_admin.html')
-                    return
+    def get(self):
+        act = self.get_argument("act", '')
+        post_id = self.get_argument("id", '')
 
-        # 评论列表
+        obj = None
+        if act == 'del':
+            if post_id:
+                Posts.delete(post_id)
+                clear_cache_by_pathlist(['/'])
+            self.set_header("Content-Type", "application/json")
+            self.write(json.dumps("OK"))
+            return
+        elif act == 'edit':
+            if post_id:
+                obj = Posts.get(post_id)
+                clear_cache_by_pathlist(['/'])
+
+        # 文章列表
         page = self.get_argument("page", 1)
-        comments = Comments.get_paged(page, getAttr('ADMIN_COMMENT_NUM'))
+        posts = Posts.get_paged(page, getAttr('ADMIN_POST_NUM'))
+        total = math.ceil(Posts.count_all() / float(getAttr('ADMIN_POST_NUM')))
         if page == 1:
-            self.echo('admin_comment.html', {
-                'title': "评论管理",
+            self.echo('admin_post_list.html', {
+                'title': "文章链接",
+                'objs': posts,
                 'obj': obj,
                 'total': total,
-                'comments': comments,
             }, layout='_layout_admin.html')
-            return
         else:
             result = {
-                'list': comments,
+                'list': posts,
                 'total': total,
             }
             self.set_header("Content-Type", "application/json")
@@ -271,7 +306,7 @@ class CommentController(BaseHandler):
 
 
     @authorized()
-    def post(self, id=''):
+    def post(self):
         act = self.get_argument("act", '')
         if act == 'findid':
             eid = self.get_argument("id", '')
@@ -300,7 +335,7 @@ urls = [
     # 文章相关
     (r"/admin/add_post", AddPost),
     (r"/admin/edit_post/(\d*)", EditPost),
-    (r"/admin/list_post", ListPost),
+    (r"/admin/posts", PostController),
     (r"/admin/del_post/(\d+)", DelPost),
     (r"/admin/comment/(\d*)", CommentController),
 ]

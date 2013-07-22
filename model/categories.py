@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import tornado.web
 from core.common import cnnow, timestamp_to_datetime, getAttr
-from model.articles import post_list_format
+from model.posts import post_list_format
 from model import sdb, mdb
 from setting import BASE_URL
 
@@ -57,9 +57,13 @@ class Categories():
         sdb._ensure_connected()
         return sdb.query('SELECT * FROM `cms_category` ORDER BY `father_category_id` ASC, `display_order` DESC')
 
-    def get_all_kv(self):
-        sql = "SELECT `category_id`,`category_name` FROM `cms_category` WHERE `father_category_id` = 0 " \
-              "ORDER BY `father_category_id` ASC, `display_order` DESC"
+    def get_all_kv(self, father_category_id=None):
+        if father_category_id:
+            sql = "SELECT `category_id`,`category_name` FROM `cms_category` WHERE `father_category_id` = 0 " \
+                  "ORDER BY `father_category_id` ASC, `display_order` DESC"
+        else:
+            sql = "SELECT `category_id`,`category_name` FROM `cms_category` WHERE `show_type` <> \'url\' " \
+                  "ORDER BY `father_category_id` ASC, `display_order` DESC"
         sdb._ensure_connected()
         return sdb.query(sql)
 
@@ -110,9 +114,9 @@ class Categories():
         urllist.append(
             urlstr % ( "%s/c/%s" % (BASE_URL, str(obj.id)), cnnow().strftime("%Y-%m-%dT%H:%M:%SZ"), 'daily', '0.8'))
 
-        from model.articles import Articles
+        from model.posts import Posts
 
-        objs = Articles.get_post_for_sitemap(obj.content.split(','))
+        objs = Posts.get_post_for_sitemap(obj.content.split(','))
         for p in objs:
             if p:
                 urllist.append(urlstr % (

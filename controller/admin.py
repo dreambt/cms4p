@@ -7,7 +7,7 @@ import time
 from core.common import BaseHandler, authorized, clear_cache_by_pathlist, clear_all_cache, setAttr, clearAllKVDB, getAttr, sendEmail
 from core.storage import put_storage, get_storage_list
 from core.utils.random_utils import random_int
-from model.articles import Articles
+from model.posts import Posts
 from model.users import Users
 from setting import *
 from extensions.imagelib import Recaptcha, Thumbnail
@@ -449,7 +449,7 @@ class PingRPC(BaseHandler):
     def get(self, n=0):
         import urllib2
 
-        pingstr = self.render('rpc.xml', {'article_id': Articles.get_max_id()})
+        pingstr = self.render('rpc.xml', {'article_id': Posts.get_max_id()})
 
         headers = {
             'User-Agent': 'request',

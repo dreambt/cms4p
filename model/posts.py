@@ -85,7 +85,7 @@ def post_detail_formate(obj):
     return obj
 
 
-class Articles():
+class Posts():
     def count_all(self, category_id=None, title=None):
         sdb._ensure_connected()
         sql = "SELECT COUNT(*) AS num FROM `cms_posts` WHERE 1=1"
@@ -194,4 +194,4 @@ class Articles():
                          "WHERE `post_id` in(%s) ORDER BY `post_id` DESC LIMIT %s" % (','.join(ids), str(len(ids))))
 
 
-Articles = Articles()
+Posts = Posts()

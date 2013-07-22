@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from model.articles import post_list_format
+from model.posts import post_list_format
 from model import mdb, sdb
 from setting import EACH_PAGE_POST_NUM, HOT_TAGS_NUM
 

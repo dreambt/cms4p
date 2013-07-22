@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from core.common import getAttr
-from model.articles import post_list_format
+from model.posts import post_list_format
 from model import mdb, sdb
 
 _author__ = 'baitao.ji'
@@ -56,8 +56,7 @@ class Archives():
 
     def remove_post_from_archive(self, archive_id='', post_id=''):
         mdb._ensure_connected()
-        mdb.execute("DELETE FROM `cms_archive_post` WHERE `archive_id` = %s and `post_id` = %s LIMIT 1", archive_id,
-                    post_id)
+        mdb.execute("DELETE FROM `cms_archive_post` WHERE `post_id` = %s LIMIT 1", post_id)
         mdb.execute("UPDATE `cms_archive` SET `post_num` = `post_num`-1 WHERE `archive_id` = %s LIMIT 1", archive_id)
 
     def remove_posts_from_archive(self, archive_id='', post_ids=[]):

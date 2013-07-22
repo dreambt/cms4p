@@ -49,14 +49,14 @@ class Comments():
     def delete(self, comment_id):
         cobj = self.get(comment_id)
         post_id = cobj.post_id
-        from model.articles import Articles
+        from model.posts import Posts
 
-        pobj = Articles.get(post_id)
+        pobj = Posts.get(post_id)
 
         mdb._ensure_connected()
         mdb.execute("DELETE FROM `cms_comments` WHERE `comment_id` = %s LIMIT 1", comment_id)
         if pobj:
-            Articles.update_comment_num(pobj.comment_num - 1, post_id)
+            Posts.update_comment_num(pobj.comment_num - 1, post_id)
         return
 
     def get(self, comment_id):

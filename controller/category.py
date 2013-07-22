@@ -39,7 +39,7 @@ class CategoryController(BaseHandler):
                 'title': "分类列表",
                 'objs': category,
                 'obj': obj,
-                'category_kv': Categories.get_all_kv(),
+                'category_kv': Categories.get_all_kv(0),
                 'show_types': ShowTypes.get_all(),
                 'total': total,
             }, layout='_layout_admin.html')
