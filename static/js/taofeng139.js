@@ -39,19 +39,20 @@ var SiQiTip = (function() {
                 title = "警告";
                 break;
         }
-        elem.addClass("message-"+type).find("p").html(text);
-        elem.find("h3").html(title);
-        elem.animate({top:"40"}, 500);
-        //elem.fadeIn();
+        elem.addClass("message-"+type).find("h3").html(title);
+        elem.find("p").html(text);
+        elem.fadeIn(500);
+        elem.animate({top:"0"}, 500);
         hideHandler = setTimeout(function() {
-            that.hide();
+            that.hide(type);
             //elem.removeClass("message-"+type).find("p").html("");
         }, 4000);
     };
 
-    that.hide = function() {
-        //elem.fadeOut();
-        elem.animate({top:"-97px"}, 500)
+    that.hide = function(type) {
+        elem.fadeOut(10);
+        elem.animate({top:"-97px"}, 500);
+        elem.removeClass("message-"+type);
     };
 
     return that;
@@ -74,7 +75,7 @@ $(function () {
                     });
                 }
                 else {
-                    SiQiTip.show("error", "操作已取消!");
+                    SiQiTip.show("warning", "操作已取消!");
                 }
             });
         });
@@ -89,7 +90,7 @@ $(function () {
                     });
                 }
                 else {
-                    SiQiTip.show("error", "操作已取消!");
+                    SiQiTip.show("warning", "操作已取消!");
                 }
         });
     });

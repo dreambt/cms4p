@@ -2,153 +2,65 @@
 -------------------------------------------------- */
 body {
     position: relative;
-    padding-top: 40px;
+    padding-top: 0px;
 }
 
-/* Tweak navbar brand link to be super sleek
--------------------------------------------------- */
-body > .navbar {
-    font-size: 13px;
-}
-
-/* Change the docs' brand */
-body > .navbar .brand {
-    padding-right: 0;
-    padding-left: 0;
-    margin-left: 20px;
-    float: right;
-    font-weight: bold;
-    color: #000;
-    text-shadow: 0 1px 0 rgba(255, 255, 255, .1), 0 0 30px rgba(255, 255, 255, .125);
-    -webkit-transition: all .2s linear;
-    -moz-transition: all .2s linear;
-    transition: all .2s linear;
-}
-
-body > .navbar .brand:hover {
-    text-decoration: none;
-    text-shadow: 0 1px 0 rgba(255, 255, 255, .1), 0 0 30px rgba(255, 255, 255, .4);
-}
-
-/* Jumbotrons
+/* Docs pages and sections
 -------------------------------------------------- */
 
-/* Base class
-------------------------- */
-.jumbotron {
-    position: relative;
-    padding: 9px 0 8px 0;
-    margin-bottom: 10px;
-    color: #fff;
-    text-align: center;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, .4), 0 0 30px rgba(0, 0, 0, .075);
-    background: #020031; /* Old browsers */
-    background: -moz-linear-gradient(45deg, #020031 0%, #6d3353 100%); /* FF3.6+ */
-    background: -webkit-gradient(linear, left bottom, right top, color-stop(0%, #020031), color-stop(100%, #6d3353)); /* Chrome,Safari4+ */
-    background: -webkit-linear-gradient(45deg, #020031 0%, #6d3353 100%); /* Chrome10+,Safari5.1+ */
-    background: -o-linear-gradient(45deg, #020031 0%, #6d3353 100%); /* Opera 11.10+ */
-    background: -ms-linear-gradient(45deg, #020031 0%, #6d3353 100%); /* IE10+ */
-    background: linear-gradient(45deg, #020031 0%, #6d3353 100%); /* W3C */
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#020031', endColorstr='#6d3353', GradientType=1); /* IE6-9 fallback on horizontal gradient */
-    -webkit-box-shadow: inset 0 3px 7px rgba(0, 0, 0, .2), inset 0 -3px 7px rgba(0, 0, 0, .2);
-    -moz-box-shadow: inset 0 3px 7px rgba(0, 0, 0, .2), inset 0 -3px 7px rgba(0, 0, 0, .2);
-    box-shadow: inset 0 3px 7px rgba(0, 0, 0, .2), inset 0 -3px 7px rgba(0, 0, 0, .2);
+/* Page headers */
+.bs-header {
+  padding: 0px 30px 20px;
+  font-size: 16px;
+  color: #5a5a5a;
+  text-align: center;
+  /*border-bottom: 1px solid #e5e5e5;*/
+}
+.bs-header h1 {
+  color: #563d7c;
+}
+.bs-header p {
+  font-weight: 300;
+  line-height: 1.5;
+}
+.bs-header .container {
+  position: relative;
 }
 
-.jumbotron h1 {
-    font-size: 80px;
-    font-weight: bold;
-    letter-spacing: -1px;
-    line-height: 1;
-}
-
-.jumbotron p {
-    font-size: 24px;
-    font-weight: 300;
-    line-height: 1.25;
-    margin-bottom: 30px;
-}
-
-/* Link styles (used on .masthead-links as well) */
-.jumbotron a {
-    color: #fff;
-    color: rgba(255, 255, 255, .5);
-    -webkit-transition: all .2s ease-in-out;
-    -moz-transition: all .2s ease-in-out;
-    transition: all .2s ease-in-out;
-}
-
-.jumbotron a:hover {
-    color: #fff;
-    text-shadow: 0 0 10px rgba(255, 255, 255, .25);
-}
-
-/* Pattern overlay
-------------------------- */
-.jumbotron .container {
-    position: relative;
-    z-index: 2;
-}
-
-.jumbotron:after {
-    content: '';
-    display: block;
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    background: url(../images/bs-docs-masthead-pattern.png) repeat center center;
-    opacity: .4;
-}
-
-@media only screen and (-webkit-min-device-pixel-ratio: 2), only screen and (   min--moz-device-pixel-ratio: 2), only screen and (     -o-min-device-pixel-ratio: 2/1) {
-
-    .jumbotron:after {
-        background-size: 150px 150px;
-    }
-}
-
-/* Helper Button
-------------------------- */
+/* Ads in page headers */
 .carbonad {
-    position: absolute;
-    top: 0;
-    right: 0;
-    margin-top: 16px !important;
-    padding: 15px;
-    height: auto !important;
-    overflow: hidden;
-    font-size: 13px !important;
-    line-height: 16px !important;
-    background: #222 !important;
-    background: rgba(0, 0, 0, .5) !important;
-    border: 0 !important;
-    border-radius: 4px;
-    box-shadow: inset 0 3px 5px rgba(0, 0, 0, .5), 0 1px 0 rgba(255, 255, 255, .1);
+  width: auto !important;
+  margin: 50px -30px -40px !important;
+  padding: 20px !important;
+  overflow: hidden; /* clearfix */
+  height: auto !important;
+  font-size: 13px !important;
+  line-height: 16px !important;
+  text-align: left;
+  background: none !important;
+  border: 0 !important;
+  border-top: 1px solid #e5e5e5 !important;
 }
-
-.carbonad a,a:hover {
-    text-decoration:none;
+.carbonad-img {
+  margin: 0 !important;
 }
-
-/* Subhead (other pages)
-------------------------- */
-.subhead {
-    text-align: left;
-    border-bottom: 1px solid #ddd;
+.carbonad-text,
+.carbonad-tag {
+  float: none !important;
+  display: block !important;
+  width: auto !important;
+  height: auto !important;
+  margin-left: 145px !important;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
 }
-
-.subhead h1 {
-    font-size: 60px;
+.carbonad-text {
+  padding-top: 0 !important;
 }
-
-.subhead p {
-    margin-bottom: 20px;
+.carbonad-tag {
+  text-align: left !important;
 }
-
-.subhead .navbar {
-    display: none;
+.carbonad #azcarbon > img {
+  display: none; /* hide what I assume are tracking images */
 }
 
 
@@ -157,7 +69,7 @@ body > .navbar .brand:hover {
 .form-signin {
             max-width: 300px;
             padding: 19px 29px 29px;
-            margin: 0 auto 20px;
+            margin: 80px auto 20px;
             background-color: #fff;
             border: 1px solid #e5e5e5;
             -webkit-border-radius: 5px;
@@ -205,6 +117,119 @@ body > .navbar .brand:hover {
 
 .footer-links li:first-child {
     padding-left: 0;
+}
+
+/* Responsive variations
+-------------------------------------------------- */
+
+/* Hide code snippets on mobile devices */
+@media screen and (max-width: 480px) {
+  .highlight {
+    display: none;
+  }
+}
+
+/* Tablets and up */
+@media screen and (min-width: 768px) {
+
+  .bs-header {
+    font-size: 21px;
+    text-align: left;
+  }
+  .bs-header h1 {
+    font-size: 60px;
+    line-height: 1;
+  }
+
+  .bs-example {
+    margin-left: 0;
+    margin-right: 0;
+    background-color: #fff;
+    border-width: 1px;
+    border-color: #ddd;
+    border-radius: 4px 4px 0 0;
+    box-shadow: none;
+  }
+
+  .carbonad {
+    margin: 0 !important;
+    border: 1px solid #e5e5e5 !important;
+    border-radius: 4px;
+  }
+
+  /* Show the docs nav */
+  .bs-sidebar {
+    display: block;
+  }
+  /* Show the hidden subnavs when space allows it */
+  .bs-sidebar .nav > .active > ul {
+    display: block;
+  }
+
+  /* Tweak display of docs jumbotrons */
+  .bs-masthead {
+    padding-top:    140px;
+    padding-bottom: 140px;
+  }
+  .bs-masthead h1 {
+    font-size: 100px;
+  }
+  .bs-masthead .lead {
+    margin-left: 15%;
+    margin-right: 15%;
+    font-size: 30px;
+  }
+
+  .bs-navbar-top-example .navbar-fixed-top,
+  .bs-navbar-bottom-example .navbar-fixed-bottom {
+    position: absolute;
+  }
+
+}
+
+/* Tablets/desktops and up */
+@media screen and (min-width: 992px) {
+
+  /* Widen the fixed sidebar */
+  .bs-sidebar.affix,
+  .bs-sidebar.affix-bottom {
+    width: 213px;
+  }
+  .bs-sidebar.affix {
+    position: fixed; /* Undo the static from mobile-first approach */
+    top: 80px;
+  }
+  .bs-sidebar.affix-bottom {
+    position: absolute; /* Undo the static from mobile-first approach */
+  }
+  .bs-sidebar.affix-bottom .bs-sidenav,
+  .bs-sidebar.affix .bs-sidenav {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+  .bs-header h1,
+  .bs-header p {
+    margin-right: 380px;
+  }
+  .carbonad {
+    position: absolute;
+    top: 20px;
+    right: 0;
+    padding: 15px !important;
+    /*width: 330px !important;*/
+    /*min-height: 132px;*/
+  }
+}
+
+/* Large desktops and up */
+@media screen and (min-width: 1200px) {
+
+  /* Widen the fixed sidebar again */
+  .bs-sidebar.affix-bottom,
+  .bs-sidebar.affix {
+    width: 270px;
+  }
+
 }
 
 /* Tip

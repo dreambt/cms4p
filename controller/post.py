@@ -112,12 +112,12 @@ class PostController(BaseHandler):
                 return
         elif act == 'del':
             if post_id:
-                oldobj = Posts.get(id)
+                oldobj = Posts.get(post_id)
                 Archives.remove_post_from_archive(post_id=post_id)
-                Posts.delete(id)
-                cache_key_list = ['/', 'post:%s' % id, 'cat:%s' % quoted_string(oldobj.category)]
+                Posts.delete(post_id)
+                cache_key_list = ['/', 'post:%s' % post_id, 'cat:%s' % quoted_string(oldobj.category)]
                 clear_cache_by_pathlist(cache_key_list)
-                clear_cache_by_pathlist(['post:%s' % id])
+                clear_cache_by_pathlist(['post:%s' % post_id])
 
                 Posts.delete(post_id)
                 clear_cache_by_pathlist(['/'])
@@ -129,7 +129,7 @@ class PostController(BaseHandler):
         page = self.get_argument("page", 1)
         posts = Posts.get_paged(page, getAttr('ADMIN_POST_NUM'))
         categories = Categories.get_all_kv()
-        total = math.ceil(Posts.count_all() / float(getAttr('ADMIN_POST_NUM')))
+        total = math.ceil(Posts.count_all() / int(getAttr('ADMIN_POST_NUM')))
         if page == 1:
             self.echo('admin_post_list.html', {
                 'title': "文章链接",

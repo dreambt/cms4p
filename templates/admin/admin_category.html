@@ -1,8 +1,10 @@
 <div class="row">
-    <div class="span12">
+    <div class="col-lg-12">
     <form id="myForm" action="" class="well form-inline" method="post">
         <?py if obj: ?>
-        <select name="father_id" class="span2">
+        <div class="row">
+        <div class="col-lg-2">
+        <select name="father_id" class="form-control">
             <?py for item in category_kv: ?>
             <?py    if item.category_id == obj.father_category_id: ?>
             <option value="${item.category_id}" selected="selected">${item.category_name}</option>
@@ -11,8 +13,9 @@
             <?py    #endif ?>
             <?py #endfor ?>
         </select>
-        <input type="text" name="name" value="${obj.category_name}" class="span2" required maxlength="100" placeholder="分类名称"/>
-        <select id="show_type" name="show_type" class="span2">
+        </div>
+        <div class="col-lg-2"><input type="text" name="name" value="${obj.category_name}" class="form-control" required maxlength="100" placeholder="分类名称"/></div>
+        <div class="col-lg-2"><select id="show_type" name="show_type" class="form-control">
             <?py for item in show_types: ?>
             <?py    if item.type_key == obj.show_type: ?>
             <option value="${item.type_key}" selected="selected">${item.type_name}</option>
@@ -20,34 +23,39 @@
             <option value="${item.type_key}">${item.type_name}</option>
             <?py    #endif ?>
             <?py #endfor ?>
-        </select>
-        <input type="number" name="sort" value="${obj.display_order}" class="span1" min="0" max="255" placeholder="排序"/>
+        </select></div>
+        <div class="col-lg-1"><input type="number" name="sort" value="${obj.display_order}" class="form-control" min="0" max="255" placeholder="排序"/></div>
         <?py ck = ['','checked'] ?>
-        <input type="checkbox" name="allow_comment" value="true" #{ck[obj.allow_comment]}> 评论
-        <input type="checkbox" name="allow_publish" value="true" #{ck[obj.allow_publish]}/> 发表
-        <input type="text" name="description" value="${obj.description}" class="span2" placeholder="分类描述"/>
+            <div class="col-lg-2"><input type="text" name="description" value="${obj.description}" class="form-control" placeholder="分类描述"/></div>
+                <div class="col-lg-2"><label class="checkbox-inline"><input type="checkbox" name="allow_comment" value="true" #{ck[obj.allow_comment]}> 评论</label></div>
+                <div class="col-lg-2"><label class="checkbox-inline"><input type="checkbox" name="allow_publish" value="true" #{ck[obj.allow_publish]}/> 发表</label></div>
         <input type="hidden" value="edit" name="act"/>
         <input type="hidden" value="#{obj.category_id}" name="id"/>
+        </div>
         <?py else: ?>
-        <select name="father_id" class="span2">
+        <div class="row">
+        <div class="col-lg-2">
+        <select name="father_id" class="form-control">
             <?py for item in category_kv: ?>
             <option value="${item.category_id}">${item.category_name}</option>
             <?py #endfor ?>
         </select>
-        <input type="text" name="name" value="" class="span2" required maxlength="100" placeholder="分类名称"/>
-        <select id="show_type" name="show_type" class="span2">
+        </div>
+        <div class="col-lg-2"><input type="text" name="name" value="" class="form-control" required maxlength="100" placeholder="分类名称"/></div>
+        <div class="col-lg-2"><select id="show_type" name="show_type" class="form-control">
           <option value="default">默认显示</option>
           <option value="list">简单列表</option>
           <option value="digest">摘要列表</option>
           <option value="pic">图片瀑布</option>
           <option value="video">视频瀑布</option>
           <option value="url">URL 网址</option>
-        </select>
-        <input type="number" name="sort" value="" class="span1" min="0" max="255" placeholder="排序"/>
-        <input type="checkbox" name="allow_comment" value="true" checked="checked"> 评论
-        <input type="checkbox" name="allow_publish" value="true" checked="checked"/> 发表
-        <input type="text" name="description" value="" class="span2" placeholder="分类描述"/>
+          </select></div>
+        <div class="col-lg-1"><input type="number" name="sort" value="" class="form-control" min="0" max="255" placeholder="排序"/></div>
+            <div class="col-lg-3"><input type="text" name="description" value="" class="form-control" placeholder="分类描述"/></div>
+            <div class="col-lg-2"><label class="checkbox-inline"><input type="checkbox" name="allow_comment" value="true" checked="checked"> 评论</label></div>
+            <div class="col-lg-2"><label class="checkbox-inline"><input type="checkbox" name="allow_publish" value="true" checked="checked"/> 发表</label></div>
         <input type="hidden" value="add" name="act"/>
+        </div>
         <?py #endif ?>
         <button type="submit" class="btn btn-primary">保 存</button>
         <button type="reset" class="btn">重 置</button>
@@ -60,12 +68,12 @@
             <th style="width:48px">#</th>
             <th>分类名称</th>
             <th style="width:80px">显示类型</th>
-            <th style="width:48px">文章数</th>
-            <th style="width:30px">排序</th>
+            <th style="width:60px">文章数</th>
+            <th style="width:40px">排序</th>
             <th style="width:30px">评论</th>
             <th style="width:30px">发表</th>
-            <th style="width:140px">最后修改时间</th>
-            <th style="width:60px">可用操作</th>
+            <th style="width:150px">最后修改时间</th>
+            <th style="width:75px">可用操作</th>
         </tr>
         </thead>
         <tbody id="content">
@@ -93,7 +101,7 @@
         <?py #endfor ?>
         </tbody>
     </table>
-    <div id="page-selection"></div>
+    <ul id="page-selection"></ul>
     </div>
 </div>
 <hr id="helper"/>

@@ -1,15 +1,18 @@
 <div class="row">
     <div class="span12">
     <form id="myForm" action="" class="well form-inline">
-        <select name="category" class="span2" id="category">
+        <div class="row">
+        <div class="col-lg-2">
+        <select name="category" class="form-control" id="category">
             <option value="">所有分类</option>
         <?py for i in categories: ?>
             <option value="#{i.category_id}">#{i.category_name}</option>
         <?py #endfor ?>
-        </select>
-        <input type="text" name="title" class="span3" maxlength="100" placeholder="文章名称"/>
+        </select></div>
+        <div class="col-lg-2"><input type="text" name="title" class="form-control" maxlength="100" placeholder="文章名称"/></div>
         <button type="submit" class="btn btn-primary">查 询</button>
         <button type="button" class="btn btn-success pull-right" onclick="window.location.href='/admin/posts?act=add'">新 建</button>
+        </div>
     </form>
     <table class="table table-striped table-hover table-bordered table-condensed">
         <thead>
@@ -19,9 +22,9 @@
             <th style="width:100px">分类</th>
             <th style="width:150px">创建时间</th>
             <th style="width:150px">最后修改时间</th>
-            <th style="width:30px">评论</th>
-            <th style="width:30px">密码</th>
-            <th style="width:60px">可用操作</th>
+            <th style="width:50px">评论</th>
+            <th style="width:60px">密码</th>
+            <th style="width:75px">可用操作</th>
         </tr>
         </thead>
         <tbody id="content">
@@ -46,7 +49,7 @@
         <?py #endfor ?>
         </tbody>
     </table>
-    <div id="page-selection"></div>
+    <ul id="page-selection"></ul>
     </div>
 </div>
 <hr id="helper"/>

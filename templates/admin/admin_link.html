@@ -1,31 +1,33 @@
 <div class="row">
     <div class="span12">
     <form id="myForm" action="" class="well form-inline" method="post">
+        <div class="row">
         <?py if obj: ?>
-        <input type="text" name="name" value="#{obj.link_name}" class="span3" required maxlength="100" placeholder="网站名称"/>
-        <input type="number" name="sort" value="#{obj.display_order}" class="span1" min="0" max="255" placeholder="排序"/>
-        <input type="text" name="url" value="#{obj.url}" class="span5" required maxlength="200" placeholder="URL"/>
+        <div class="col-lg-2"><input type="text" name="name" value="#{obj.link_name}" class="form-control" required maxlength="100" placeholder="网站名称"/></div>
+        <div class="col-lg-1"><input type="number" name="sort" value="#{obj.display_order}" class="form-control" min="0" max="255" placeholder="排序"/></div>
+        <div class="col-lg-4"><input type="text" name="url" value="#{obj.url}" class="form-control" required maxlength="200" placeholder="URL"/></div>
         <input type='hidden' value='edit' name='act'/>
         <input type='hidden' value='#{obj.link_id}' name='id'/>
         <?py else: ?>
-        <input type="text" name="name" value="" class="span3" required maxlength="100" placeholder="网站名称"/>
-        <input type="number" name="sort" value="" class="span1" min="0" max="255" placeholder="排序"/>
-        <input type="text" name="url" value="" class="span5" required maxlength="200" placeholder="URL"/>
+        <div class="col-lg-2"><input type="text" name="name" value="" class="form-control" required maxlength="100" placeholder="网站名称"/></div>
+        <div class="col-lg-1"><input type="number" name="sort" value="" class="form-control" min="0" max="255" placeholder="排序"/></div>
+        <div class="col-lg-4"><input type="text" name="url" value="" class="form-control" required maxlength="200" placeholder="URL"/></div>
         <input type='hidden' value='add' name='act'/>
         <?py #endif ?>
         <button type="submit" class="btn btn-primary">保 存</button>
         <button type="reset" class="btn">重 置</button>
         <button type="button" class="btn btn-success pull-right" onclick="window.location.href='/admin/links'">新 建</button>
+        </div>
     </form>
     <table class="table table-striped table-hover table-bordered table-condensed">
         <thead>
         <tr>
             <th style="width:48px">#</th>
             <th style="width:180px">网站名称</th>
-            <th style="width:30px">排序</th>
+            <th style="width:60px">排序</th>
             <th>URL</th>
-            <th style="width:140px">最后修改时间</th>
-            <th style="width:60px">可用操作</th>
+            <th style="width:150px">最后修改时间</th>
+            <th style="width:75px">可用操作</th>
         </tr>
         </thead>
         <tbody id="content">
@@ -41,7 +43,7 @@
         <?py #endfor ?>
         </tbody>
     </table>
-    <div id="page-selection"></div>
+    <ul id="page-selection"></ul>
     </div>
 </div>
 <hr id="helper"/>

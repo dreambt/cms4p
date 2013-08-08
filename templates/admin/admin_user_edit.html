@@ -1,36 +1,40 @@
 <form id="myForm" class="form-horizontal">
-    <div class="control-group">
-        <label class="control-label">用户名</label>
-        <div class="controls">
+    <div class="row">
+    <div class="form-group">
+        <label class="col-lg-2 control-label">用户名</label>
+        <div class="col-lg-4">
             <input type="hidden" name="method" value="#{method}"/>
             <?py if obj and obj.user_id: ?>
             <input type="hidden" name="user_id" value="#{obj.user_id}"/>
-            <input type="text" class="span6" value="${obj.user_name}" readonly/>
+            <input type="text" class="form-control" value="${obj.user_name}" readonly/>
             <?py else: ?>
-            <input type="text" name="user_name" class="span6" required maxlength="20" value="${obj.user_name}" placeholder="用户名"/>
+            <input type="text" name="user_name" class="form-control" required maxlength="20" value="${obj.user_name}" placeholder="用户名"/>
             <?py #endif ?>
         </div>
     </div>
-    <div class="control-group">
-        <label class="control-label">邮箱</label>
-        <div class="controls">
+    <div class="form-group">
+        <label class="col-lg-2 control-label">邮箱</label>
+        <div class="col-lg-4">
             <?py if obj and obj.user_id: ?>
-            <input type="email" class="span6" value="${obj.email}" readonly/>
+            <input type="email" class="form-control" value="${obj.email}" readonly/>
             <?py else: ?>
-            <input type="email" name="email" class="span6" required maxlength="40" value="${obj.email}" placeholder="邮箱地址"/>
+            <input type="email" name="email" class="form-control" required maxlength="40" value="${obj.email}" placeholder="邮箱地址"/>
             <?py #endif ?>
         </div>
     </div>
-    <div class="control-group">
-        <label class="control-label">有效</label>
-        <div class="controls">
+    <div class="form-group">
+        <label class="col-lg-2 control-label">有效</label>
+        <div class="col-lg-4">
             <div class="switch switch-small"><?py ck = ['','checked'] ?><input id="status" name="status" type="checkbox" value="true" #{ck[obj.status]}/></div>
         </div>
     </div>
     <div class="form-actions">
+        <div class="col-lg-offset-2 col-lg-4">
         <button type="submit" id="submit" class="btn btn-primary">保 存</button>
         <button type="reset" id="helper" class="btn">重 置</button>
         <button type="button" class="btn btn-inverse" onclick="history.go(-1);">返 回</button>
+        </div>
+    </div>
     </div>
 </form>
 <hr/>
