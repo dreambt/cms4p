@@ -18,12 +18,12 @@ from core.common import BaseHandler, unquoted_unicode, safe_encode, pagecache, c
 
 
 class HomePage(BaseHandler):
-    @pagecache()
+    # @pagecache()
     def get(self):
         try:
-            news1 = Categories.get(1)
-            news2 = Categories.get(2)
-            prods = Categories.get(3)
+            news1 = Categories.get_posts_by_category_id(1)
+            news2 = Categories.get_posts_by_category_id(2)
+            prods = Categories.get_posts_by_category_id(3)
         except:
             self.redirect('/install')
             return
@@ -43,14 +43,14 @@ class HomePage(BaseHandler):
             'prods': prods,
             'cats': Categories.get_all_category_name(),
             'tags': Tags.get_hot_tag(),
-            'archives': Archives.get_by_name(),
+            'archives': Archives.get_top_n(),
         }, layout='_layout.html')
         self.write(output)
         return output
 
 
 class IndexPage(BaseHandler):
-    @pagecache('post_list_index', PAGE_CACHE_TIME, lambda self, direction, page, base_id: page)
+    # @pagecache('post_list_index', PAGE_CACHE_TIME, lambda self, direction, page, base_id: page)
     def get(self, direction='next', page='2', base_id='1'):
         if page == '1':
             self.redirect(BASE_URL)

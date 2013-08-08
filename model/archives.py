@@ -19,6 +19,10 @@ class Archives():
         sdb._ensure_connected()
         return sdb.get('SELECT * FROM `cms_archive` WHERE `archive_name` = \'%s\'' % archive_name)
 
+    def get_top_n(self, n=8):
+        sdb._ensure_connected()
+        return sdb.query('SELECT * FROM `cms_archive` limit %s' % n)
+
     def get_post_num_by_archive_id(self, archive_id=''):
         sql = 'SELECT count(*) FROM `cms_posts` p ' \
               'inner join `cms_archive_post` ap on p.`post_id` = ap.post_id and ap.archive_id = \'%s\''
