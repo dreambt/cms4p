@@ -59,6 +59,7 @@ class Login(BaseHandler):
             password = md5(password.encode('utf-8')).hexdigest()
             if password == has_user.password:
                 self.set_secure_cookie('username', has_user.user_name, expires_days=365)
+                self.set_secure_cookie('user_id', str(has_user.user_id), expires_days=365)
                 self.set_secure_cookie('email', has_user.email, expires_days=365)
                 self.set_secure_cookie('password', password, expires_days=365)
                 self.write(json.dumps("OK"))

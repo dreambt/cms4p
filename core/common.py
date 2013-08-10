@@ -335,6 +335,7 @@ def authorized(url='/admin/login'):
         def authorized_handler(self, *args, **kw):
             request = self.request
             #username_cookie = self.get_secure_cookie('username')
+            #userid_cookie = self.get_secure_cookie('user_id')
             email_cookie = self.get_secure_cookie('email')
             password_cookie = self.get_secure_cookie('password')
             from model.users import Users

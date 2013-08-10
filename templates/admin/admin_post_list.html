@@ -1,5 +1,5 @@
 <div class="row">
-    <div class="span12">
+    <div class="col-lg-12">
     <form id="myForm" action="" class="well form-inline">
         <div class="row">
         <div class="col-lg-2">
@@ -22,6 +22,7 @@
             <th style="width:100px">分类</th>
             <th style="width:150px">创建时间</th>
             <th style="width:150px">最后修改时间</th>
+            <th style="width:50px">置顶</th>
             <th style="width:50px">评论</th>
             <th style="width:60px">密码</th>
             <th style="width:75px">可用操作</th>
@@ -36,15 +37,19 @@
             <td><a href="/c/#{i.category_id}" title="Link to #{i.category_name}" target="_blank">#{i.category_name}</a></td>
             <td>#{i.created_date}</td>
             <td>#{i.last_modified_date}</td>
-            <td>
-        <?py    if i.closecomment == 0: ?><span class="label label-success">允许</span>
-        <?py    else: ?><span class="label">禁止</span>
+	        <td>
+        <?py    if i.top == '1': ?><span class="label label-info">置顶</span>
+        <?py    else: ?><span class="label label-default">普通</span>
         <?py    #endif ?></td>
             <td>
-        <?py    if i.password == 0: ?><span class="label label-success">开启</span>
-        <?py    else: ?><span class="label">关闭</span>
+        <?py    if i.allow_comment == '1': ?><span class="label label-success">允许</span>
+        <?py    else: ?><span class="label label-danger">禁止</span>
         <?py    #endif ?></td>
-            <td><a href="/admin/edit_post/#{i.post_id}">编辑</a> <a href="/admin/del_post/#{i.post_id}" class="ajax" data-remove-closest="tr">删除</a></td>
+            <td>
+        <?py    if len(i.password) == 0: ?><span class="label label-default">关闭</span>
+        <?py    else: ?><span class="label label-success">开启</span>
+        <?py    #endif ?></td>
+            <td><a href="/admin/posts?act=edit&post_id=#{i.post_id}">编辑</a> <a href="/admin/posts?act=del&post_id=#{i.post_id}" class="ajax" data-remove-closest="tr">删除</a></td>
         </tr>
         <?py #endfor ?>
         </tbody>
@@ -106,14 +111,18 @@
     <td><%=$format(list[i].created_date)%></td>
     <td><%=$format(list[i].last_modified_date)%></td>
     <td>
-        <%if(list[i].closecomment == 0){%><span class="label label-success">允许</span>
-        <%}else{%><span class="label">禁止</span>
+        <%if(list[i].top == 1){%><span class="label label-info">置顶</span>
+        <%}else{%><span class="label label-default">普通</span>
+        <%}%></td>
+    <td>
+        <%if(list[i].allow_comment == 1){%><span class="label label-success">允许</span>
+        <%}else{%><span class="label label-danger">禁止</span>
         <%}%></td>
     <td>
         <%if(list[i].password.length > 0){%><span class="label label-success">开启</span>
-        <%}else{%><span class="label">关闭</span>
+        <%}else{%><span class="label label-default">关闭</span>
         <%}%></td>
-    <td><a href="/admin/posts?id=<%=list[i].post_id%>&act=edit">编辑</a> <a href="/admin/posts?id=<%=list[i].post_id%>&act=del" class="ajax" data-remove-closest="tr">删除</a></td>
+    <td><a href="/admin/posts?post_id=<%=list[i].post_id%>&act=edit">编辑</a> <a href="/admin/posts?post_id=<%=list[i].post_id%>&act=del" class="ajax" data-remove-closest="tr">删除</a></td>
 </tr>
 <%}%>
 </script>

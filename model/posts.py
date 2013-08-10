@@ -8,7 +8,8 @@ _author__ = 'baitao.ji'
 
 def post_list_format(posts):
     for obj in posts:
-        obj.absolute_url = '%s/topic/%d/%s' % (BASE_URL, obj.id, slugfy(obj.title))
+        obj.absolute_url = '%s/topic/%d/%s' % (BASE_URL, obj.post_id, slugfy(obj.title))
+
         obj.taglist = ', '.join(
             ["""<a href="%s/tag/%s/" rel="tag">%s</a>""" % (BASE_URL, tag, tag) for tag in obj.tags.split(',')])
 
@@ -17,7 +18,8 @@ def post_list_format(posts):
         else:
             obj.shorten_content = HTML_REG.sub('', obj.content[:int(getAttr('SHORTEN_CONTENT_WORDS'))])
 
-        obj.add_time_fn = time_from_now(int(obj.add_time))
+
+        obj.add_time_fn = time_from_now(obj.created_date)
     return posts
 
 
@@ -46,7 +48,7 @@ def post_detail_formate(obj):
             'SELECT `id`,`title` FROM `cms_posts` WHERE `id` < %s ORDER BY `id` DESC LIMIT 1' % str(obj.id))
         if obj.next_obj:
             obj.next_obj.slug = slugfy(obj.next_obj.title)
-            #get relative obj base tags
+        #get relative obj base tags
         obj.relative = []
         if obj.tags:
             idlist = []
@@ -65,14 +67,14 @@ def post_detail_formate(obj):
                                 break
                 if getit:
                     break
-                    #
+                #
             if idlist:
                 obj.relative = sdb.query('SELECT `id`,`title` FROM `cms_posts` WHERE `id` in(%s) LIMIT %s' % (
-                    ','.join(idlist), str(len(idlist))))
+                ','.join(idlist), str(len(idlist))))
                 if obj.relative:
                     for robj in obj.relative:
                         robj.slug = slugfy(robj.title)
-                        #get comment
+                    #get comment
         obj.coms = []
         if obj.comment_num > 0:
             if obj.comment_num >= EACH_PAGE_COMMENT_NUM:
@@ -96,9 +98,9 @@ class Posts():
         return sdb.query(sql)[0]['num']
 
     def create(self, params):
-        query = "INSERT INTO `cms_posts` (`category_id`, `user_id`，`title`, `tags`, `digest`, `content`, " \
-                "`image_url`, `password`, `salt`, `top`, `allow_comment`) " \
-                "values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+        query = "INSERT INTO `cms_posts` (`category_id`, `user_id`, `title`, `tags`, `digest`, `content`, " \
+                "`image_url`, `password`, `salt`, `top`, `allow_comment`,`created_date`) " \
+                "values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,current_date)"
         mdb._ensure_connected()
         return mdb.execute(query, params['category_id'], params['user_id'], params['title'], params['tags'],
                            params['digest'], params['content'], params['image_url'], params['password'],
@@ -106,20 +108,20 @@ class Posts():
 
     def update(self, params):
         sql = "UPDATE `cms_posts` SET "
-        sql += "`category_id` = %s," % params['category_id']
-        sql += "`title` = %s," % params['title']
-        sql += "`tags` = %s," % params['tags']
-        sql += "`digest` = %s," % params['digest']
-        sql += "`content` = %s," % params['content']
-        sql += "`image_url` = %s," % params['image_url']
-        sql += "`password` = %s," % params['password']
-        sql += "`salt` = %s," % params['salt']
-        sql += "`image_url` = %s," % params['image_url']
+        sql += "`category_id` = \'%s\'," % params['category_id']
+        sql += "`title` = \'%s\'," % params['title']
+        sql += "`tags` = \'%s\'," % params['tags']
+        sql += "`digest` = \'%s\'," % params['digest']
+        sql += "`content` = \'%s\'," % params['content']
+        sql += "`image_url` = \'%s\'," % params['image_url']
+        sql += "`password` = \'%s\'," % params['password']
+        sql += "`salt` = \'%s\'," % params['salt']
+        sql += "`image_url` = \'%s\'," % params['image_url']
         sql += "`top` = %s," % params['top']
-        sql += "`allow_comment` = %s," % params['allow_comment']
-        sql += "`post_id` = %s where `post_id` = %s"
+        sql += "`allow_comment` = %s" % params['allow_comment']
+        sql += " where post_id = %s" % params['post_id']
         mdb._ensure_connected()
-        mdb.execute(sql, params['post_id'], params['post_id'])
+        mdb.execute(sql)
         return params['post_id']
 
     def update_post_edit_author(self, post_id, user_id):
@@ -140,7 +142,9 @@ class Posts():
 
     def get(self, post_id):
         sdb._ensure_connected()
-        return sdb.get('SELECT * FROM `cms_posts` WHERE `post_id` = %s' % str(post_id))
+        return sdb.get(
+            'SELECT p.*,c.category_name FROM `cms_posts` as p inner join `cms_category` as c on p.category_id=c.category_id and `post_id` = %s' % str(
+                post_id))
 
     def get_all(self):
         sdb._ensure_connected()
@@ -151,7 +155,7 @@ class Posts():
         if limit is None:
             limit = getAttr('EACH_PAGE_POST_NUM')
         limit = int(limit)
-        sql = "SELECT * FROM `cms_posts` where 1=1"
+        sql = "SELECT p.*,c.category_name FROM `cms_posts` as p inner join `cms_category` as c on p.category_id=c.category_id where 1=1"
         if category_id:
             sql += " and category_id = \'%s\'" % category_id
         if title:

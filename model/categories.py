@@ -16,12 +16,11 @@ class Categories():
     def create(self, params):
         mdb._ensure_connected()
         query = "INSERT INTO `cms_category` (`father_category_id`, `category_name`, `display_order`, `show_type`, " \
-                "`description`, `allow_comment`, `allow_publish`) values(%s,%s,%s,%s,%s,%s,%s,%s)"
+                "`description`, `allow_comment`, `allow_publish`,`created_date`) values(%s,%s,%s,%s,%s,%s,%s,%s,current_date)"
         mdb.execute(query, params['father_category_id'], params['category_name'], params['display_order'],
                     params['show_type'], params['description'], params['allow_comment'], params['allow_publish'])
 
     def update(self, params):
-        mdb._ensure_connected()
         sql = "UPDATE `cms_category` SET "
         if params['father_category_id']:
             sql += "`father_category_id` = %s," % params['father_category_id']
@@ -32,6 +31,7 @@ class Categories():
         sql += "`allow_comment` = %s," % params['allow_comment']
         sql += "`allow_publish` = %s," % params['allow_publish']
         sql += "category_id = %s WHERE category_id = %s"
+        mdb._ensure_connected()
         mdb.execute(sql, params['category_id'], params['category_id'])
 
     def delete(self, category_id):

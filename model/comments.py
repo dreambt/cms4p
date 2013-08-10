@@ -34,8 +34,8 @@ class Comments():
         return sdb.query('SELECT COUNT(*) AS num FROM `cms_comments`')[0]['num']
 
     def create(self, params):
-        query = "INSERT INTO `cms_comments` (`post_id`, `user_name`, `email`, `website`, `content`, `status`) " \
-                "values(%s,%s,%s,%s,%s,%s)"
+        query = "INSERT INTO `cms_comments` (`post_id`, `user_name`, `email`, `website`, `content`, `status`,`created_date`) " \
+                "values(%s,%s,%s,%s,%s,%s,current_date)"
         mdb._ensure_connected()
         return mdb.execute(query, params['post_id'], params['user_name'], params['email'], params['website'],
                            params['content'], params['status'])

@@ -27,8 +27,8 @@ class Users():
                 password = random_string(16)
                 salt = random_string(8)
                 password += salt
-                sql = "insert into `cms_user` (`user_name`,`email`, `password`, `salt`, `status`)" \
-                      " values(%s,%s,%s,%s,%s)"
+                sql = "insert into `cms_user` (`user_name`,`email`, `password`, `salt`, `status`,`created_date`)" \
+                      " values(%s,%s,%s,%s,%s,current_date)"
                 mdb._ensure_connected()
                 mdb.execute(sql, params['user_name'], params['email'],
                             md5(password.encode('utf-8')).hexdigest(), salt, params['status'])

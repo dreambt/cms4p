@@ -33,7 +33,7 @@ class CategoryController(BaseHandler):
         # 分类列表
         page = self.get_argument("page", 1)
         category = Categories.get_paged(page, getAttr('ADMIN_CATEGORY_NUM'))
-        total = math.ceil(Categories.count_all() / float(getAttr('ADMIN_CATEGORY_NUM')))
+        total = int(math.ceil(Categories.count_all() / float(getAttr('ADMIN_CATEGORY_NUM'))))
         if page == 1:
             self.echo('admin_category.html', {
                 'title': "分类列表",
@@ -62,8 +62,8 @@ class CategoryController(BaseHandler):
             category_name = self.get_argument("name", '').encode('utf-8')
             show_type = self.get_argument("show_type", '').encode('utf-8')
             display_order = self.get_argument("sort", '0').encode('utf-8')
-            allow_comment = tf[self.get_argument("allow_comment", "true").encode('utf-8')]
-            allow_publish = tf[self.get_argument("allow_publish", "true").encode('utf-8')]
+            allow_comment = tf[self.get_argument("allow_comment", "false").encode('utf-8')]
+            allow_publish = tf[self.get_argument("allow_publish", "false").encode('utf-8')]
             description = self.get_argument("description", '').encode('utf-8')
         except:
             self.write(json.dumps("用户名、密码、验证码均为必填项！"))

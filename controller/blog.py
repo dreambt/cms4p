@@ -21,9 +21,9 @@ class HomePage(BaseHandler):
     # @pagecache()
     def get(self):
         try:
-            news1 = Categories.get_posts_by_category_id(1)
-            news2 = Categories.get_posts_by_category_id(2)
-            prods = Categories.get_posts_by_category_id(3)
+            news1 = Categories.get_posts_by_category_id(category_id=7, limit=8)
+            news2 = Categories.get_posts_by_category_id(category_id=9, limit=8)
+            prods = Categories.get_posts_by_category_id(category_id=3, limit=8)
         except:
             self.redirect('/install')
             return

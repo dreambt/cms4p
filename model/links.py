@@ -12,15 +12,15 @@ class Links():
         return sdb.query('SELECT COUNT(*) AS num FROM `cms_links`')[0]['num']
 
     def create(self, params):
-        query = "INSERT INTO `cms_links` (`link_name`, `url`, `display_order`) values(%s,%s,%s)"
+        query = "INSERT INTO `cms_links` (`link_name`, `url`, `display_order`,`created_date`) values(%s,%s,%s,current_date)"
         mdb._ensure_connected()
         return mdb.execute(query, params['link_name'], params['url'], params['display_order'])
 
     def update(self, params):
-        query = "UPDATE `cms_links` SET `link_name` = \'%s\', `url` = \'%s\', `display_order` = %s " \
-                "WHERE `link_id` = %s LIMIT 1"
+        query = "UPDATE `cms_links` SET `link_name` = \'%s\', `url` = \'%s\'," % (params['link_name'], params['url'])
+        query += "`display_order` = %s WHERE `link_id` = %s" % (params['display_order'], params['link_id'])
         mdb._ensure_connected()
-        mdb.execute(query, params['link_name'], params['url'], params['display_order'], params['link_id'])
+        mdb.execute(query)
 
     def delete(self, link_id):
         mdb._ensure_connected()
