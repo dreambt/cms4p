@@ -1,73 +1,68 @@
 <form id="myForm" action="" class="form-horizontal" method="post">
-    <fieldset>
-        <legend>参数设置</legend>
         <div class="row">
-            <div class="span6">
-                <div class="control-group">
-                    <label class="control-label" for="input01">站点名称</label>
-                    <div class="controls">
+                <div class="form-group">
+                    <label class="col-lg-2 control-label" for="input01">站点名称</label>
+                    <div class="col-lg-4">
                         <input type="text" name="SITE_TITLE" value="#{getAttr('SITE_TITLE')}"
-                               class="input-xlarge" id="input01" required tabindex="1"/>
+                               class="form-control" id="input01" required tabindex="1"/>
                     </div>
                 </div>
-                <div class="control-group">
-                    <label class="control-label" for="input02">站点名称2</label>
-                    <div class="controls">
+                <div class="form-group">
+                    <label class="col-lg-2 control-label" for="input02">站点名称2</label>
+                    <div class="col-lg-4">
                         <input type="text" name="SITE_TITLE2" value="#{getAttr('SITE_TITLE2')}"
-                               class="input-xlarge" id="input02" required tabindex="2"/>
+                               class="form-control" id="input02" required tabindex="2"/>
                     </div>
                 </div>
-                <div class="control-group">
-                    <label class="control-label" for="input03">站点子标题</label>
-                    <div class="controls">
+                <div class="form-group">
+                    <label class="col-lg-2 control-label" for="input03">站点子标题</label>
+                    <div class="col-lg-4">
                         <input type="text" name="SITE_SUB_TITLE" value="#{getAttr('SITE_SUB_TITLE')}"
-                               class="input-xlarge" id="input03" required tabindex="3"/>
+                               class="form-control" id="input03" required tabindex="3"/>
                     </div>
                 </div>
-                <div class="control-group">
-                    <label class="control-label" for="input04">站点关键词</label>
-                    <div class="controls">
-                        <input type="text" name="KEYWORDS" value="#{getAttr('KEYWORDS')}" class="input-xlarge"
+                <div class="form-group">
+                    <label class="col-lg-2 control-label" for="input04">站点关键词</label>
+                    <div class="col-lg-4">
+                        <input type="text" name="KEYWORDS" value="#{getAttr('KEYWORDS')}" class="form-control"
                                id="input04" required tabindex="4"/>
                     </div>
                 </div>
-                <div class="control-group">
-                    <label class="control-label" for="input05">站点描述</label>
-                    <div class="controls">
+                <div class="form-group">
+                    <label class="col-lg-2 control-label" for="input05">站点描述</label>
+                    <div class="col-lg-4">
                         <input type="text" name="SITE_DECR" value="#{getAttr('SITE_DECR')}"
-                               class="input-xlarge" id="input05" required tabindex="5"/>
+                               class="form-control" id="input05" required tabindex="5"/>
                     </div>
                 </div>
-            </div>
-            <div class="span6">
-                <div class="control-group">
-                    <label class="control-label" for="input06">管理员账号</label>
-                    <div class="controls">
+                <div class="form-group">
+                    <label class="col-lg-2 control-label" for="input06">管理员账号</label>
+                    <div class="col-lg-4">
                         <input type="text" name="ADMIN_NAME" value="#{getAttr('ADMIN_NAME')}"
-                               class="input-xlarge" id="input06" required tabindex="6"/>
+                               class="form-control" id="input06" required tabindex="6"/>
                     </div>
                 </div>
-                <div class="control-group">
-                    <label class="control-label" for="input08">通知邮箱</label>
-                    <div class="controls">
+                <div class="form-group">
+                    <label class="col-lg-2 control-label" for="input08">通知邮箱</label>
+                    <div class="col-lg-4">
                         <input type="text" name="NOTICE_MAIL" value="#{getAttr('NOTICE_MAIL')}"
-                               class="input-xlarge" id="input08" required tabindex="7"/>
+                               class="form-control" id="input08" required tabindex="7"/>
                     </div>
                 </div>
-                <div class="control-group">
-                    <label class="control-label" for="input07">数据迁移密码</label>
-                    <div class="controls">
+                <div class="form-group">
+                    <label class="col-lg-2 control-label" for="input07">数据迁移密码</label>
+                    <div class="col-lg-4">
                         <input type="password" name="MOVE_SECRET" value="#{getAttr('MOVE_SECRET')}"
-                               class="input-xlarge" id="input07" required tabindex="8"/>
+                               class="form-control" id="input07" required tabindex="8"/>
                     </div>
                 </div>
-            </div>
         </div>
         <div class="form-actions">
+            <div class="col-lg-offset-2 col-lg-4">
             <button type="submit" class="btn btn-primary">保 存</button>
-            <button type="button" class="btn">重 置</button>
+            <button type="button" class="btn btn-default">重 置</button>
         </div>
-    </fieldset>
+        </div>
 </form>
 <script type="text/javascript">
     $(function () {

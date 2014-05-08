@@ -5,12 +5,12 @@ import json
 from hashlib import md5
 from time import time
 from urlparse import unquote
-from model.archive import Archive
-from model.article import Article
-from model.category import Category
-from model.comment import Comment
-from model.link import Link
-from model.tag import Tag
+from model.archives import Archives
+from model.posts import Posts
+from model.categories import Categories
+from model.comments import Comments
+from model.links import Links
+from model.tags import Tags
 
 from setting import *
 
@@ -18,18 +18,18 @@ from core.common import BaseHandler, unquoted_unicode, safe_encode, pagecache, c
 
 
 class HomePage(BaseHandler):
-    @pagecache()
+    # @pagecache()
     def get(self):
         try:
-            news1 = Category.get_paged_posts_by_name('新闻资讯')
-            news2 = Category.get_paged_posts_by_name('行业资讯')
-            prods = Category.get_paged_posts_by_name('产品展示')
+            news1 = Categories.get_posts_by_category_id(category_id=7, limit=8)
+            news2 = Categories.get_posts_by_category_id(category_id=9, limit=8)
+            prods = Categories.get_posts_by_category_id(category_id=3, limit=8)
         except:
             self.redirect('/install')
             return
 
         each_page_post_num = int(getAttr('EACH_PAGE_POST_NUM'))
-        all_post = Article.count_all()
+        all_post = Posts.count_all()
         all_page = all_post / each_page_post_num
         if all_post % each_page_post_num:
             all_page += 1
@@ -41,21 +41,21 @@ class HomePage(BaseHandler):
             'news1': news1,
             'news2': news2,
             'prods': prods,
-            'cats': Category.get_all_cat_name(),
-            'tags': Tag.get_hot_tag_name(),
-            'archives': Archive.get_all_archive_name(),
+            'cats': Categories.get_all_category_name(),
+            'tags': Tags.get_hot_tag(),
+            'archives': Archives.get_top_n(),
         }, layout='_layout.html')
         self.write(output)
         return output
 
 
 class IndexPage(BaseHandler):
-    @pagecache('post_list_index', PAGE_CACHE_TIME, lambda self, direction, page, base_id: page)
+    # @pagecache('post_list_index', PAGE_CACHE_TIME, lambda self, direction, page, base_id: page)
     def get(self, direction='next', page='2', base_id='1'):
         if page == '1':
             self.redirect(BASE_URL)
             return
-        objs = Article.get_page_posts(direction, page, base_id)
+        objs = Posts.get_paged(direction, page, base_id)
         if objs:
             if direction == 'prev':
                 objs.reverse()
@@ -65,7 +65,7 @@ class IndexPage(BaseHandler):
             fromid = endid = ''
 
         each_page_post_num = int(getAttr('EACH_PAGE_POST_NUM'))
-        all_post = Article.count_all()
+        all_post = Posts.count_all()
         all_page = all_post / each_page_post_num
         if all_post % each_page_post_num:
             all_page += 1
@@ -74,16 +74,16 @@ class IndexPage(BaseHandler):
             'keywords': getAttr('KEYWORDS'),
             'description': getAttr('SITE_DECR'),
             'objs': objs,
-            'cats': Category.get_all_cat_name(),
-            'tags': Tag.get_hot_tag_name(),
-            'archives': Archive.get_all_archive_name(),
+            'cats': Categories.get_all_category_name(),
+            'tags': Tags.get_hot_tag(),
+            'archives': Archives.get_by_name(),
             'page': int(page),
             'allpage': all_page,
             'listtype': 'index',
             'fromid': fromid,
             'endid': endid,
-            'comments': Comment.get_recent_comments(),
-            'links': Link.get_all_links(),
+            'comments': Comments.get_recent_comments(),
+            'links': Links.get_all(),
         }, layout='_layout.html')
         self.write(output)
         return output
@@ -92,7 +92,7 @@ class IndexPage(BaseHandler):
 class PostDetailShort(BaseHandler):
     @client_cache(600, 'public')
     def get(self, id=''):
-        obj = Article.get_article_simple(id)
+        obj = Posts.get_post_simple(id)
         if obj:
             self.redirect('%s/topic/%d/%s' % (BASE_URL, obj.id, obj.title), 301)
             return
@@ -102,9 +102,9 @@ class PostDetailShort(BaseHandler):
 
 class PostDetail(BaseHandler):
     @pagecache('post', PAGE_CACHE_TIME, lambda self, id, title: id)
-    def get(self, id='', title=''):
+    def get(self, post_id='', title=''):
         tmpl = ''
-        obj = Article.get_article_detail(id)
+        obj = Posts.get_post_detail(post_id)
         if not obj:
             self.redirect(BASE_URL)
             return
@@ -118,16 +118,16 @@ class PostDetail(BaseHandler):
             return
             #
         if obj.password and THEME == 'default':
-            rp = self.get_secure_cookie("rp%s" % id, '')
+            rp = self.get_secure_cookie("rp%s" % post_id, '')
             if rp != obj.password:
                 tmpl = '_pw'
         elif obj.password and getAttr('BLOG_PSW_SUPPORT'):
-            rp = self.get_secure_cookie("rp%s" % id, '')
+            rp = self.get_secure_cookie("rp%s" % post_id, '')
             print 'rp===%s' % (str(rp))
             if rp != obj.password:
                 tmpl = '_pw'
 
-        keyname = 'pv_%s' % (str(id))
+        keyname = 'pv_%s' % (str(post_id))
         increment(keyname)
         self.set_secure_cookie(keyname, '1', expires_days=1)
         self.set_header("Last-Modified", obj.last_modified)
@@ -143,15 +143,15 @@ class PostDetail(BaseHandler):
             'obj': obj,
             'cobjs': obj.coms,
             'postdetail': 'postdetail',
-            'cats': Category.get_all_cat_name(),
-            'tags': Tag.get_hot_tag_name(),
-            'archives': Archive.get_all_archive_name(),
+            'cats': Categories.get_all_category_name(),
+            'tags': Tags.get_hot_tag(),
+            'archives': Archives.get_by_name(),
             'page': 1,
             'allpage': 10,
-            'comments': Comment.get_recent_comments(),
-            'links': Link.get_all_links(),
+            'comments': Comments.get_recent_comments(),
+            'links': Links.get_all(),
             'hits': get_count(keyname),
-            'recent_article': Article.get_last_post(8),
+            'recent_article': Posts.get_last_post(8),
             'listtype': '',
         }, layout='_layout.html')
         self.write(output)
@@ -173,7 +173,7 @@ class PostDetail(BaseHandler):
                 return
 
             pw = self.get_argument("pw", '')
-            pobj = Article.get_article_simple(id)
+            pobj = Posts.get_post_simple(id)
             if pw:
                 if pobj.password == pw:
                     clear_cache_by_pathlist(['post:%s' % id])
@@ -200,7 +200,7 @@ class PostDetail(BaseHandler):
                     limit = each_page_comment_num
                 else:
                     limit = all_num - showed_num
-                cobjs = Comment.get_post_page_comments_by_id(id, fromid, limit)
+                cobjs = Comments.get_post_page_comments_by_id(id, fromid, limit)
                 rspd['commentstr'] = self.render('comments.html', {'cobjs': cobjs})
                 rspd['lavenum'] = all_num - showed_num - limit
                 self.write(json.dumps(rspd))
@@ -232,11 +232,11 @@ class PostDetail(BaseHandler):
             self.write(json.dumps(rspd))
             return
 
-        pobj = Article.get_article_simple(id)
+        pobj = Posts.get_post_simple(id)
         if pobj and not pobj.closecomment:
-            cobjid = Comment.create_comment(post_dic)
+            cobjid = Comments.create(post_dic)
             if cobjid:
-                Article.update_comment_num(pobj.comment_num + 1, id)
+                Posts.update_comment_num(pobj.comment_num + 1, id)
                 self.set_secure_cookie("usercomnum", str(int(usercomnum) + 1), expires_days=1)
                 rspd['status'] = 200
                 rspd['msg'] = '恭喜您，已成功提交评论！'
@@ -263,7 +263,7 @@ class PostDetail(BaseHandler):
                         else:
                             tolist = []
                         if post_dic['toid']:
-                            tcomment = Comment.get_comment(post_dic['toid'])
+                            tcomment = Comments.get(post_dic['toid'])
                             if tcomment and tcomment.email:
                                 tolist.append(tcomment.email)
                         commenturl = "%s/t/%s#r%s" % (BASE_URL, str(pobj.id), str(cobjid))
@@ -289,7 +289,7 @@ class PostDetail(BaseHandler):
 class CategoryDetailShort(BaseHandler):
     @client_cache(3600, 'public')
     def get(self, id=''):
-        obj = Category.get_category(id)
+        obj = Categories.get(id)
         if obj:
             self.redirect('%s/category/%s' % (BASE_URL, obj.name), 301)
             return
@@ -300,8 +300,8 @@ class CategoryDetailShort(BaseHandler):
 class CategoryDetail(BaseHandler):
     @pagecache('cat', PAGE_CACHE_TIME, lambda self, name: name)
     def get(self, name=''):
-        objs = Category.get_paged_posts_by_name(name, 1)
-        catobj = Category.get_by_name(name)
+        #objs = Category.get_posts_by_name(name, 1)
+        catobj = Categories.get_by_category_name(name)
 
         if catobj:
             pass
@@ -320,17 +320,17 @@ class CategoryDetail(BaseHandler):
             'keywords': catobj.name,
             'description': getAttr('SITE_DECR'),
             'objs': objs,
-            'cats': Category.get_all_cat_name(),
-            'tags': Tag.get_hot_tag_name(),
-            'archives': Archive.get_all_archive_name(),
+            'cats': Categories.get_all_category_name(),
+            'tags': Tags.get_hot_tag(),
+            'archives': Archives.get_by_name(),
             'page': 1,
             'allpage': all_page,
             'listtype': 'cat',
             'name': name,
             'namemd5': md5(name.encode('utf-8')).hexdigest(),
-            'recent_article': Article.get_last_post(8),
-            'comments': Comment.get_recent_comments(),
-            'links': Link.get_all_links(),
+            'recent_article': Posts.get_last_post(8),
+            'comments': Comments.get_recent_comments(),
+            'links': Links.get_all(),
         }, layout='_layout.html')
         self.write(output)
         return output
@@ -341,11 +341,11 @@ class ArchiveDetail(BaseHandler):
     def get(self, name=''):
         if not name:
             print 'ArchiveDetail name null'
-            name = Archive.get_latest_archive_name()
+            name = Archives.get_latest_archive_name()
 
-        objs = Archive.get_archive_page_posts(name, 1)
+        objs = Archives.get_page_posts_by_archive_name(name, 1)
 
-        archiveobj = Archive.get_archive_by_name(name)
+        archiveobj = Archives.get_by_name(name)
         if archiveobj:
             pass
         else:
@@ -363,17 +363,17 @@ class ArchiveDetail(BaseHandler):
             'keywords': archiveobj.name,
             'description': getAttr('SITE_DECR'),
             'objs': objs,
-            'cats': Category.get_all_cat_name(),
-            'tags': Tag.get_hot_tag_name(),
-            'archives': Archive.get_all_archive_name(),
+            'cats': Categories.get_all_category_name(),
+            'tags': Tags.get_hot_tag(),
+            'archives': Archives.get_by_name(),
             'page': 1,
             'allpage': all_page,
             'listtype': 'archive',
             'name': name,
             'namemd5': md5(name.encode('utf-8')).hexdigest(),
-            'recent_article': Article.get_last_post(8),
-            'comments': Comment.get_recent_comments(),
-            'links': Link.get_all_links(),
+            'recent_article': Posts.get_last_post(8),
+            'comments': Comments.get_recent_comments(),
+            'links': Links.get_all(),
         }, layout='_layout.html')
         self.write(output)
         return output
@@ -382,9 +382,9 @@ class ArchiveDetail(BaseHandler):
 class TagDetail(BaseHandler):
     @pagecache()
     def get(self, name=''):
-        objs = Tag.get_tag_page_posts(name, 1)
+        objs = Tags.get_page_posts_by_tag_name(name, 1)
 
-        catobj = Tag.get_tag_by_name(name)
+        catobj = Tags.get_tag_by_name(name)
         if catobj:
             pass
         else:
@@ -402,17 +402,17 @@ class TagDetail(BaseHandler):
             'keywords': catobj.name,
             'description': getAttr('SITE_DECR'),
             'objs': objs,
-            'cats': Category.get_all_cat_name(),
-            'tags': Tag.get_hot_tag_name(),
-            'archives': Archive.get_all_archive_name(),
+            'cats': Categories.get_all_category_name(),
+            'tags': Tags.get_hot_tag(),
+            'archives': Archives.get_by_name(),
             'page': 1,
             'allpage': all_page,
             'listtype': 'tag',
             'name': name,
             'namemd5': md5(name.encode('utf-8')).hexdigest(),
-            'recent_article': Article.get_last_post(8),
-            'comments': Comment.get_recent_comments(),
-            'links': Link.get_all_links(),
+            'recent_article': Posts.get_last_post(8),
+            'comments': Comments.get_recent_comments(),
+            'links': Links.get_all(),
         }, layout='_layout.html')
         self.write(output)
         return output
@@ -423,16 +423,16 @@ class ArticleList(BaseHandler):
     def get(self, list_type='', direction='next', page='1', name=''):
         catobj = None
         if list_type == 'cat':
-            objs = Category.get_paged_posts_by_name(name, page)
-            catobj = Category.get_by_name(name)
+            #objs = Category.get_posts_by_name(name, page)
+            catobj = Categories.get_by_category_name(name)
             show_type = catobj.showtype
         elif list_type == 'tag':
-            objs = Tag.get_tag_page_posts(name, page)
-            catobj = Tag.get_tag_by_name(name)
+            objs = Tags.get_page_posts_by_tag_name(name, page)
+            catobj = Tags.get_tag_by_name(name)
             show_type = "list"
         elif list_type == 'archive':
-            objs = Archive.get_archive_page_posts(name, page)
-            catobj = Archive.get_archive_by_name(name)
+            objs = Archives.get_page_posts_by_archive_name(name, page)
+            catobj = Archives.get_by_name(name)
             show_type = "list"
 
         if catobj:
@@ -452,16 +452,16 @@ class ArticleList(BaseHandler):
             'keywords': catobj.name,
             'description': getAttr('SITE_DECR'),
             'objs': objs,
-            'cats': Category.get_all_cat_name(),
-            'tags': Tag.get_hot_tag_name(),
-            'archives': Archive.get_all_archive_name(),
+            'cats': Categories.get_all_category_name(),
+            'tags': Tags.get_hot_tag(),
+            'archives': Archives.get_by_name(),
             'page': int(page),
             'allpage': all_page,
             'listtype': list_type,
             'name': name,
             'namemd5': md5(name.encode('utf-8')).hexdigest(),
-            'comments': Comment.get_recent_comments(),
-            'links': Link.get_all_links(),
+            'comments': Comments.get_recent_comments(),
+            'links': Links.get_all(),
         }, layout='_layout.html')
         self.write(output)
         return output
@@ -469,15 +469,15 @@ class ArticleList(BaseHandler):
 
 class Robots(BaseHandler):
     def get(self):
-        self.echo('robots.txt', {'cats': Category.get_all()})
+        self.echo('robots.txt', {'cats': Categories.get_all()})
 
 
 class Feed(BaseHandler):
     def get(self):
-        posts = Article.get_last_post()
+        posts = Posts.get_last_post()
         output = self.render('index.xml', {
             'posts': posts,
-            'site_updated': Article.get_last_post_add_time(),
+            'site_updated': Posts.get_last_post_add_time(),
         })
         self.set_header('Content-Type', 'application/atom+xml')
         self.write(output)
@@ -486,7 +486,7 @@ class Feed(BaseHandler):
 class Sitemap(BaseHandler):
     def get(self, id=''):
         self.set_header('Content-Type', 'text/xml')
-        self.echo('sitemap.html', {'sitemapstr': Category.get_sitemap_by_id(id), 'id': id})
+        self.echo('sitemap.html', {'sitemapstr': Categories.get_sitemap_by_category_id(id), 'id': id})
 
 
 class Attachment(BaseHandler):

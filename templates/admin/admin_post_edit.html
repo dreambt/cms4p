@@ -1,139 +1,177 @@
-<form id="myForm" class="form-horizontal">
-    <div class="control-group">
-        <label class="control-label" for="selectBtn">* 分类/标题</label>
-        <div class="controls">
-            <div class="input-prepend">
-                <div class="btn-group">
-                    <?py if obj and obj.category: ?>
-                    <button id="selectBtn" class="btn dropdown-toggle" data-toggle="dropdown">${obj.category} <span class="caret"></span></button>
-                    <?py else: ?>
-                    <button id="selectBtn" class="btn dropdown-toggle" data-toggle="dropdown">选择分类 <span class="caret"></span></button>
-                    <?py #endif ?>
-                    <ul class="dropdown-menu">
-                        <?py for cat in cats: ?>
-                        <li><a href="#" onclick="$('#cat').val(($(this).text()));$('#selectBtn').html(($(this).text()+' <span class=caret></span>'));">#{cat.name}</a></li>
-                        <?py #endfor ?>
-                    </ul>
-                </div>
-                <input type="hidden" name="postid" value="#{obj.id}"/>
-                <input type="hidden" name="method" value="#{method}"/>
-                <input type="hidden" name="cat" value="${obj.category}" id="cat">
-                <input type="text" name="tit" class="span7" required maxlength="100" value="${obj.title}" tabindex="2" placeholder="标题"/>
-            </div>
-        </div>
-    </div>
-    <div class="control-group">
-        <label class="control-label" for="html">* 文章正文</label>
-        <div class="controls">
-            <textarea id="html" class="input-xlarge" name="con" rows="3" tabindex="3">#{obj.content}</textarea>
-        </div>
-    </div>
-    <div class="control-group">
-        <label class="control-label" for="tag">标签</label>
-        <div class="controls">
-            <select data-placeholder="按住Ctrl可以选择多个标签，输入新标签后按空格键，推荐选择 10 个左右" id="tag" name="tag" class="span8 chzn-select" multiple>
-                <option value=""></option>
-                <?py for tag in tags: ?>
-                <?py    if 0<=obj.tags.find(tag['name']): ?>
-                <option value="#{tag.name}" selected>#{tag.name}</option>
-                <?py    else: ?>
-                <option value="#{tag.name}">#{tag.name}</option>
-                <?py    #endif ?>
-                <?py #endfor ?>
-            </select>
-        </div>
-    </div>
-    <div class="row">
-        <div class="span3">
-            <div class="control-group">
-                <label class="control-label" for="clo">评论功能</label>
-                <div class="controls">
-                    <div class="switch switch-small"><?py ck = ['checked',''] ?><input id="clo" name="clo" type="checkbox" value="true" tabindex="5" #{ck[obj.closecomment]}/></div>
-                </div>
-            </div>
-        </div>
-        <div class="span3">
-            <div class="control-group">
-                <label class="control-label" for="password">阅读密码</label>
-                <div class="controls">
-                    <input type="text" id="password" name="password" class="input-medium" value="${obj.password}" maxlength="16"/>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="form-actions">
-        <button type="submit" id="submit" class="btn btn-primary">保 存</button>
-        <button type="reset" id="helper" class="btn">重 置</button>
-        <button type="button" class="btn btn-inverse" onclick="window.location.href='/admin/list_post';">返 回</button>
-    </div>
-</form>
+<div class="row">
+	<div class="col-lg-12">
+		<form id="myForm" class="form-horizontal">
+			<div class="form-group">
+				<label class="col-lg-2 control-label" for="selectBtn">* 分类/标题</label>
+
+				<div class="col-lg-8">
+					<div class="input-group">
+						<div class="input-group-btn">
+							<?py if obj and obj.category_name: ?>
+							<button id="selectBtn" class="btn  btn-default dropdown-toggle" data-toggle="dropdown">
+								#{obj.category_name} <span
+									class="caret"></span></button>
+							<?py else: ?>
+							<button id="selectBtn" class="btn  btn-default dropdown-toggle" data-toggle="dropdown">选择分类 <span
+									class="caret"></span>
+							</button>
+							<?py #endif ?>
+							<ul class="dropdown-menu">
+								<?py for cat in categories: ?>
+								<li><a href="#"
+								       onclick="$('#cat').val(#{cat.category_id});$('#selectBtn').html(($(this).text()+' <span class=caret></span>'));">#{cat.category_name}</a>
+								</li>
+								<?py #endfor ?>
+							</ul>
+						</div>
+						<input type="text" name="title" class="form-control" required maxlength="100"
+						       value="#{obj.title}"
+						       placeholder="标题"/>
+					</div>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-lg-2 control-label" for="html">* 文章正文</label>
+
+				<div class="col-lg-8">
+					<textarea id="html" name="content" rows="3">#{obj.content}</textarea>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-lg-2 control-label" for="tag">标签</label>
+
+				<div class="col-lg-8">
+					<select data-placeholder="按住Ctrl可以选择多个标签，输入新标签后按空格键，推荐选择 10 个左右" id="tag" name="tag"
+					        class="form-control chzn-select" multiple>
+						<option value=""></option>
+						<?py for tag in tags: ?>
+						<?py    if 0<=obj.tags.find(tag['name']): ?>
+						<option value="#{tag.name}" selected>#{tag.name}</option>
+						<?py    else: ?>
+						<option value="#{tag.name}">#{tag.name}</option>
+						<?py    #endif ?>
+						<?py #endfor ?>
+					</select>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-lg-2 control-label" for="clo">评论功能</label>
+
+				<div class="col-lg-8">
+					<div class="switch"><?py ck = ['','checked'] ?><input id="clo" name="clo" type="checkbox"
+					                                                      value="true" #{ck[obj.allow_comment]} />
+					</div>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-lg-2 control-label" for="clo">置顶显示</label>
+
+				<div class="col-lg-8">
+					<div class="switch"><?py ck = ['','checke'] ?><input id="top" name="top" type="checkbox"
+					                                                      value="true" #{ck[obj.top]} />
+					</div>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-lg-2 control-label" for="password">阅读密码</label>
+
+				<div class="col-lg-4">
+					<input type="text" id="password" name="password" class="form-control" value="#{obj.password}"
+					       maxlength="16"/>
+				</div>
+			</div>
+			<div class="form-actions">
+				<div class="col-lg-offset-2 col-lg-8">
+					<input type="hidden" name="post_id" value="#{obj.post_id}"/>
+					<input type="hidden" name="method" value="#{method}"/>
+					<input type="hidden" name="category_id" value="#{obj.category_id}" id="cat"/>
+					<button type="submit" id="submit" class="btn btn-primary">保 存</button>
+					<button type="reset" id="helper" class="btn btn-default">重 置</button>
+					<button type="button" class="btn btn-default" onclick="window.location.href='/admin/posts';">返 回
+					</button>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
 <hr/>
 <div class="well">
-  <a class="pull-right" href="#">
-    <img class="media-object" src="#{{ STATIC_URL }}/static/images/helper-girl.jpg">
-  </a>
-  <h4>文章分类</h4>
-  <p>1.可以选择已有的文章分类</p>
-  <p>2.如果要新建分类可以直接输入新的分类名称</p>
-  <h4>标签</h4>
-  <p>1.按住 Ctrl 不放可以选择多个标签</p>
-  <p>2.新建标签：输入新标签后按空格键</p>
-  <p>3.删除标签：点击标签右侧的关闭符号</p>
-  <p>4.推荐选择 10 个左右的标签来优化搜索引擎的检索量</p>
-  <h4>可选设置</h4>
-  <p>1.设定密码可以只允许知道密码的人查看文章内容</p>
-  <p>2.勾选“关闭评论”将禁止用户发表评论，已有评论也将不再显示</p>
-  <p><a href="#top" class="btn btn-primary">我明白了</a></p>
+	<a class="pull-right" href="#">
+		<img class="media-object" src="#{{ STATIC_URL }}/static/images/helper-girl.jpg">
+	</a>
+	<h4>文章分类</h4>
+
+	<p>1.可以选择已有的文章分类</p>
+
+	<p>2.如果要新建分类可以直接输入新的分类名称</p>
+	<h4>标签</h4>
+
+	<p>1.按住 Ctrl 不放可以选择多个标签</p>
+
+	<p>2.新建标签：输入新标签后按空格键</p>
+
+	<p>3.删除标签：点击标签右侧的关闭符号</p>
+
+	<p>4.推荐选择 10 个左右的标签来优化搜索引擎的检索量</p>
+	<h4>可选设置</h4>
+
+	<p>1.设定密码可以只允许知道密码的人查看文章内容</p>
+
+	<p>2.勾选“关闭评论”将禁止用户发表评论，已有评论也将不再显示</p>
+
+	<p><a href="#top" class="btn btn-primary">我明白了</a></p>
 </div>
 <script type="text/javascript" src="#{{ STATIC_URL }}/static/js/vender/chosen.jquery.min.js"></script>
 <script type="text/javascript" src="#{{ STATIC_URL }}/static/kindeditor/kindeditor-min.js"></script>
 <script type="text/javascript">
-    $(function () {
-        $("#post_page").addClass("active");
-        $(".chzn-select").chosen();
-        //$(".chzn-select").trigger("liszt:updated");
-        var editor = KindEditor.create('#html', {
-            uploadJson: '/admin/fileupload',
-            fileManagerJson: '/admin/filelist',
-            allowFileManager: true,
-            width: '800px',
-            height: '360px'
-        });
-        $('#myForm').submit(function () {
-            editor.sync();
-            $('#submit').attr('disabled', 'disabled');
-            $.ajax({
-                type: 'POST',
-                url: $('#method').val(),
-                data: $('#myForm').serialize(),
-                success: function (data) {
-                    bootbox.dialog(data.msg+"，请选择下一步操作：", [{
-                        "label" : "新建文章",
-                        "class" : "btn-success",
-                        "callback": function() {
-                            window.location.href = "/admin/add_post";
-                        }
-                    }, {
-                        "label" : "继续编辑",
-                        "class" : "btn-primary",
-                        "callback": function() {
-                            window.location.href = "/admin/edit_post/"+data.postid;
-                        }
-                    }, {
-                        "label" : "文章列表",
-                        "class" : "btn-primary",
-                        "callback": function() {
-                            window.location.href = "/admin/list_post";
-                        }
-                    }]);
-                    $('#submit').removeAttr('disabled');
-                },
-                error: function(){
-                    SiQiTip.show("block", "服务器貌似出现问题，请稍后重试！");
-                    $('#submit').removeAttr('disabled');
-                }
-            });
-            return false;
-        });
-    });
+	$(function () {
+		$("#post_page").addClass("active");
+		$(".chzn-select").chosen();
+		//$(".chzn-select").trigger("liszt:updated");
+		var editor = KindEditor.create('#html', {
+			uploadJson: '/admin/fileupload',
+			fileManagerJson: '/admin/filelist',
+			allowFileManager: true,
+			width: '800px',
+			height: '360px'
+		});
+		$('#myForm').submit(function () {
+			editor.sync();
+			$('#submit').attr('disabled', 'disabled');
+			$.ajax({
+				type: 'POST',
+				url: $('#method').val(),
+				data: $('#myForm').serialize(),
+				success: function (data) {
+					if (data.status == 500) {
+						bootbox.alert(data.msg);
+					}
+					else {
+						bootbox.dialog(data.msg + "请选择下一步操作：", [
+							{
+								"label": "新建文章",
+								"class": "btn-success",
+								"callback": function () {
+									window.location.href = "/admin/posts?act=add";
+								}
+							},
+							{
+								"label": "文章列表",
+								"class": "btn-primary",
+								"callback": function () {
+									window.location.href = "/admin/posts";
+								}
+							}
+						]);
+					}
+					$('#submit').removeAttr('disabled');
+				},
+				error: function () {
+					SiQiTip.show("block", "服务器貌似出现问题，请稍后重试！");
+					$('#submit').removeAttr('disabled');
+				}
+			});
+			return false;
+		});
+	});
 </script>

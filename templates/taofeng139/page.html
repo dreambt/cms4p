@@ -1,0 +1,82 @@
+<div class="row">
+    <div class="span9">
+        <article class="hentry" role="article">
+            <div class="entry-content" id="postcondiv">#{obj.content}<br/>#{getAttr('ADSENSE_CODE1')}<br/></div>
+        </article>
+        <a name="comments"></a>
+        <?py if obj.comment_num > 0: ?>
+        <section>
+            <legend>留言列表 (共 #{obj.comment_num} 条)</legend>
+            <div id="comments">
+                <ul class="singlecomments" id="commentlist">
+                    <?py include("comments.html") ?>
+                </ul>
+                <?py if obj.comment_num > getAttr('EACH_PAGE_COMMENT_NUM'): ?>
+                <p class="topline grey">
+                    本主题还有 <strong id="hasnum">#{obj.comment_num - getAttr('EACH_PAGE_COMMENT_NUM')}</strong> 条评论未显示，<span class="label label-info" onclick="goon();return false;">点击这里查看更多</span>
+                </p>
+                <?py #endif ?>
+            </div>
+        </section>
+        <?py else: ?>
+        <section id="commentsec" style="display:none;">
+            <h1 class="topline">评论</h1>
+            <div id="comments">
+                <h2 class="comments">只有一条评论 "#{obj.title}"</h2>
+                <ul class="singlecomments" id="commentlist">
+                </ul>
+            </div>
+        </section>
+        <?py #endif ?>
+
+        <!-- new comment -->
+        <section>
+            <div id="respond" class="topline">
+                <?py if obj.closecomment: ?>
+                <!--<p>无法评论</p>-->
+                <script>
+                    function reply(toid, name) {
+                        return false;
+                    }
+                </script>
+                <?py else: ?>
+                <?py include("newcomment.html") ?>
+                <?py #endif ?>
+            </div>
+        </section>
+        <!-- new comment end -->
+
+        <?py if obj.comment_num > getAttr('EACH_PAGE_COMMENT_NUM'): ?>
+        <!-- readmore comments -->
+        <script>
+            function goon() {
+                var fromid = $("#commentlist li:last").attr('id').split("-")[1];
+                var showednum = $("#commentlist li").length;
+                $.ajax({
+                    type: 'POST',
+                    url: '#{request.path}',
+                    dataType: "json",
+                    data: {'act': 'readmorecomment', 'fromid': fromid, 'showednum': showednum, 'allnum': '#{obj.comment_num}' },
+                    success: function (data) {
+                        if (data.status == 200) {
+                            $('#commentlist').append(data.commentstr);
+                            $('#hasnum').text(data.lavenum);
+                            if (data.lavenum == 0) {
+                                $('#idgoon').html('没有了！在下面补上一条吧！！');
+                            }
+                        }
+                    }
+
+                });
+                return false;
+            }
+        </script>
+        <!-- readmore comments end -->
+        <?py #endif ?>
+
+
+    </div>
+    <div class="span3">
+        <?py include("sider.html") ?>
+    </div>
+</div>

@@ -6,9 +6,9 @@
     :modified by laoqiu.com@gmail.com
 
     Example:
-    #>>> from extensions.permission import UserNeed, RoleNeed, ItemNeed, Permission
-    #>>> admin = Permission(RoleNeed('admin'))
-    #>>> editor = Permission(UserNeed(1)) & admin
+    >>> from extensions.permission import UserNeed, RoleNeed, ItemNeed, Permission
+    >>> admin = Permission(RoleNeed('admin'))
+    >>> editor = Permission(UserNeed(1)) & admin
 
     # handers
     ~~~~~~~~~

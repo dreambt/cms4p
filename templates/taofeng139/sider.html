@@ -1,0 +1,21 @@
+<h4>强烈推荐</h4>
+<ul class="nav nav-pills nav-stacked">
+<?py for i in recent_article: ?>
+<li><a href="/topic/#{i['id']}/#{i['title']}">#{i['title']}</a></li>
+<?py #endfor ?>
+</ul>
+<h4>最新评论</h4>
+<?py for each in comments: ?>
+<div class="media">
+    <a class="pull-left" href="/t/#{each.postid}#r#{each.id}"><img class="media-object" style="width:48px;height:48px;" src="#{each.gravatar}?s=48&d=monsterid"></a>
+    <div class="media-body"><h6 class="media-heading"><a href="/t/#{each.postid}#r#{each.id}">#{each.author}</a> 于 ${each.add_time}</h6>#{each.short_content}</div>
+</div>
+<?py #endfor ?>
+<p id="Ads">#{getAttr('ADSENSE_CODE2')}</p>
+<h4>友情链接</h4>
+<?py for link in LINK_BROLL: ?>
+<span class="label" onclick="window.open('#{link['url']}','_blank');">#{link['text']}</span>
+<?py #endfor ?>
+<?py for link in links: ?>
+<span class="label" onclick="window.open('#{link['url']}','_blank');">#{link['name']}</span>
+<?py #endfor ?>

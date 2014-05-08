@@ -1,42 +1,39 @@
 <form id="myForm" action="#" class="form-horizontal" method="POST">
-    <fieldset>
-        <legend>修改密码</legend>
         <div class="row">
-            <div class="span12">
-                <div class="control-group">
-                    <label class="control-label" for="oldPassword">原密码</label>
-                    <div class="controls">
-                        <input type="password" name="oldPassword" class="input-xlarge" required id="oldPassword" tabindex="1"/>
+                <div class="form-group">
+                    <label class="col-lg-2 control-label" for="oldPassword">原密码</label>
+                    <div class="col-lg-4">
+                        <input type="password" name="oldPassword" class="form-control" required id="oldPassword" tabindex="1"/>
                     </div>
                 </div>
-                <div class="control-group">
-                    <label class="control-label" for="newPassword">新密码</label>
-                    <div class="controls">
-                        <input type="password" name="newPassword" class="input-xlarge" required minlength="8" id="newPassword" tabindex="2"/>
+                <div class="form-group">
+                    <label class="col-lg-2 control-label" for="newPassword">新密码</label>
+                    <div class="col-lg-4">
+                        <input type="password" name="newPassword" class="form-control" required minlength="8" id="newPassword" tabindex="2"/>
                     </div>
                 </div>
-                <div class="control-group">
-                    <label class="control-label" for="newPassword2">确认密码</label>
-                    <div class="controls">
-                        <input type="password" name="newPassword2" class="input-xlarge" required minlength="8" id="newPassword2" tabindex="3"/>
+                <div class="form-group">
+                    <label class="col-lg-2 control-label" for="newPassword2">确认密码</label>
+                    <div class="col-lg-4">
+                        <input type="password" name="newPassword2" class="form-control" required minlength="8" id="newPassword2" tabindex="3"/>
                     </div>
                 </div>
                 <div class="form-actions">
+                    <div class="col-lg-offset-2 col-lg-4">
                     <button type="submit" class="btn btn-primary">保 存</button>
-                    <button type="button" class="btn">重 置</button>
+                    <button type="button" class="btn btn-default">重 置</button>
+                    </div>
                 </div>
-            </div>
         </div>
-    </fieldset>
 </form>
 <script type="text/javascript">
     $(function () {
         $("#profile_page").addClass("active");
         $("input,select,textarea").not("[type=submit]").not("[type=reset]").jqBootstrapValidation();
         $('#myForm').submit(function () {
-            var oldPassword = $("#oldPassword").val().trim();
-            var newPassword = $("#newPassword").val().trim();
-            var newPassword2 = $("#newPassword2").val().trim();
+            var oldPassword = $.trim($("#oldPassword").val());
+            var newPassword = $.trim($("#newPassword").val());
+            var newPassword2 = $.trim($("#newPassword2").val());
             if(newPassword != newPassword2){
                 SiQiTip.show("error", "新密码和确认密码必须一致");
                 return false;

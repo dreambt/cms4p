@@ -1,15 +1,18 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="#{{ LANGUAGE }}">
 <head>
     <meta charset='utf-8'>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <title>#{title} - #{{ getAttr('SITE_TITLE') }}</title>
+    <meta name="author" content="#{{ ADMIN_NAME }}"/>
+    <meta name="HandheldFriendly" content="True"/>
+    <meta name="MobileOptimized" content="320"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <link rel="shortcut icon" href="#{{ STATIC_URL }}/favicon.ico" type="image/x-icon"/>
-    <link rel="stylesheet" href="#{{ STATIC_URL }}/static/style/bootstrap.min.css" type="text/css"/>
-    <link rel="stylesheet" href="#{{ STATIC_URL }}/static/style/bootstrap-responsive.min.css" type="text/css"/>
-    <link rel="stylesheet" href="#{{ STATIC_URL }}/static/style/bootstrap-switch.min.css" type="text/css"/>
-    <link rel="stylesheet" href="#{{ STATIC_URL }}/static/style/chosen.css" type="text/css"/>
-    <link rel="stylesheet" href="#{{ STATIC_URL }}/static/style/admin.css" type="text/css"/>
+    <link rel="stylesheet" href="#{{ STATIC_URL }}/static/style/bootstrap.min.css" media="screen"/>
+    <link rel="stylesheet" href="#{{ STATIC_URL }}/static/style/bootstrap-switch.min.css" media="screen"/>
+    <link rel="stylesheet" href="#{{ STATIC_URL }}/static/style/chosen.min.css" media="screen"/>
+    <link rel="stylesheet" href="#{{ STATIC_URL }}/static/style/admin.css" media="screen"/>
     <!--[if lt IE 9]>
     <script type="text/javascript" src="#{{ STATIC_URL }}/static/js/vender/jquery-1.10.1.min.js"></script>
     <![endif]-->
@@ -18,37 +21,36 @@
     <!--<![endif]-->
 </head>
 <body data-spy="scroll" data-target=".bs-docs-sidebar">
-<div class="navbar navbar-inverse navbar-fixed-top">
-    <div class="navbar-inner">
+<div class="navbar navbar-static-top">
         <div class="container">
-            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-responsive-collapse">
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="brand" href="/">#{{ getAttr('SITE_TITLE') }}</a>
-            <div class="nav-collapse collapse">
-                <ul class="nav">
+            <a class="navbar-brand" href="/">#{{ getAttr('SITE_TITLE') }}</a>
+            <div class="nav-collapse collapse navbar-responsive-collapse">
+                <ul class="nav navbar-nav">
                     <li id="admin_page"><a href="/admin/">后台首页</a></li>
                     <li id="category_page"><a href="/admin/category">分类管理</a></li>
-                    <li id="post_page"><a href="/admin/list_post">文章管理</a></li>
+                    <li id="post_page"><a href="/admin/posts">文章管理</a></li>
                     <li id="comment_page"><a href="/admin/comment/">评论管理</a></li>
-                    <li id="user_page"><a href="/admin/list_user">用户管理</a></li>
+                    <li id="user_page"><a href="/admin/users">用户管理</a></li>
                     <li id="link_page"><a href="/admin/links">友情链接</a></li>
                     <li class="divider-vertical"></li>
                     <li id="sys_page" class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">系统设置
                         <b class="caret"></b></a>
                         <ul class="dropdown-menu">
-                            <li class="nav-header">基本设置</li>
+                            <li class="dropdown-header">基本设置</li>
                             <li><a href="/admin/setting">站点信息</a></li>
                             <li><a href="/admin/setting2">邮箱配置</a></li>
                             <li class="divider"></li>
-                            <li class="nav-header">应用设置</li>
+                            <li class="dropdown-header">应用设置</li>
                             <li><a href="/admin/setting3">前台参数</a></li>
                             <li><a href="/admin/setting5">后台参数</a></li>
                             <li><a href="/admin/setting4">广告统计</a></li>
                             <li class="divider"></li>
-                            <li class="nav-header">高危操作</li>
+                            <li class="dropdown-header">高危操作</li>
                             <li><a id="flushcache">清空缓存</a></li>
                             <!--<li><a href="/admin/kvdb">KVDB管理</a></li>-->
                             <li><a id="flush">初始化数据</a></li>
@@ -58,23 +60,23 @@
                     <li id="profile_page"><a href="/admin/profile">修改密码</a></li>
                     <li><a href="/admin/logout">安全退出</a></li>
                 </ul>
-            </div>
         </div>
     </div>
 </div>
-<header class="jumbotron subhead" id="overview">
+<header class="bs-header" id="overview">
     <div class="container">
         <h1>#{title}</h1>
         <div id="carbonads-container">
-            <div class="carbonad"><a href="#helper">帮助信息</a></div>
+            <div class="carbonad"><a href="#helper" class="btn btn-default btn-lg">帮助信息</a></div>
         </div>
     </div>
 </header>
-<div class="bb-alert alert" style="display:none;">
-    <span>默认提示信息</span>
-</div>
 <div class="container">
     #{_content}
+</div>
+<div class="message" style="top:-97px;">
+    <h3>提示</h3>
+    <p>默认提示信息</p>
 </div>
 <footer id="footer">
     <div class="container">
@@ -88,8 +90,10 @@
 <script type="text/javascript" src="#{{ STATIC_URL }}/static/js/vender/bootstrap-ajax.js"></script>
 <script type="text/javascript" src="#{{ STATIC_URL }}/static/js/vender/jquery.bootpag.min.js"></script>
 <script type="text/javascript" src="#{{ STATIC_URL }}/static/js/vender/jqBootstrapValidation-1.3.7.min.js"></script>
+<script type="text/javascript" src="#{{ STATIC_URL }}/static/js/vender/imagesloaded.pkgd.min.js"></script>
 <script type="text/javascript" src="#{{ STATIC_URL }}/static/js/vender/bootbox.min.js"></script>
 <script type="text/javascript" src="#{{ STATIC_URL }}/static/js/vender/bootstrap-switch.min.js"></script>
-<script type="text/javascript" src="#{{ STATIC_URL }}/static/js/custom.js"></script>
+<script type="text/javascript" src="#{{ STATIC_URL }}/static/js/vender/respond.min.js"></script>
+<script type="text/javascript" src="#{{ STATIC_URL }}/static/js/taofeng139.js"></script>
 </body>
 </html>

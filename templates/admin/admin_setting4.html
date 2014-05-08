@@ -1,33 +1,30 @@
 <form id="myForm" action="" class="form-horizontal" method="post">
-    <fieldset>
-        <legend>参数设置</legend>
         <div class="row">
-            <div class="span12">
-                <div class="control-group">
-                    <label class="control-label" for="input02">广告代码 1</label>
-                    <div class="controls">
-                        <textarea name="ADSENSE_CODE1" id="input02" class="input-xxlarge" rows="6" tabindex="1">#{getAttr('ADSENSE_CODE1')}</textarea> <span class="help-inline">文章混排</span>
+                <div class="form-group">
+                    <label class="col-lg-2 control-label" for="input02">广告代码 1</label>
+                    <div class="col-lg-4">
+                        <textarea name="ADSENSE_CODE1" id="input02" class="form-control" rows="6" tabindex="1">#{getAttr('ADSENSE_CODE1')}</textarea> <span class="help-inline">文章混排</span>
                     </div>
                 </div>
-                <div class="control-group">
-                    <label class="control-label" for="input03">广告代码 2</label>
-                    <div class="controls">
-                        <textarea name="ADSENSE_CODE2" id="input03" class="input-xxlarge" rows="6" tabindex="2">#{getAttr('ADSENSE_CODE2')}</textarea> <span class="help-inline">边栏显示</span>
+                <div class="form-group">
+                    <label class="col-lg-2 control-label" for="input03">广告代码 2</label>
+                    <div class="col-lg-4">
+                        <textarea name="ADSENSE_CODE2" id="input03" class="form-control" rows="6" tabindex="2">#{getAttr('ADSENSE_CODE2')}</textarea> <span class="help-inline">边栏显示</span>
                     </div>
                 </div>
-                <div class="control-group">
-                    <label class="control-label" for="input01">统计代码</label>
-                    <div class="controls">
-                        <textarea name="ANALYTICS_CODE" id="input01" class="input-xxlarge" rows="6" tabindex="3">#{getAttr('ANALYTICS_CODE')}</textarea>
+                <div class="form-group">
+                    <label class="col-lg-2 control-label" for="input01">统计代码</label>
+                    <div class="col-lg-4">
+                        <textarea name="ANALYTICS_CODE" id="input01" class="form-control" rows="6" tabindex="3">#{getAttr('ANALYTICS_CODE')}</textarea>
                     </div>
                 </div>
                 <div class="form-actions">
+                    <div class="col-lg-offset-2 col-lg-4">
                     <button type="submit" class="btn btn-primary">保 存</button>
-                    <button type="reset" class="btn">重 置</button>
+                    <button type="reset" class="btn btn-default">重 置</button>
+                </div>
                 </div>
             </div>
-        </div>
-    </fieldset>
 </form>
 <script type="text/javascript">
     $(function () {

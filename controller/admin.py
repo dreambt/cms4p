@@ -1,26 +1,14 @@
 # -*- coding: utf-8 -*-
 import StringIO
 from hashlib import md5
-import random
 import re
 import time
-import math
 
-from tornado import escape
-import tornado
-from tornado.database import OperationalError
-
-from core.common import BaseHandler, authorized, safe_encode, clear_cache_by_pathlist, quoted_string, clear_all_cache, genArchive, setAttr, clearAllKVDB, set_count, increment, getAttr, sendEmail
+from core.common import BaseHandler, authorized, clear_cache_by_pathlist, clear_all_cache, setAttr, clearAllKVDB, getAttr, sendEmail
 from core.storage import put_storage, get_storage_list
 from core.utils.random_utils import random_int
-from model.archive import Archive
-from model.article import Article
-from model.base import MyData
-from model.category import Category
-from model.comment import Comment
-from model.link import Link
-from model.tag import Tag
-from model.user import User
+from model.posts import Posts
+from model.users import Users
 from setting import *
 from extensions.imagelib import Recaptcha, Thumbnail
 
@@ -30,7 +18,6 @@ except:
     import simplejson as json
 
 if not debug:
-    import sae.mail
     from sae.taskqueue import add_task
 
 
@@ -55,9 +42,9 @@ class Login(BaseHandler):
         self.set_header("Content-Type", "application/json")
 
         try:
-            name = self.get_argument("name")
-            password = self.get_argument("password")
-            captcha = self.get_argument("captcha")
+            name_or_email = self.get_argument("name_or_email").encode('utf-8')
+            password = self.get_argument("password").encode('utf-8')
+            captcha = self.get_argument("captcha").encode('utf-8')
         except:
             self.write(json.dumps("用户名、密码、验证码均为必填项！"))
             return
@@ -66,16 +53,15 @@ class Login(BaseHandler):
             self.write(json.dumps("验证码填写错误或用户不存在！"))
             return
 
-        has_user = User.get_user_by_name(name)
-        if not has_user:
-            has_user = User.get_user_by_email(name)
-            name = has_user.name
-        if has_user:
+        has_user = Users.get_by_name_or_email(name_or_email)
+        if has_user and has_user.status == 1 and has_user.deleted == 0:
             password += has_user.salt
             password = md5(password.encode('utf-8')).hexdigest()
             if password == has_user.password:
-                self.set_secure_cookie('username', name, expires_days=365)
-                self.set_secure_cookie('userpw', password, expires_days=365)
+                self.set_secure_cookie('username', has_user.user_name, expires_days=365)
+                self.set_secure_cookie('user_id', str(has_user.user_id), expires_days=365)
+                self.set_secure_cookie('email', has_user.email, expires_days=365)
+                self.set_secure_cookie('password', password, expires_days=365)
                 self.write(json.dumps("OK"))
                 return
             else:
@@ -207,582 +193,6 @@ class FileManager(BaseHandler):
         self.set_header("Content-Type", "application/json")
         self.write(json.dumps(upload))
         return
-
-
-class CategoryController(BaseHandler):
-    @authorized()
-    def get(self):
-        act = self.get_argument("act", '')
-        id = self.get_argument("id", '')
-
-        obj = None
-        if act == 'del':
-            if id:
-                Category.delete_category(id)
-                clear_cache_by_pathlist(['/'])
-            self.set_header("Content-Type", "application/json")
-            self.write(json.dumps("OK"))
-            return
-        elif act == 'edit':
-            if id:
-                obj = Category.get_category(id)
-
-        # 分类列表
-        page = self.get_argument("page", 1)
-        category = Category.get_paged(page, getAttr('ADMIN_CATEGORY_NUM'))
-        total = math.ceil(Category.count_all() / float(getAttr('ADMIN_CATEGORY_NUM')))
-        if page == 1:
-            self.echo('admin_category.html', {
-                'title': "分类列表",
-                'objs': category,
-                'obj': obj,
-                'total': total,
-            }, layout='_layout_admin.html')
-        else:
-            result = {
-                'list': category,
-                'total': total,
-            }
-            self.set_header("Content-Type", "application/json")
-            self.write(json.dumps(result))
-            return
-
-    @authorized()
-    def post(self):
-        act = self.get_argument("act", '')
-        id = self.get_argument("id", '')
-        name = self.get_argument("name", '')
-        showtype = self.get_argument("showtype", '')
-        sort = self.get_argument("sort", '0')
-
-        if id and (name or sort):
-            if act == 'add':
-                Category.create_category(name)
-
-            if act == 'edit':
-                params = {'id': id, 'name': name, 'showtype': showtype, 'displayorder': sort}
-                Category.update_cat(params)
-
-            if act == 'del':
-                Category.delete_category(id)
-
-            clear_cache_by_pathlist(['/'])
-
-            self.set_header("Content-Type", "application/json")
-            self.write(json.dumps("OK"))
-        else:
-            self.set_header("Content-Type", "application/json")
-            self.write(json.dumps("参数异常"))
-
-
-class AddPost(BaseHandler):
-    @authorized()
-    def get(self):
-        obj = Article
-        obj.id = ''
-        obj.category = ''
-        obj.title = ''
-        obj.content = ''
-        obj.tags = ''
-        obj.closecomment = 0
-        obj.password = ''
-        self.echo('admin_post_edit.html', {
-            'title': "添加文章",
-            'method': "/admin/add_post",
-            'cats': Category.get_all_cat_name(),
-            'tags': Tag.get_all_tag_name(),
-            'obj': obj,
-        }, layout='_layout_admin.html')
-
-    @authorized()
-    def post(self):
-        self.set_header('Content-Type', 'application/json')
-        rspd = {'status': 201, 'msg': 'ok'}
-
-        try:
-            tf = {'true': 0, 'false': 1}
-            timestamp = int(time.time())
-            post_dic = {
-                'category': self.get_argument("cat", '-'),
-                'title': self.get_argument("tit"),
-                'content': self.get_argument("con"),
-                'tags': ','.join(self.get_arguments("tag")),
-                'closecomment': tf[self.get_argument("clo", 'false')],
-                'password': self.get_argument("password", ''),
-                'add_time': timestamp,
-                'edit_time': timestamp,
-                'archive': genArchive(),
-            }
-        except:
-            rspd['status'] = 500
-            rspd['msg'] = '错误： 注意必填的三项'
-            self.write(json.dumps(rspd))
-            return
-
-        postid = Article.create_article(post_dic)
-        if postid:
-            keyname = 'pv_%s' % (str(postid))
-            set_count(keyname, 0, 0)
-
-            Category.add_postid_to_cat(post_dic['category'], str(postid))
-            Archive.add_postid_to_archive(genArchive(), str(postid))
-            increment('Totalblog')
-
-            if post_dic['tags']:
-                Tag.add_postid_to_tags(post_dic['tags'].split(','), str(postid))
-
-            rspd['status'] = 200
-            rspd['msg'] = '文章发布成功'
-            rspd['postid'] = postid
-            rspd['method'] = "/admin/edit_post"
-            clear_cache_by_pathlist(['/', 'cat:%s' % quoted_string(post_dic['category'])])
-
-            if not debug:
-                add_task('default', '/task/pingrpctask')
-
-            self.write(json.dumps(rspd))
-            return
-        else:
-            rspd['status'] = 500
-            rspd['msg'] = '错误： 未知错误，请尝试重新提交'
-            self.write(json.dumps(rspd))
-            return
-
-
-class ListPost(BaseHandler):
-    @authorized()
-    def get(self):
-        page = self.get_argument("page", 1)
-        category = self.get_argument("category", "")
-        title = self.get_argument("title", "")
-        article = Article.get_paged(page, getAttr('ADMIN_POST_NUM'), category, title)
-        total = math.ceil(Article.count_all(category, title) / float(getAttr('ADMIN_POST_NUM')))
-        if page == 1:
-            cats = Category.get_all()
-            self.echo('admin_post_list.html', {
-                'title': "文章列表",
-                'objs': article,
-                'cats': cats,
-                'total': total,
-            }, layout='_layout_admin.html')
-        else:
-            result = {
-                'list': article,
-                'total': total,
-            }
-            self.set_header("Content-Type", "application/json")
-            self.write(json.dumps(result))
-            return
-
-
-class EditPost(BaseHandler):
-    @authorized()
-    def get(self, id=''):
-        obj = None
-        if id:
-            obj = Article.get_article(id)
-        self.echo('admin_post_edit.html', {
-            'title': "编辑文章",
-            'method': "/admin/edit_post/" + id,
-            'cats': Category.get_all_cat_name(),
-            'tags': Tag.get_all_tag_name(),
-            'obj': obj
-        }, layout='_layout_admin.html')
-
-    @authorized()
-    def post(self, id=''):
-        self.set_header('Content-Type', 'application/json')
-        rspd = {'status': 201, 'msg': 'ok'}
-        oldobj = Article.get_article(id)
-
-        try:
-            tf = {'true': 0, 'false': 1}
-            timestamp = int(time.time())
-            post_dic = {
-                'category': self.get_argument("cat", '-'),
-                'title': self.get_argument("tit"),
-                'content': self.get_argument("con"),
-                'tags': ",".join(self.get_arguments("tag")),
-                'closecomment': tf[self.get_argument("clo", 'false')],
-                'password': self.get_argument("password", ''),
-                'edit_time': timestamp,
-                'id': id
-            }
-
-            if post_dic['tags']:
-                tagslist = set([x.strip() for x in post_dic['tags'].split(',')])
-                try:
-                    tagslist.remove('')
-                except:
-                    pass
-                if tagslist:
-                    post_dic['tags'] = ','.join(tagslist)
-        except:
-            rspd['status'] = 500
-            rspd['msg'] = '错误： 注意必填的三项'
-            self.write(json.dumps(rspd))
-            return
-
-        postid = Article.update_post_edit(post_dic)
-        if postid:
-            cache_key_list = ['/', 'post:%s' % id, 'cat:%s' % quoted_string(oldobj.category)]
-            if oldobj.category != post_dic['category']:
-                #cat changed 
-                Category.add_postid_to_cat(post_dic['category'], str(postid))
-                Category.remove_postid_from_cat(oldobj.category, str(postid))
-                cache_key_list.append('cat:%s' % quoted_string(post_dic['category']))
-
-            if oldobj.tags != post_dic['tags']:
-                #tag changed 
-                old_tags = set(oldobj.tags.split(','))
-                new_tags = set(post_dic['tags'].split(','))
-
-                removed_tags = old_tags - new_tags
-                added_tags = new_tags - old_tags
-
-                if added_tags:
-                    Tag.add_postid_to_tags(added_tags, str(postid))
-
-                if removed_tags:
-                    Tag.remove_postid_from_tags(removed_tags, str(postid))
-
-            clear_cache_by_pathlist(cache_key_list)
-            rspd['status'] = 200
-            rspd['msg'] = '文章编辑成功'
-            rspd['postid'] = postid
-            self.write(json.dumps(rspd))
-            return
-        else:
-            rspd['status'] = 500
-            rspd['msg'] = '错误： 未知错误，请尝试重新提交'
-            self.write(json.dumps(rspd))
-            return
-
-
-class DelPost(BaseHandler):
-    @authorized()
-    def get(self, id=''):
-        try:
-            if id:
-                oldobj = Article.get_article(id)
-                Category.remove_postid_from_cat(oldobj.category, str(id))
-                Archive.remove_postid_from_archive(oldobj.archive, str(id))
-                Tag.remove_postid_from_tags(set(oldobj.tags.split(',')), str(id))
-                Article.delete_post(id)
-                increment('Totalblog', NUM_SHARDS, -1)
-                cache_key_list = ['/', 'post:%s' % id, 'cat:%s' % quoted_string(oldobj.category)]
-                clear_cache_by_pathlist(cache_key_list)
-                clear_cache_by_pathlist(['post:%s' % id])
-                self.set_header("Content-Type", "application/json")
-                self.write(json.dumps("OK"))
-                return
-        except:
-            self.set_header("Content-Type", "application/json")
-            self.write(json.dumps("error"))
-            return
-
-
-class CommentController(BaseHandler):
-    @authorized()
-    def get(self, id=''):
-        obj = None
-        total = math.ceil(Comment.count_all() / float(getAttr('ADMIN_COMMENT_NUM')))
-        if id:
-            obj = Comment.get_comment(id)
-            if obj:
-                act = self.get_argument("act", '')
-                if act == 'del':
-                    Comment.delete_comment(id)
-                    clear_cache_by_pathlist(['post:%d' % obj.postid])
-                    self.set_header("Content-Type", "application/json")
-                    self.write(json.dumps("OK"))
-                    return
-                else:
-                    self.echo('admin_comment.html', {
-                        'title': "评论管理",
-                        'obj': obj,
-                        'total': total,
-                    }, layout='_layout_admin.html')
-                    return
-
-        # 评论列表
-        page = self.get_argument("page", 1)
-        comments = Comment.get_paged(page, getAttr('ADMIN_COMMENT_NUM'))
-        if page == 1:
-            self.echo('admin_comment.html', {
-                'title': "评论管理",
-                'obj': obj,
-                'total': total,
-                'comments': comments,
-            }, layout='_layout_admin.html')
-            return
-        else:
-            result = {
-                'list': comments,
-                'total': total,
-            }
-            self.set_header("Content-Type", "application/json")
-            self.write(json.dumps(result))
-            return
-
-
-    @authorized()
-    def post(self, id=''):
-        act = self.get_argument("act", '')
-        if act == 'findid':
-            eid = self.get_argument("id", '')
-            self.redirect('%s/admin/comment/%s' % (BASE_URL, eid))
-            return
-
-        tf = {'true': 1, 'false': 0}
-        post_dic = {
-            'author': self.get_argument("author"),
-            'email': self.get_argument("email", ''),
-            'content': safe_encode(self.get_argument("content").replace('\r', '\n')),
-            'url': self.get_argument("url", ''),
-            'visible': self.get_argument("visible", 'false'),
-            'id': id
-        }
-        post_dic['visible'] = tf[post_dic['visible'].lower()]
-
-        Comment.update_comment(post_dic)
-        clear_cache_by_pathlist(['post:%s' % id])
-        self.redirect('%s/admin/comment/%s' % (BASE_URL, id))
-        return
-
-
-class LinkController(BaseHandler):
-    @authorized()
-    def get(self):
-        act = self.get_argument("act", '')
-        id = self.get_argument("id", '')
-
-        obj = None
-        if act == 'del':
-            if id:
-                Link.delete_link(id)
-                clear_cache_by_pathlist(['/'])
-            self.set_header("Content-Type", "application/json")
-            self.write(json.dumps("OK"))
-            return
-        elif act == 'edit':
-            if id:
-                obj = Link.get_link(id)
-                clear_cache_by_pathlist(['/'])
-
-        # 友情链接列表
-        page = self.get_argument("page", 1)
-        links = Link.get_paged(page, getAttr('ADMIN_LINK_NUM'))
-        total = math.ceil(Link.count_all() / float(getAttr('ADMIN_LINK_NUM')))
-        if page == 1:
-            self.echo('admin_link.html', {
-                'title': "友情链接",
-                'objs': links,
-                'obj': obj,
-                'total': total,
-            }, layout='_layout_admin.html')
-        else:
-            result = {
-                'list': links,
-                'total': total,
-            }
-            self.set_header("Content-Type", "application/json")
-            self.write(json.dumps(result))
-            return
-
-
-    @authorized()
-    def post(self):
-        act = self.get_argument("act", '')
-        id = self.get_argument("id", '')
-        name = self.get_argument("name", '')
-        sort = self.get_argument("sort", '0')
-        url = self.get_argument("url", '')
-
-        if name and url:
-            params = {'id': id, 'name': name, 'url': url, 'displayorder': sort}
-            if act == 'add':
-                Link.create_link(params)
-
-            if act == 'edit':
-                Link.update_link(params)
-
-            clear_cache_by_pathlist(['/'])
-
-        self.set_header("Content-Type", "application/json")
-        self.write(json.dumps("OK"))
-
-
-class AddUser(BaseHandler):
-    @authorized()
-    def get(self):
-        obj = User
-        obj.id = ''
-        obj.name = ''
-        obj.email = ''
-        obj.status = 1
-        self.echo('admin_user_edit.html', {
-            'title': "添加用户",
-            'method': "/admin/add_user",
-            'obj': obj,
-        }, layout='_layout_admin.html')
-
-    @authorized()
-    def post(self):
-        self.set_header('Content-Type', 'application/json')
-        rspd = {'status': 201, 'msg': 'OK'}
-
-        try:
-            tf = {'true': 1, 'false': 0}
-            email = self.get_argument("email", '')
-            name = self.get_argument("username", '')
-            pw = ''.join(random.sample('zAyBxCwDvEuFtGsHrIqJpKoLnMmNlOkPjQiRhSgTfUeVdWcXbYaZ1928374650', 16))
-            status = tf[self.get_argument("status", 'true')]
-        except:
-            rspd['status'] = 500
-            rspd['msg'] = '错误： 注意必填项'
-            self.write(json.dumps(rspd))
-            return
-
-        try:
-            userid = User.create_user(name, email, pw, status)
-            if userid:
-                sendEmail(u"新用户注册通知 - " + SITE_TITLE, u"您的密码是：" + pw + u"<br />请及时登录并修改密码！", email)
-
-                rspd['status'] = 200
-                rspd['msg'] = '创建用户成功，已邮件通知该用户！'
-                rspd['userid'] = userid
-                rspd['method'] = "/admin/edit_user"
-                clear_cache_by_pathlist(['/', 'user:%s' % str(userid)])
-            else:
-                rspd['status'] = 500
-                rspd['msg'] = '错误： 通知邮件发送失败，请稍后重试'
-        except OperationalError:
-            rspd['status'] = 500
-            rspd['msg'] = '错误： 该 Email 地址已被占用，请尝试重新提交'
-        except:
-            rspd['status'] = 500
-            rspd['msg'] = '错误： 未知错误，请尝试重新提交'
-
-        self.write(json.dumps(rspd))
-        return
-
-
-class ListUser(BaseHandler):
-    @authorized()
-    def get(self):
-        page = self.get_argument("page", 1)
-        limit = getAttr('ADMIN_USER_NUM')
-        users = User.get_paged(page, limit)
-        total = math.ceil(User.count_all() / float(limit))
-        if page == 1:
-            self.echo('admin_user_list.html', {
-                'title': "用户列表",
-                'objs': users,
-                'total': total,
-            }, layout='_layout_admin.html')
-        else:
-            result = {
-                'list': users,
-                'total': total,
-            }
-            self.set_header("Content-Type", "application/json")
-            self.write(json.dumps(result))
-            return
-
-
-class EditUser(BaseHandler):
-    @authorized()
-    def get(self, id=''):
-        obj = None
-        if id:
-            obj = User.get_user(id)
-        self.echo('admin_user_edit.html', {
-            'title': "编辑用户",
-            'method': "/admin/edit_user/" + id,
-            'obj': obj
-        }, layout='_layout_admin.html')
-
-    @authorized()
-    def post(self, id=''):
-        self.set_header('Content-Type', 'application/json')
-        rspd = {'status': 201, 'msg': 'ok'}
-
-        try:
-            tf = {'true': 1, 'false': 0}
-            status = tf[self.get_argument("status", 'false')]
-            User.update_user_audit(id, status)
-            rspd['status'] = 200
-            rspd['msg'] = '用户编辑成功'
-        except:
-            rspd['status'] = 500
-            rspd['msg'] = '错误：注意必填项'
-
-        self.write(json.dumps(rspd))
-        return
-
-
-class DelUser(BaseHandler):
-    @authorized()
-    def get(self, id=''):
-        try:
-            if id:
-                user = User.get_user(id)
-                articles = Article.get_article_by_author(user.name)
-                for article in articles:
-                    Article.update_post_edit_author(article.id, "admin")
-                User.delete_user(id)
-                cache_key_list = ['/', 'user:%s' % id]
-                clear_cache_by_pathlist(cache_key_list)
-                self.set_header("Content-Type", "application/json")
-                self.write(json.dumps("OK"))
-                return
-        except:
-            raise tornado.web.HTTPError(500)
-
-
-class RePassword(BaseHandler):
-    def get(self):
-        self.echo('admin_repass.html')
-
-    def post(self):
-        self.set_header("Content-Type", "application/json")
-        try:
-            name = self.get_argument("name")
-            email = self.get_argument("email")
-            captcha = self.get_argument("captcha", "")
-        except:
-            self.write(json.dumps("用户名、邮箱、验证码均为必填项！"))
-            return
-
-        if captcha:
-            if self.get_secure_cookie("captcha") != captcha:
-                self.write(json.dumps("验证码填写错误！"))
-                return
-        else:
-            user_name_cookie = self.get_secure_cookie('username')
-            user_pw_cookie = self.get_secure_cookie('userpw')
-            if not User.check_user_password(user_name_cookie, user_pw_cookie):
-                self.write(json.dumps("重置密码失败！"))
-                return
-
-        if name and email and User.check_name_email(name, email):
-            pw = "".join(random.sample('zAyBxCwDvEuFtGsHrIqJpKoLnMmNlOkPjQiRhSgTfUeVdWcXbYaZ1928374650', 16))
-            User.update_user(name, email, pw)
-            sub = {
-                "%website%": [getAttr("SITE_TITLE").encode('utf-8')],
-                "%url%": [getAttr("BASE_URL")],
-                "%name%": [name],
-                "%password%": [pw]
-            }
-            #sendTemplateEmail(u"密码重置通知 - " + getAttr('SITE_TITLE'), sub, str(email))
-            sendEmail(u"密码重置通知 - " + getAttr('SITE_TITLE'), u"您的新密码是：" + pw + u"<br /><br />请及时登录并修改密码！", str(email))
-
-            self.write(json.dumps("OK"))
-            return
-        else:
-            self.write(json.dumps("重置密码失败！"))
-            return
 
 
 class BlogSetting(BaseHandler):
@@ -994,37 +404,6 @@ class BlogSetting5(BaseHandler):
         return
 
 
-class EditProfile(BaseHandler):
-    @authorized()
-    def get(self):
-        self.echo('admin_profile.html', {
-            'title': "个人资料",
-        }, layout='_layout_admin.html')
-
-    @authorized()
-    def post(self):
-        self.set_header("Content-Type", "application/json")
-        oldPassword = self.get_argument("oldPassword", '')
-        newPassword = self.get_argument("newPassword", '')
-        newPassword2 = self.get_argument("newPassword2", '')
-        if oldPassword and newPassword and newPassword2:
-            if newPassword == newPassword2:
-                username = self.get_secure_cookie('username')
-                old_user = User.get_user_by_name(username)
-                oldPassword = md5(oldPassword.encode('utf-8') + old_user.salt.encode('utf-8')).hexdigest()
-                if oldPassword == old_user.password:
-                    User.update_user(username, None, newPassword)
-                    user = User.get_user(old_user.id)
-                    self.set_secure_cookie('userpw', user.password, expires_days=1)
-                    self.write(escape.json.dumps("OK"))
-                    return
-                else:
-                    self.write(escape.json.dumps("更新用户失败！"))
-                    pass
-        self.write(escape.json.dumps("请认真填写必填项！"))
-        return
-
-
 # TODO KVDB 管理
 class KVDBAdmin(BaseHandler):
     @authorized()
@@ -1044,7 +423,8 @@ class FlushData(BaseHandler):
     def post(self):
         act = self.get_argument("act", '')
         if act == 'flush':
-            MyData.flush_all_data()
+            from deploy.create_db import flush_all_data
+            flush_all_data()
             clear_all_cache()
             clearAllKVDB()
             self.set_header("Content-Type", "application/json")
@@ -1070,7 +450,7 @@ class PingRPC(BaseHandler):
     def get(self, n=0):
         import urllib2
 
-        pingstr = self.render('rpc.xml', {'article_id': Article.get_max_id()})
+        pingstr = self.render('rpc.xml', {'article_id': Posts.get_max_id()})
 
         headers = {
             'User-Agent': 'request',
@@ -1198,30 +578,14 @@ urls = [
     (r"/admin/login", Login),
     (r"/admin/logout", Logout),
     (r"/admin/403", Forbidden),
-    # 分类管理
-    (r"/admin/category", CategoryController),
-    # 文章相关
-    (r"/admin/add_post", AddPost),
-    (r"/admin/edit_post/(\d*)", EditPost),
-    (r"/admin/list_post", ListPost),
-    (r"/admin/del_post/(\d+)", DelPost),
-    (r"/admin/comment/(\d*)", CommentController),
-    # 用户管理
-    (r"/admin/add_user", AddUser),
-    (r"/admin/edit_user/(\d*)", EditUser),
-    (r"/admin/list_user", ListUser),
-    (r"/admin/del_user/(\d+)", DelUser),
-    (r"/admin/repass_user", RePassword),
     # 文件上传及管理
     (r"/admin/fileupload", FileUpload),
     (r"/admin/filelist", FileManager),
-    (r"/admin/links", LinkController),
     (r"/admin/setting", BlogSetting),
     (r"/admin/setting2", BlogSetting2),
     (r"/admin/setting3", BlogSetting3),
     (r"/admin/setting4", BlogSetting4),
     (r"/admin/setting5", BlogSetting5), # 后台设置
-    (r"/admin/profile", EditProfile),
     (r"/admin/kvdb", KVDBAdmin),
     (r"/admin/flushdata", FlushData),
     (r"/task/pingrpctask", PingRPCTask),

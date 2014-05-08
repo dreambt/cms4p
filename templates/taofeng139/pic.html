@@ -1,0 +1,56 @@
+<div id="wall" class="row" style="margin-top:5px">
+    <?py for obj in objs: ?>
+    <div class="span3 item">
+		<div class="picture">
+	        <a class="image" href="#{obj.absolute_url}" title="#{obj.title}"><img src="http://clabs.co/projects/tabula/img/photo4.jpg" alt=""/></a>
+			<div class="description"><p>#{escape(obj.shorten_content)}</p></div>
+			<div class="meta">
+				<span><i class="icon-calendar"></i>#{obj.add_time_fn}</span>
+				<span><i class="icon-user"></i> <a href="#">#{{ ADMIN_NAME }}</a></span>
+				<span><i class="icon-heart"></i> #{obj.comment_num}</span>
+			</div>
+		</div>
+	</div>
+    <?py #endfor ?>
+</div>
+<ul class="pager">
+    <li class="previous">
+        <?py if 1< page <= allpage: ?>
+        <?py     tvar = fromid if (listtype == 'index') else name ?>
+        <a class="prev" href="#{{ BASE_URL }}/#{listtype}_prev_page/#{page-1}/#{tvar}/">&larr; 上一页</a>
+        <?py #endif ?>
+    </li>
+    <li class="next">
+        <?py if page< allpage: ?>
+        <?py     tvar = endid if (listtype == 'index') else name ?>
+        <a class="next" href="#{{ BASE_URL }}/#{listtype}_next_page/#{page+1}/#{tvar}/">下一页 &rarr;</a>
+        <?py #endif ?>
+    </li>
+</ul>
+<script type="text/javascript" src="#{{ STATIC_URL }}/static/js/vender/modernizr.min.js"></script>
+<script type="text/javascript" src="#{{ STATIC_URL }}/static/js/vender/jquery.isotope.min.js"></script>
+<script type="text/javascript" src="#{{ STATIC_URL }}/static/js/vender/jquery.infinitescroll.min.js"></script>
+<script type="text/javascript">
+    $(function () {
+        var $container = $('#wall');
+        $container.imagesLoaded(function () {
+            $container.isotope({
+                itemSelector: '.item'
+            });
+
+            $container.infinitescroll({
+                        navSelector: '.next',
+                        nextSelector: '.next a',
+                        itemSelector: '.item',
+                        loading: {
+                            finishedMsg: '已经没有可以加载的内容.',
+                            img: 'http://i.imgur.com/qkKy8.gif'
+                        }
+                    },
+                    function (newElements) {
+                        $container.isotope('appended', $(newElements));
+                    }
+            );
+        });
+    });
+</script>
